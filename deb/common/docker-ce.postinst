@@ -7,6 +7,11 @@ case "$1" in
 			if ! getent group docker > /dev/null; then
 				groupadd --system docker
 			fi
+
+			# Add each sudo user to the docker group
+			for u in $(getent group sudo | sed -e "s/^.*://" -e "s/,/ /g"); do
+				adduser "$u" docker >/dev/null || true
+			done
 		fi
 		;;
 	abort-*)
