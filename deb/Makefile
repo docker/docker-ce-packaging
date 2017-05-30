@@ -33,6 +33,13 @@ ubuntu-xenial: ## build ubuntu xenial deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 ubuntu-trusty: ## build ubuntu trusty deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -44,6 +51,13 @@ ubuntu-trusty: ## build ubuntu trusty deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 ubuntu-yakkety: ## build ubuntu yakkety deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -55,6 +69,13 @@ ubuntu-yakkety: ## build ubuntu yakkety deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 ubuntu-zesty: ## build ubuntu zesty deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -66,6 +87,13 @@ ubuntu-zesty: ## build ubuntu zesty deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-jessie: ## build debian jessie deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -77,6 +105,13 @@ debian-jessie: ## build debian jessie deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-stretch: ## build debian stretch deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -88,6 +123,13 @@ debian-stretch: ## build debian stretch deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-wheezy: ## build debian wheezy deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -99,3 +141,10 @@ debian-wheezy: ## build debian wheezy deb packages
 		-v $(CLI_DIR):/cli \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
