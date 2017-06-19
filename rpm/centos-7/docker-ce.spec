@@ -130,11 +130,11 @@ install -d $RPM_BUILD_ROOT/usr/share/nano
 install -p -m 644 engine/contrib/syntax/nano/Dockerfile.nanorc $RPM_BUILD_ROOT/usr/share/nano/Dockerfile.nanorc
 
 mkdir -p build-docs
-for engine_file in engine/AUTHORS engine/CHANGELOG.md engine/CONTRIBUTING.md engine/LICENSE engine/MAINTAINERS engine/NOTICE engine/README.md; do
-    cp "$engine_file" "build-docs/engine-$(basename $engine_file)"
+for engine_file in AUTHORS CHANGELOG.md CONTRIBUTING.md LICENSE MAINTAINERS NOTICE README.md; do
+    cp "engine/$engine_file" "build-docs/engine-$engine_file"
 done
-for cli_file in cli/LICENSE cli/MAINTAINERS cli/NOTICE cli/README.md; do
-    cp "$cli_file" "build-docs/cli-$(basename $cli_file)"
+for cli_file in LICENSE MAINTAINERS NOTICE README.md; do
+    cp "cli/$cli_file" "build-docs/cli-$cli_file"
 done
 
 # list files owned by the package here
