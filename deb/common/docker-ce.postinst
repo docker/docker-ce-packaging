@@ -9,6 +9,9 @@ case "$1" in
 			fi
 		fi
 		;;
+	upgrade)
+		invoke-rc.d docker start || exit $?
+		;;
 	abort-*)
 		# How'd we get here??
 		exit 1
