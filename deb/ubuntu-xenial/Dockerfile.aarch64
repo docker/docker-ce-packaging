@@ -1,0 +1,31 @@
+FROM multiarch/ubuntu-core:arm64-xenial
+
+RUN apt-get update && apt-get install -y apparmor bash-completion btrfs-tools build-essential cmake curl ca-certificates debhelper dh-apparmor dh-systemd git libapparmor-dev libdevmapper-dev libltdl-dev libseccomp-dev pkg-config vim-common libsystemd-dev gnupg dirmngr  --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+RUN echo "deb http://ppa.launchpad.net/longsleep/golang-backports/ubuntu xenial main" >>/etc/apt/sources.list && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 52B59B1571A79DBC054901C0F6BC817356A3D45E  && \
+    apt-get update && apt-get install -y golang-1.8 && \
+    ln -s /usr/lib/go-1.8/bin/* /usr/bin/
+
+ENV GOPATH /go
+ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
+ENV DOCKER_BUILDTAGS apparmor pkcs11 seccomp selinux
+ENV RUNC_BUILDTAGS apparmor seccomp selinux
+
+COPY common/ /root/build-deb/debian
+COPY build-deb /root/build-deb/build-deb
+
+RUN mkdir -p /go/src/github.com/docker && \
+	mkdir -p /go/src/github.com/opencontainers && \
+	ln -snf /engine /root/build-deb/engine && \
+	ln -snf /cli /root/build-deb/cli && \
+	ln -snf /root/build-deb/engine /go/src/github.com/docker/docker && \
+	ln -snf /root/build-deb/cli /go/src/github.com/docker/cli
+
+
+ENV DISTRO ubuntu
+ENV SUITE xenial
+
+WORKDIR /root/build-deb
+
+ENTRYPOINT ["/root/build-deb/build-deb"]

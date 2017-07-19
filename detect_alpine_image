@@ -7,6 +7,8 @@ if [ "$arch" = "x86_64" ]; then
     img="alpine"
 elif [ "$arch" = "armv7l" ]; then
     img="armhf/alpine"
+elif [ "$arch" = "aarch64" ]; then
+    img="arm64v8/alpine"
 elif [ "$arch" = "s390x" ]; then
     img="s390x/alpine"
 else
