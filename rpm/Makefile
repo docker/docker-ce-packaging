@@ -1,9 +1,11 @@
 ARCH=$(shell uname -m)
 ALPINE_IMG:=$(shell $(CURDIR)/../detect_alpine_image)
 ENGINE_DIR:=$(CURDIR)/../../engine
+COMMON_DIR:=$(CURDIR)/../common
 CLI_DIR:=$(CURDIR)/../../cli
 GITCOMMIT=$(shell cd $(ENGINE_DIR) && git rev-parse --short HEAD)
 VERSION=$(shell cat $(ENGINE_DIR)/VERSION)
+PLUGIN_VERSION?=1.0.0.linux-$(ARCH)-test
 DOCKER_EXPERIMENTAL=0
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(ENGINE_DIR) $(VERSION))
 CHOWN=docker run --rm -i -v $(CURDIR):/v -w /v $(ALPINE_IMG) chown

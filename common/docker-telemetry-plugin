@@ -1,0 +1,68 @@
+#!/usr/bin/env sh
+
+BASE=/var/lib/docker
+PLUGIN_NAME=docker/telemetry
+EDITION_INFO=$BASE/.edition-information
+
+# make sure that docker is running
+DOCKER_SOCKET=
+if ! printf "%s" "$DOCKER_OPTS" | grep -qE -e '-H|--host'; then
+        DOCKER_SOCKET=/var/run/docker.sock
+else
+        DOCKER_SOCKET=$(printf "%s" "$DOCKER_OPTS" | grep -oP -e '(-H|--host)\W*unix://\K(\S+)' | sed 1q)
+fi
+
+if [ -n "$DOCKER_SOCKET" ]; then
+        while ! [ -e "$DOCKER_SOCKET" ]; do
+                sleep 0.1
+        done
+else
+        # docker socket not found, exiting...
+        exit
+fi
+
+# check if the file exists
+if ! [ -e "$EDITION_INFO" ]; then
+        # edition metadata not found, exiting...
+        exit
+fi
+
+# Create the engine UUID, if it doesn't exist
+# This will be eventually handled by the docker engine
+# ref. https://github.com/moby/moby/issues/33356
+if [ -f $BASE/engine_uuid ]; then
+    UUID=$(cat $BASE/engine_uuid)
+fi
+if [ -z ${UUID+x} ]; then
+    UUID=$(cat /proc/sys/kernel/random/uuid | tee $BASE/engine_uuid)
+fi
+
+# store the metrics plugin state
+plugin_name=$(docker plugin ls | grep $PLUGIN_NAME | awk 'NR==1{print $2}')
+if docker inspect $plugin_name > /dev/null 2>&1; then
+        plugin_state=$(docker plugin inspect -f '{{.Enabled}}' $plugin_name)
+        # remove previous plugin state
+        sed -i 's/,"Enabled":.*/\}/g' $EDITION_INFO
+        # add new plugin state
+        sed -i "s/\}/,\"Enabled\":$plugin_state\}/g" $EDITION_INFO
+fi
+
+# install/upgrade telemetry plugin in case it's not present (ignore stdout/stderror)
+plugin_version=$(cat $EDITION_INFO | sed 's/{.*plugin_version":"*\([0-9a-zA-Z._-]*\)"*,*.*}/\1/')
+plugin_name=$PLUGIN_NAME:$plugin_version
+if ! docker inspect $plugin_name > /dev/null 2>&1; then
+        # remove old plugin versions
+        docker plugin rm -f `docker plugin ls | grep $PLUGIN_NAME | awk '{print $2}'` > /dev/null 2>&1
+        # create new plugin (disabled by default)
+        docker plugin install --disable --grant-all-permissions $plugin_name > /dev/null 2>&1
+        # extract all the edition variables, including the engine uuid
+        uuid=$(cat /var/lib/docker/engine_uuid)
+        edition_version=$(cat $EDITION_INFO | sed 's/{.*edition_version":"*\([0-9a-zA-Z._-]*\)"*,*.*}/\1/')
+        edition_type=$(cat $EDITION_INFO | sed 's/{.*edition_type":"*\([0-9a-zA-Z._-]*\)"*,*.*}/\1/')
+        edition_name=$(cat $EDITION_INFO | sed 's/{.*edition_name":"*\([0-9a-zA-Z._-]*\)"*,*.*}/\1/')
+        docker plugin set $plugin_name edition_name=$edition_name edition_type=$edition_type edition_version=$edition_version anonymous_id=$uuid > /dev/null 2>&1
+        # set the metrics plugin to its previous state
+        if grep 'true' $EDITION_INFO > /dev/null 2>&1 ; then
+                docker plugin enable $plugin_name > /dev/null 2>&1
+        fi
+fi

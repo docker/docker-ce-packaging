@@ -3,8 +3,10 @@ ALPINE_IMG:=$(shell $(CURDIR)/../detect_alpine_image)
 ARCH:=$(shell uname -m)
 ENGINE_DIR:=$(CURDIR)/../../engine
 CLI_DIR:=$(CURDIR)/../../cli
+COMMON_DIR:=$(CURDIR)/../common
 GITCOMMIT?=$(shell cd $(ENGINE_DIR) && git rev-parse --short HEAD)
 VERSION?=$(shell cat $(ENGINE_DIR)/VERSION)
+PLUGIN_VERSION?=1.0.0.linux-$(ARCH)-test
 DOCKER_EXPERIMENTAL:=0
 CHOWN:=docker run --rm -v $(CURDIR):/v -w /v $(ALPINE_IMG) chown
 
