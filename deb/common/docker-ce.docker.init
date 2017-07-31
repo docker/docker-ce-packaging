@@ -114,6 +114,8 @@ case "$1" in
 				$DOCKER_OPTS \
 					>> "$DOCKER_LOGFILE" 2>&1
 		log_end_msg $?
+		# load metrics plugin (disabled by default)
+		/usr/bin/docker-telemetry-plugin
 		;;
 
 	stop)

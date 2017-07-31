@@ -68,7 +68,7 @@ TMP_GOPATH="/go" hack/dockerfile/install-binaries.sh runc-dynamic containerd-dyn
 hack/make.sh dynbinary
 popd
 mkdir -p plugin
-printf '{"edition_type":"ce","edition_name":"%s","edition_version":"%s"}\n' "${DISTRO}" "%{_version}" > plugin/.plugin-metadata
+printf '{"edition_type":"ce","edition_name":"%s","edition_version":"%s", "plugin_version":"%s"}\n' "${DISTRO}" "%{_version}" "%{_plugin_version}" > .edition-information
 
 %check
 cli/build/docker -v
@@ -139,6 +139,11 @@ for cli_file in LICENSE MAINTAINERS NOTICE README.md; do
     cp "cli/$cli_file" "build-docs/cli-$cli_file"
 done
 
+# add telemetry plugin
+install -d $RPM_BUILD_ROOT/var/lib/docker
+install -p -m 644 .edition-information $RPM_BUILD_ROOT/var/lib/docker
+install -p -m 755 /common/docker-telemetry-plugin $RPM_BUILD_ROOT/%{_bindir}/docker-telemetry-plugin
+
 # list files owned by the package here
 %files
 %doc build-docs/engine-AUTHORS build-docs/engine-CHANGELOG.md build-docs/engine-CONTRIBUTING.md build-docs/engine-LICENSE build-docs/engine-MAINTAINERS build-docs/engine-NOTICE build-docs/engine-README.md
@@ -164,6 +169,8 @@ done
 /usr/share/vim/vimfiles/ftdetect/dockerfile.vim
 /usr/share/vim/vimfiles/syntax/dockerfile.vim
 /usr/share/nano/Dockerfile.nanorc
+/var/lib/docker/.edition-information
+/usr/bin/docker-telemetry-plugin
 
 %pre
 if [ $1 -gt 0 ] ; then
