@@ -181,6 +181,15 @@ fi
 %systemd_post docker
 if ! getent group docker > /dev/null; then
     groupadd --system docker
+else
+    echo
+    echo "WARNING! The 'docker' group is already created, the following users now have access to Docker:"
+    awk -F':' '{print $1}' /etc/passwd | while IFS= read -r user; do
+    if groups "$user" | grep docker >/dev/null; then
+        echo "    - $user"
+    fi
+    done
+    echo
 fi
 
 %preun
