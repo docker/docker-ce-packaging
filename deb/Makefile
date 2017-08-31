@@ -36,6 +36,13 @@ ubuntu-xenial: ## build ubuntu xenial deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 ubuntu-trusty: ## build ubuntu trusty deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -48,6 +55,13 @@ ubuntu-trusty: ## build ubuntu trusty deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 ubuntu-zesty: ## build ubuntu zesty deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -60,6 +74,13 @@ ubuntu-zesty: ## build ubuntu zesty deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-jessie: ## build debian jessie deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -72,6 +93,13 @@ debian-jessie: ## build debian jessie deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-stretch: ## build debian stretch deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -84,6 +112,13 @@ debian-stretch: ## build debian stretch deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 debian-wheezy: ## build debian wheezy deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -96,6 +131,13 @@ debian-wheezy: ## build debian wheezy deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb
 
 raspbian-jessie: ## build raspbian jessie deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
@@ -120,3 +162,10 @@ raspbian-stretch: ## build raspbian stretch deb packages
 		-v $(CURDIR)/systemd:/root/build-deb/systemd \
 		debbuild-$@/$(ARCH)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	docker run --rm \
+		-v $(CURDIR)/:/v \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-w /v \
+		--entrypoint ./test_install \
+		debbuild-$@/$(ARCH) \
+		/build/*.deb

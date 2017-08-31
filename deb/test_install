@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+dpkg -i $@
+apt-get update && apt-get install -y -f
+dpkg -i $@
+docker --version
+exit $?
