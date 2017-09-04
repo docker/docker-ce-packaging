@@ -1,4 +1,4 @@
-FROM multiarch/debian-debootstrap:arm64-stretch
+FROM arm64v8/debian:stretch
 
 # allow replacing httpredir or deb mirror
 ARG APT_MIRROR=deb.debian.org
