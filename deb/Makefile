@@ -1,12 +1,11 @@
 SHELL:=/bin/bash
-ALPINE_IMG:=$(shell $(CURDIR)/../detect_alpine_image)
 ARCH:=$(shell uname -m)
 ENGINE_DIR:=$(CURDIR)/../../engine
 CLI_DIR:=$(CURDIR)/../../cli
 GITCOMMIT?=$(shell cd $(ENGINE_DIR) && git rev-parse --short HEAD)
 VERSION?=$(shell cat $(ENGINE_DIR)/VERSION)
 DOCKER_EXPERIMENTAL:=0
-CHOWN:=docker run --rm -v $(CURDIR):/v -w /v $(ALPINE_IMG) chown
+CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
 
 .PHONY: help clean deb ubuntu debian ubuntu-xenial ubuntu-trusty ubuntu-zesty debian-buster debian-jessie debian-stretch debian-wheezy raspbian-jessie raspbian-stretch
 
@@ -50,6 +49,19 @@ ubuntu-trusty: ## build ubuntu trusty deb packages
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
 
 ubuntu-zesty: ## build ubuntu zesty deb packages
+	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
+	docker run --rm -i \
+		-e VERSION=$(VERSION) \
+		-e DOCKER_GITCOMMIT=$(GITCOMMIT) \
+		-v $(CURDIR)/debbuild/$@:/build \
+		-v $(ENGINE_DIR):/engine \
+		-v $(CLI_DIR):/cli \
+		-v $(CURDIR)/systemd:/root/build-deb/systemd \
+		debbuild-$@/$(ARCH)
+	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+
+.PHONY: ubuntu-artful
+ubuntu-artful: ## build ubuntu artful deb packages
 	docker build -t debbuild-$@/$(ARCH) -f $(CURDIR)/$@/Dockerfile.$(ARCH) .
 	docker run --rm -i \
 		-e VERSION=$(VERSION) \
