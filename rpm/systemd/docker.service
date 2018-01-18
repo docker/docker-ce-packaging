@@ -5,11 +5,12 @@ After=network-online.target firewalld.service
 Wants=network-online.target
 
 [Service]
+EnvironmentFile=-/etc/sysconfig/docker
 Type=notify
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
-ExecStart=/usr/bin/dockerd
+ExecStart=/usr/bin/dockerd -H fd:// $DOCKER_OPTS
 ExecReload=/bin/kill -s HUP $MAINPID
 # Having non-zero Limit*s causes performance problems due to accounting overhead
 # in the kernel. We recommend using cgroups to do container-local accounting.
