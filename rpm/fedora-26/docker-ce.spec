@@ -9,6 +9,7 @@ Source1: cli.tgz
 URL: https://www.docker.com
 Vendor: Docker
 Packager: Docker <support@docker.com>
+Epoch: 1
 
 # DWZ problem with multiple golang binary, see bug
 # https://bugzilla.redhat.com/show_bug.cgi?id=995136#c12
