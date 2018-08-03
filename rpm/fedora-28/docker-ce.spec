@@ -19,6 +19,12 @@ Packager: Docker <support@docker.com>
 %global _missing_build_ids_terminate_build 0
 
 BuildRequires: pkgconfig(systemd)
+BuildRequires: libtool-ltdl-devel
+BuildRequires: libseccomp-devel
+BuildRequires: btrfs-progs-devel
+BuildRequires: device-mapper-devel
+BuildRequires: glibc-static
+BuildRequires: cmake
 
 # required packages on install
 Requires: /bin/sh
