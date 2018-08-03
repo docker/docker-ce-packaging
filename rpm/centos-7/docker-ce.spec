@@ -19,6 +19,12 @@ Packager: Docker <support@docker.com>
 
 BuildRequires: pkgconfig(systemd)
 BuildRequires: pkgconfig(libsystemd-journal)
+BuildRequires: libtool-ltdl-devel
+BuildRequires: libseccomp-devel
+BuildRequires: btrfs-progs-devel
+BuildRequires: device-mapper-devel
+BuildRequires: glibc-static
+BuildRequires: cmake
 
 # required packages on install
 Requires: /bin/sh
