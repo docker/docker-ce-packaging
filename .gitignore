@@ -4,3 +4,4 @@ rpmbuild
 tmp
 artifacts
 sources
+image-linux*
