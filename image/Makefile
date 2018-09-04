@@ -48,4 +48,13 @@ engine-$(ARCH).tar: image-linux
 
 .PHONY: release
 release:
+	if ! docker trust inspect --pretty $(DOCKER_HUB_ORG)/$(ENGINE_IMAGE):$(STATIC_VERSION).$(ARCH); \
+		echo ""; \
+		echo "FAILURE No Trust data exists"; \
+		echo "Please create the necessary Trust data and keys"; \
+		echo ""; \
+		exit 1; \
+	fi
+	docker trust key load /trust-key
+	docker trust sign --local $(DOCKER_HUB_ORG)/$(ENGINE_IMAGE):$(STATIC_VERSION).$(ARCH)
 	docker push $(DOCKER_HUB_ORG)/$(ENGINE_IMAGE):$(STATIC_VERSION).$(ARCH)
