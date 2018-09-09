@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# If we want to force an image to build let's do it here
+if [ ! -z "$FORCE_IMAGE_BUILD" ]; then
+    echo "WARNING: Forcing image build for $1..."
+    exit 1
+fi
+if DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect "$1" > /dev/null 2>/dev/null; then
+    echo "INFO: Pulling existing image $1..."
+    (set -x; docker pull "$1")
+    exit 0
+fi
+echo "INFO: Image $1 not found on hub building..."
+exit 1

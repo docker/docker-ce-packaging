@@ -133,9 +133,9 @@ $(DOCKER2OCI):
 
 # offline bundle
 rpmbuild/SOURCES/engine.tar: $(DOCKER2OCI)
-	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) image-linux
+	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) image-linux-dm
 	mkdir -p artifacts
-	docker save -o artifacts/docker-engine.tar $$(cat ../image/image-linux)
+	docker save -o artifacts/docker-engine.tar $$(cat ../image/image-linux-dm)
 	./$(DOCKER2OCI) -i artifacts/docker-engine.tar artifacts/engine-image
 	mkdir -p $(@D)
 	tar c -C artifacts/engine-image . > $@
