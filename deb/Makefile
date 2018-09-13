@@ -33,7 +33,7 @@ RUN=docker run --rm -i \
 	-v $(CURDIR)/debbuild/$@:/build \
 	debbuild-$@/$(ARCH)
 
-SOURCE_FILES=containerd-proxy.tgz cli.tgz docker.service dockerd.json engine.tar
+SOURCE_FILES=cli.tgz docker.service
 SOURCES=$(addprefix sources/, $(SOURCE_FILES))
 ENGINE_IMAGE=docker/engine-community
 ENGINE_SCOPE=ce
@@ -134,29 +134,6 @@ sources/cli.tgz:
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
 
-sources/containerd-proxy.tgz:
-	mkdir -p tmp/
-	curl -fL -o tmp/containerd-proxy.tgz "https://github.com/crosbymichael/containerd-proxy/archive/$(CONTAINERD_PROXY_COMMIT).tar.gz"
-	tar xzf tmp/containerd-proxy.tgz -C tmp/
-	mv tmp/containerd-proxy-$(CONTAINERD_PROXY_COMMIT) tmp/containerd-proxy
-	mkdir -p $(@D)
-	$(CHOWN) -R $(shell id -u):$(shell id -g) $$(dirname $(@D))
-	tar -zcf $@ -C tmp/ containerd-proxy
-	rm -rf tmp/
-
 sources/docker.service: ../systemd/docker.service
 	mkdir -p $(@D)
 	cp $< $@
-
-sources/dockerd.json: ../common/dockerd.json
-	mkdir -p $(@D)
-	sed \
-	    -e 's!$${ENGINE_IMAGE}!$(ENGINE_IMAGE)!' \
-	    -e 's!$${ENGINE_SCOPE}!$(ENGINE_SCOPE)!' \
-	    -e 's/$${IMAGE_TAG}/$(IMAGE_TAG)/' \
-	    $< > $@
-
-# offline bundle
-sources/engine.tar: 
-	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) engine-$(ARCH).tar
-	mv ../image/engine-$(ARCH).tar $@

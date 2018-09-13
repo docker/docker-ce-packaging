@@ -1,6 +1,7 @@
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
+BindsTo=containerd.service
 After=network-online.target docker.socket firewalld.service
 Wants=network-online.target
 Requires=docker.socket
@@ -10,7 +11,9 @@ Type=notify
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
-ExecStart=/usr/bin/dockerd -H fd://
+ExecStart=/usr/bin/dockerd -H fd:// --containerd /run/containerd/containerd.sock \
+	--default-runtime containerd \
+	--add-runtime containerd=runc
 ExecReload=/bin/kill -s HUP $MAINPID
 LimitNOFILE=1048576
 # Having non-zero Limit*s causes performance problems due to accounting overhead

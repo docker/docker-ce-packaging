@@ -21,7 +21,6 @@ RUN mk-build-deps -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-reco
 # Copy our sources and untar them
 COPY sources/ /sources
 RUN mkdir -p /go/src/github.com/docker/ && tar -xzf /sources/cli.tgz -C /go/src/github.com/docker/
-RUN mkdir -p /go/src/github.com/crosbymichael && tar -xzf /sources/containerd-proxy.tgz -C /go/src/github.com/crosbymichael
 
 RUN ln -snf /go/src/github.com/docker/cli /root/build-deb/cli
 
@@ -29,7 +28,6 @@ ENV DISTRO ubuntu
 ENV SUITE trusty
 
 COPY --from=golang /usr/local/go /usr/local/go
-COPY --from=shim-process /bin/containerd-shim-process-v1 /containerd-shim-process-v1
 
 WORKDIR /root/build-deb
 COPY build-deb /root/build-deb/build-deb

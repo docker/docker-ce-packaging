@@ -62,24 +62,15 @@ RUN . /binaries-commits && \
     cmake . && make tini-static && \
     cp tini-static /sbin/docker-init
 
-# runc
-FROM builder as runc-builder
-RUN apt-get install -y libseccomp-dev
-RUN git clone https://github.com/opencontainers/runc.git /go/src/github.com/opencontainers/runc
-WORKDIR /go/src/github.com/opencontainers/runc
-RUN . /binaries-commits && \
-    git checkout -q "$RUNC_COMMIT" && \
-    make BUILDTAGS='seccomp apparmor' static && make install
-
 # Final docker image
 FROM scratch
 ARG VERSION
 ARG GITCOMMIT
 ARG BUILDTIME
-COPY --from=dockerd-builder /sbin/dockerd /sbin/
-COPY --from=proxy-builder /sbin/docker-proxy /sbin/
-COPY --from=init-builder /sbin/docker-init /sbin/
-COPY --from=runc-builder /usr/local/sbin/runc /sbin/
+COPY --from=dockerd-builder /sbin/dockerd /bin/
+COPY --from=proxy-builder /sbin/docker-proxy /bin/
+COPY --from=init-builder /sbin/docker-init /bin/
+
 LABEL \
     org.opencontainers.image.authors="Docker Inc." \
     org.opencontainers.image.created="${BUILDTIME}" \
