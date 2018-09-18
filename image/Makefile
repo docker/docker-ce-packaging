@@ -19,7 +19,7 @@ help: ## show make targets
 
 .PHONY: clean
 clean: ## remove build artifacts
-	-$(RM) $(ENGINE_DIR)/Dockerfile.engine
+	-$(RM) $(ENGINE_DIR)/Dockerfile
 	-docker rmi $(DOCKER_HUB_ORG)/$(ENGINE_IMAGE):$(STATIC_VERSION)
 	-rm -f image-linux
 	-$(RM) -r artifacts
@@ -29,12 +29,12 @@ clean: ## remove build artifacts
 image: image-linux
 
 
-$(ENGINE_DIR)/Dockerfile.engine:
-	cp Dockerfile.engine $(ENGINE_DIR)
+$(ENGINE_DIR)/Dockerfile:
+	cp Dockerfile $(ENGINE_DIR)
 
 # builds across multiple archs because the base images
 # utilize manifests
-image-linux: $(ENGINE_DIR)/Dockerfile.engine
+image-linux: $(ENGINE_DIR)/Dockerfile
 	docker build -t $(DOCKER_HUB_ORG)/$(ENGINE_IMAGE):$(STATIC_VERSION) \
 		--build-arg GO_IMAGE="$(ENGINE_GO_IMAGE)" \
 		--build-arg VERSION="$(STATIC_VERSION)" \

@@ -2,6 +2,7 @@ include ../containerd.mk
 
 SHELL:=/bin/bash
 ARCH:=$(shell uname -m)
+ENGINE_DIR:=$(CURDIR)/../../engine
 CLI_DIR:=$(CURDIR)/../../cli
 GITCOMMIT?=$(shell cd $(CLI_DIR) && git rev-parse --short HEAD)
 VERSION?=0.0.0-dev
@@ -31,6 +32,7 @@ RUN=docker run --rm -i \
 	-e VERSION=$(word 2, $(DEB_VERSION)) \
 	-e DOCKER_GITCOMMIT=$(GITCOMMIT) \
 	-v $(CURDIR)/debbuild/$@:/build \
+	-v $(CURDIR)/debbuild/docker:/docker \
 	debbuild-$@/$(ARCH)
 
 SOURCE_FILES=cli.tgz docker.service
@@ -137,3 +139,11 @@ sources/cli.tgz:
 sources/docker.service: ../systemd/docker.service
 	mkdir -p $(@D)
 	cp $< $@
+
+docker.tgz:
+	$(MAKE) -C ../static ENGINE_DIR=$(ENGINE_DIR) VERSION=$(VERSION) static-engine
+
+# offline bundle
+sources/engine.tar:
+	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) engine-$(ARCH).tar
+	mv ../image/engine-$(ARCH).tar $@
