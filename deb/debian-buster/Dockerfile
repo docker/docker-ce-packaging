@@ -1,8 +1,6 @@
 ARG GO_IMAGE
-ARG CONTAINERD_SHIM_PROCESS_IMAGE
 ARG BUILD_IMAGE=debian:buster
 FROM ${GO_IMAGE} as golang
-FROM ${CONTAINERD_SHIM_PROCESS_IMAGE} as shim-process
 
 FROM ${BUILD_IMAGE}
 
@@ -21,15 +19,15 @@ RUN mk-build-deps -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-reco
 # Copy our sources and untar them
 COPY sources/ /sources
 RUN mkdir -p /go/src/github.com/docker/ && tar -xzf /sources/cli.tgz -C /go/src/github.com/docker/
-RUN mkdir -p /go/src/github.com/crosbymichael && tar -xzf /sources/containerd-proxy.tgz -C /go/src/github.com/crosbymichael
+RUN mkdir -p /go/src/github.com/docker/ && tar -xzf /sources/engine.tgz -C /go/src/github.com/docker/
 
 RUN ln -snf /go/src/github.com/docker/cli /root/build-deb/cli
+RUN ln -snf /go/src/github.com/docker/engine /root/build-deb/engine
 
 ENV DISTRO debian
 ENV SUITE buster
 
 COPY --from=golang /usr/local/go /usr/local/go
-COPY --from=shim-process /bin/containerd-shim-process-v1 /containerd-shim-process-v1
 
 WORKDIR /root/build-deb
 COPY build-deb /root/build-deb/build-deb

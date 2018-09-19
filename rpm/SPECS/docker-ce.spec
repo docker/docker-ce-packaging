@@ -4,9 +4,8 @@ Name: docker-ce
 Version: %{_version}
 Release: %{_release}%{?dist}
 Epoch: 3
-Source0: containerd-proxy.tgz
+Source0: engine.tgz
 Source1: docker.service
-Source2: engine.tar
 Summary: The open-source application container engine
 Group: Tools/Docker
 License: ASL 2.0
@@ -21,10 +20,21 @@ Requires: iptables
 # Should be required as well by docker-ce-cli but let's just be thorough
 Requires: containerd.io
 
-BuildRequires: which
-BuildRequires: make
+BuildRequires: bash
+BuildRequires: btrfs-progs-devel
+BuildRequires: ca-certificates
+BuildRequires: cmake
+BuildRequires: device-mapper-devel
 BuildRequires: gcc
+BuildRequires: git
+BuildRequires: glibc-static
+BuildRequires: libseccomp-devel
+BuildRequires: libtool
+BuildRequires: make
 BuildRequires: pkgconfig(systemd)
+BuildRequires: selinux-policy-devel
+BuildRequires: systemd-devel
+BuildRequires: which
 
 # conflicting packages
 Conflicts: docker
@@ -52,28 +62,27 @@ depending on a particular stack or provider.
 %setup -q -c -n src
 
 %build
-# dockerd proxy compilation
-mkdir -p /go/src/github.com/crosbymichael/
-ls %{_topdir}/BUILD/src
-ln -s %{_topdir}/BUILD/src/containerd-proxy /go/src/github.com/crosbymichael/containerd-proxy
-pushd /go/src/github.com/crosbymichael/containerd-proxy
-make SCOPE_LABEL="com.docker/containerd-proxy.scope" ANY_SCOPE="ee" bin/containerd-proxy
+pushd docker
+for component in tini "proxy dynamic";do
+    TMP_GOPATH="/go" hack/dockerfile/install/install.sh $component
+done
+hack/make.sh dynbinary
 popd
 
+%check
+docker/bundles/dynbinary-daemon/dockerd -v
+
 %install
-# Install containerd-proxy as dockerd
-install -D -m 0755 %{_topdir}/BUILD/src/containerd-proxy/bin/containerd-proxy $RPM_BUILD_ROOT/%{_bindir}/dockerd
-install -D -m 0644 %{_topdir}/SOURCES/engine.tar $RPM_BUILD_ROOT/%{_sharedstatedir}/docker-engine/engine.tar
+install -D -m 0755 $(readlink -f docker/bundles/dynbinary-daemon/dockerd) $RPM_BUILD_ROOT/%{_bindir}/dockerd
+install -D -m 0755 /usr/local/bin/docker-proxy $RPM_BUILD_ROOT/%{_bindir}/docker-proxy
+install -D -m 0755 /usr/local/bin/docker-init $RPM_BUILD_ROOT/%{_bindir}/docker-init
 install -D -m 0644 %{_topdir}/SOURCES/docker.service $RPM_BUILD_ROOT/%{_unitdir}/docker.service
-install -D -m 0644 %{_topdir}/SOURCES/dockerd.json $RPM_BUILD_ROOT/etc/containerd-proxy/dockerd.json
-install -D -m 0755 /containerd-shim-process-v1 $RPM_BUILD_ROOT/%{_sbindir}/containerd-shim-process-v1
 
 %files
 /%{_bindir}/dockerd
-/%{_sbindir}/containerd-shim-process-v1
-/%{_sharedstatedir}/docker-engine/engine.tar
+/%{_bindir}/docker-proxy
+/%{_bindir}/docker-init
 /%{_unitdir}/docker.service
-/etc/containerd-proxy/dockerd.json
 
 %pre
 if [ $1 -gt 0 ] ; then

@@ -9,7 +9,7 @@ Wants=network-online.target
 # the default is not to use systemd for cgroups because the delegate issues still
 # exists and systemd currently does not support the cgroup feature set required
 # for containers run by docker
-ExecStart=/usr/bin/dockerd
+ExecStart=/usr/bin/dockerd -H unix:// --containerd /run/containerd/containerd.sock --default-runtime containerd --add-runtime containerd=runc
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStopPost=/usr/bin/dockerd post-stop
 TimeoutSec=0

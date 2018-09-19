@@ -1,4 +1,5 @@
 include ../containerd.mk
+include ../ce.mk
 
 ARCH=$(shell uname -m)
 ENGINE_DIR:=$(CURDIR)/../../engine
@@ -38,11 +39,16 @@ RPMBUILD_FLAGS?=-ba\
 	--define '_version $(word 1,$(GEN_RPM_VER))' \
 	--define '_origversion $(word 4, $(GEN_RPM_VER))' \
 	$(SPECS)
-RUN?=$(RPMBUILD) rpmbuild-$@/$(ARCH) $(RPMBUILD_FLAGS)
-ENGINE_IMAGE=docker/engine-community
-ENGINE_SCOPE=ce
+RUN?=$(RPMBUILD) \
+	-e VERSION=$(VERSION) \
+	-e DOCKER_GITCOMMIT=$(GITCOMMIT) \
+	-e PLATFORM="$(PLATFORM)" \
+	-e PRODUCT="$(PRODUCT)" \
+	-e DEFAULT_PRODUCT_LICENSE="$(DEFAULT_PRODUCT_LICENSE)" \
+	rpmbuild-$@/$(ARCH) \
+	$(RPMBUILD_FLAGS)
 
-SOURCE_FILES=containerd-proxy.tgz cli.tgz docker.service dockerd.json engine.tar
+SOURCE_FILES=engine.tgz cli.tgz docker.service
 SOURCES=$(addprefix rpmbuild/SOURCES/, $(SOURCE_FILES))
 
 
@@ -101,28 +107,14 @@ rpmbuild/SOURCES/cli.tgz:
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
 
-rpmbuild/SOURCES/containerd-proxy.tgz:
-	mkdir -p tmp/
-	curl -fL -o tmp/containerd-proxy.tgz "https://github.com/crosbymichael/containerd-proxy/archive/$(CONTAINERD_PROXY_COMMIT).tar.gz"
-	tar xzf tmp/containerd-proxy.tgz -C tmp/
-	mv tmp/containerd-proxy-$(CONTAINERD_PROXY_COMMIT) tmp/containerd-proxy
-	mkdir -p $(@D)
-	$(CHOWN) -R $(shell id -u):$(shell id -g) rpmbuild
-	tar -zcf $@ -C tmp/ containerd-proxy
-	rm -rf tmp/
+rpmbuild/SOURCES/engine.tgz:
+	mkdir -p rpmbuild/SOURCES
+	docker run --rm -i -w /v \
+		-v $(ENGINE_DIR):/docker \
+		-v $(CURDIR)/rpmbuild/SOURCES:/v \
+		alpine \
+		tar -C / -c -z -f /v/engine.tgz --exclude .git docker
 
 rpmbuild/SOURCES/docker.service: ../systemd/docker.service
 	mkdir -p $(@D)
 	cp $< $@
-
-rpmbuild/SOURCES/dockerd.json: ../common/dockerd.json
-	mkdir -p $(@D)
-	sed \
-	    -e 's!$${ENGINE_IMAGE}!$(ENGINE_IMAGE)!' \
-	    -e 's!$${ENGINE_SCOPE}!$(ENGINE_SCOPE)!' \
-	    -e 's/$${IMAGE_TAG}/$(IMAGE_TAG)/' \
-	    $< > $@
-
-rpmbuild/SOURCES/engine.tar:
-	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) engine-$(ARCH)-dm.tar
-	mv ../image/engine-$(ARCH)-dm.tar $@
