@@ -1,8 +1,6 @@
 ARG GO_IMAGE
-ARG CONTAINERD_SHIM_PROCESS_IMAGE
 ARG BUILD_IMAGE=fedora:27
 FROM ${GO_IMAGE} as golang
-FROM ${CONTAINERD_SHIM_PROCESS_IMAGE} as shim-process
 
 FROM ${BUILD_IMAGE}
 ENV DISTRO fedora
@@ -16,6 +14,6 @@ RUN dnf install -y rpm-build rpmlint dnf-plugins-core
 COPY SPECS /root/rpmbuild/SPECS
 RUN dnf builddep -y /root/rpmbuild/SPECS/*.spec
 COPY --from=golang /usr/local/go /usr/local/go/
-COPY --from=shim-process /bin/containerd-shim-process-v1 /containerd-shim-process-v1
+COPY rpmbuild/SOURCES /root/rpmbuild/SOURCES
 WORKDIR /root/rpmbuild
 ENTRYPOINT ["/bin/rpmbuild"]
