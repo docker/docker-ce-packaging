@@ -2,12 +2,22 @@ Source: docker-ce
 Section: admin
 Priority: optional
 Maintainer: Docker <support@docker.com>
-Build-Depends: bash-completion,
+Build-Depends: bash,
+               bash-completion,
+               btrfs-tools | libbtrfs-dev,
+               ca-certificates,
+               cmake,
                dh-apparmor,
                dh-systemd,
+               gcc,
+               git,
+               libc-dev,
+               libdevmapper-dev,
                libltdl-dev,
+               libseccomp-dev,
+               libtool,
                make,
-               gcc
+               pkg-config
 Standards-Version: 3.9.6
 Homepage: https://docker.com
 Vcs-Browser: https://github.com/docker/docker

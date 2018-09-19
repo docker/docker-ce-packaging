@@ -1,8 +1,9 @@
-include ../containerd.mk
+include ../ce.mk
 
 SHELL:=/bin/bash
 ARCH:=$(shell uname -m)
 CLI_DIR:=$(CURDIR)/../../cli
+ENGINE_DIR:=$(CURDIR)/../../engine
 GITCOMMIT?=$(shell cd $(CLI_DIR) && git rev-parse --short HEAD)
 VERSION?=0.0.0-dev
 GO_BASE_IMAGE=golang
@@ -21,21 +22,21 @@ BUILD?=docker build \
 	$(BUILD_IMAGE_FLAG) \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	--build-arg COMMON_FILES=$(COMMON_FILES) \
-	--build-arg CONTAINERD_SHIM_PROCESS_IMAGE=$(CONTAINERD_SHIM_PROCESS_IMAGE) \
 	-t debbuild-$@/$(ARCH) \
 	-f $(CURDIR)/$@/Dockerfile .
-RUN=docker run --rm -i \
+RUN?=docker run --rm -i \
 	-e EPOCH='$(EPOCH)' \
 	-e DEB_VERSION=$(word 1, $(DEB_VERSION)) \
 	-e VERSION=$(word 2, $(DEB_VERSION)) \
 	-e DOCKER_GITCOMMIT=$(GITCOMMIT) \
+	-e PLATFORM="$(PLATFORM)" \
+	-e PRODUCT="$(PRODUCT)" \
+	-e DEFAULT_PRODUCT_LICENSE="$(DEFAULT_PRODUCT_LICENSE)" \
 	-v $(CURDIR)/debbuild/$@:/build \
 	debbuild-$@/$(ARCH)
 
-SOURCE_FILES=containerd-proxy.tgz cli.tgz docker.service dockerd.json engine.tar
+SOURCE_FILES=cli.tgz engine.tgz docker.service
 SOURCES=$(addprefix sources/, $(SOURCE_FILES))
-ENGINE_IMAGE=docker/engine-community
-ENGINE_SCOPE=ce
 
 IMAGE_TAG=nightly
 
@@ -133,29 +134,16 @@ sources/cli.tgz:
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
 
-sources/containerd-proxy.tgz:
-	mkdir -p tmp/
-	curl -fL -o tmp/containerd-proxy.tgz "https://github.com/crosbymichael/containerd-proxy/archive/$(CONTAINERD_PROXY_COMMIT).tar.gz"
-	tar xzf tmp/containerd-proxy.tgz -C tmp/
-	mv tmp/containerd-proxy-$(CONTAINERD_PROXY_COMMIT) tmp/containerd-proxy
+sources/engine.tgz:
 	mkdir -p $(@D)
-	$(CHOWN) -R $(shell id -u):$(shell id -g) $$(dirname $(@D))
-	tar -zcf $@ -C tmp/ containerd-proxy
-	rm -rf tmp/
+	docker run --rm -i -w /v \
+		-v $(ENGINE_DIR):/docker \
+		-v $(CURDIR)/$(@D):/v \
+		alpine \
+		tar -C / -c -z -f /v/engine.tgz --exclude .git docker
 
 sources/docker.service: ../systemd/docker.service
 	mkdir -p $(@D)
 	cp $< $@
 
-sources/dockerd.json: ../common/dockerd.json
-	mkdir -p $(@D)
-	sed \
-	    -e 's!$${ENGINE_IMAGE}!$(ENGINE_IMAGE)!' \
-	    -e 's!$${ENGINE_SCOPE}!$(ENGINE_SCOPE)!' \
-	    -e 's/$${IMAGE_TAG}/$(IMAGE_TAG)/' \
-	    $< > $@
-
-# offline bundle
-sources/engine.tar: 
-	$(MAKE) -C ../image ENGINE_IMAGE=$(ENGINE_IMAGE) ENGINE_SCOPE=$(ENGINE_SCOPE) engine-$(ARCH).tar
-	mv ../image/engine-$(ARCH).tar $@
+-include ../ee.mk
