@@ -32,7 +32,7 @@ RUN=docker run --rm -i \
 	-v $(CURDIR)/debbuild/$@:/build \
 	debbuild-$@/$(ARCH)
 
-SOURCE_FILES=engine-image cli.tgz docker.service distribution_based_engine.json
+SOURCE_FILES=engine-image cli.tgz docker.service distribution_based_engine.json 50-pid_max.conf
 SOURCES=$(addprefix sources/, $(SOURCE_FILES))
 
 .PHONY: help
@@ -128,6 +128,10 @@ sources/cli.tgz:
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
 
 sources/docker.service: ../systemd/docker.service
+	mkdir -p $(@D)
+	cp $< $@
+
+sources/50-pid_max.conf: ../common/50-pid_max.conf
 	mkdir -p $(@D)
 	cp $< $@
 

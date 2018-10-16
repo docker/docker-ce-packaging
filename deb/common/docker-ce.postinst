@@ -28,6 +28,7 @@ case "$1" in
 				groupadd --system docker
 			fi
 		fi
+		/usr/lib/systemd/systemd-sysctl 50-pid_max.conf >/dev/null 2>&1 || :
 		update_dockerd
 		;;
 	update)

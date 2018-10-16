@@ -58,6 +58,7 @@ install -D -m 0755 /sources/docker-proxy $RPM_BUILD_ROOT/%{_bindir}/docker-proxy
 install -D -m 0755 /sources/docker-init $RPM_BUILD_ROOT/%{_bindir}/docker-init
 install -D -m 0644 %{_topdir}/SOURCES/docker.service $RPM_BUILD_ROOT/%{_unitdir}/docker.service
 install -D -m 0644 %{_topdir}/SOURCES/distribution_based_engine.json $RPM_BUILD_ROOT/var/lib/docker-engine/distribution_based_engine-ce.json
+install -D -m 0644 %{_topdir}/SOURCES/50-pid_max.conf $RPM_BUILD_ROOT/etc/sysctl.d/50-pid_max.conf
 
 %files
 /%{_bindir}/dockerd-ce
@@ -65,6 +66,7 @@ install -D -m 0644 %{_topdir}/SOURCES/distribution_based_engine.json $RPM_BUILD_
 /%{_bindir}/docker-init
 /%{_unitdir}/docker.service
 /var/lib/docker-engine/distribution_based_engine-ce.json
+/etc/sysctl.d/50-pid_max.conf
 
 %pre
 if [ $1 -gt 0 ] ; then
@@ -81,6 +83,7 @@ if [ $1 -gt 0 ] ; then
 fi
 
 %post
+/usr/lib/systemd/systemd-sysctl 50-pid_max.conf >/dev/null 2>&1 || :
 %systemd_post docker
 if ! getent group docker > /dev/null; then
     groupadd --system docker
