@@ -49,7 +49,8 @@ BuildRequires: git
 Conflicts: docker
 Conflicts: docker-io
 Conflicts: docker-engine-cs
-Conflicts: docker-ee
+Conflicts: docker-ce < 18.09
+Conflicts: docker-ee < 18.09
 Conflicts: docker-ee-cli
 
 %description
