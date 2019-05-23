@@ -8,6 +8,7 @@ GOPATH=$(go env GOPATH)
 REPO=https://github.com/docker/app.git
 COMMIT=v0.8.0-beta2
 DEST=${GOPATH}/src/github.com/docker/app
+export EXPERIMENTAL_PLUGIN=1
 
 build() {
     if [ ! -d "${DEST}" ]; then

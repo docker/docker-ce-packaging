@@ -2,6 +2,7 @@
 
 DESTDIR=${DESTDIR:-}
 PREFIX=${PREFIX:-/usr/local}
+EXPERIMENTAL_PLUGIN=${EXPERIMENTAL_PLUGIN:-}
 
 add_github_ssh_host() {
     # You're not able to clone from github unless you add to known_hosts
@@ -12,6 +13,7 @@ add_github_ssh_host() {
 }
 
 install_binary() {
+    [ -n "${EXPERIMENTAL_PLUGIN}" ] && PREFIX=${PREFIX}-experimental
     for binary in "$@"; do
         mkdir -p "${DESTDIR}${PREFIX}"
         install -p -m 755 "${binary}" "${DESTDIR}${PREFIX}"

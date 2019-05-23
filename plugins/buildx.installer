@@ -8,6 +8,7 @@ GOPATH=$(go env GOPATH)
 REPO=https://${PKG}.git
 COMMIT=master
 DEST=${GOPATH}/src/${PKG}
+export EXPERIMENTAL_PLUGIN=1
 
 build() {
     if [ ! -d "${DEST}" ]; then
@@ -18,8 +19,10 @@ build() {
         git fetch --all
         git checkout -q "${COMMIT}"
         local LDFLAGS
-        # TODO: unmark `-tp` when no longer a technical preview
-        LDFLAGS="-X ${PKG}/version.Version=$(git describe --match 'v[0-9]*' --always --tags)-tp -X ${PKG}/version.Revision=$(git rev-parse HEAD) -X ${PKG}/version.Package=${PKG}"
+        local VERSION
+        VERSION=$(git describe --match 'v[0-9]*' --always --tags)
+        test -n "${EXPERIMENTAL_PLUGIN}" && VERSION=${VERSION}-tp
+        LDFLAGS="-X ${PKG}/version.Version=${VERSION} -X ${PKG}/version.Revision=$(git rev-parse HEAD) -X ${PKG}/version.Package=${PKG}"
         set -x
         go build -o bin/docker-buildx -ldflags "${LDFLAGS}" ./cmd/buildx
     )
