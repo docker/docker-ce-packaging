@@ -20,7 +20,9 @@ Requires: container-selinux >= 2:2.74
 Requires: libseccomp >= 2.3
 Requires: systemd
 Requires: iptables
+%if %{undefined suse_version}
 Requires: libcgroup
+%endif
 Requires: containerd.io >= 1.2.2-3
 Requires: tar
 Requires: xz
