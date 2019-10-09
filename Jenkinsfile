@@ -8,9 +8,9 @@ pipeline {
 	}
 	parameters {
 		string(name: 'github_repo_engine', defaultValue: 'docker/engine', description: 'github org/repo of engine')
-		string(name: 'github_branch_engine', defaultValue: env.CHANGE_TARGET, description: 'github branch of engine')
+		string(name: 'github_branch_engine', defaultValue: env.CHANGE_TARGET ?: env.BRANCH_NAME, description: 'github branch of engine')
 		string(name: 'github_repo_cli', defaultValue: 'docker/cli', description: 'github org/repo of cli')
-		string(name: 'github_branch_cli', defaultValue: env.CHANGE_TARGET, description: 'github branch of cli')
+		string(name: 'github_branch_cli', defaultValue: env.CHANGE_TARGET ?: env.BRANCH_NAME, description: 'github branch of cli')
 		booleanParam(name: 'archive_packages', defaultValue: false, description: 'archive packages')
 	}
 	environment {
