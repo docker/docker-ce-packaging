@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+###
+# Script Name:  verify
+#
+# Description: This runs a smoke test to verify that the packages can be installed corrected
+###
+
+# packaging/build/${DIST_ID}/${DIST_VERSION}/${ARCH} - location of all packages
+# Manually Testing: docker run --rm -it -v $(pwd):/v -w /v "centos:7" ./verify
+
+set -e
+
+source install-containerd-helpers
+
+function verify() {
+    if dpkg --version > /dev/null 2> /dev/null; then
+        verify_deb
+    elif rpm --version > /dev/null 2> /dev/null; then
+        verify_rpm
+    else
+        echo "[ERROR] Unable to determine base os:"
+        cat /etc/os-release
+        exit 1
+    fi
+}
+
+function verify_deb() {
+    apt-get update
+    apt-get -y install lsb-release software-properties-common curl apt-transport-https gnupg2
+
+    DIST_ID=$(source /etc/os-release; echo "$ID")
+    DIST_VERSION=$(lsb_release -sc)
+    ARCH=$(dpkg --print-architecture)
+
+    install_debian_containerd
+
+    packages=$(find "docker-ce/components/packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
+    # All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
+    packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
+
+    (
+        set -x
+        apt-get -y install --no-install-recommends ${packages}
+    )
+}
+
+function verify_rpm() {
+    DIST_ID=$(. /etc/os-release; echo "${ID}")
+    DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
+    ARCH=$(uname -m)
+
+    pkg_manager="yum"
+    pkg_config_manager="yum-config-manager"
+    if dnf --version; then
+        pkg_manager="dnf"
+        pkg_config_manager="dnf config-manager"
+        dnf clean all && dnf upgrade -y
+        ${pkg_manager} install -y 'dnf-command(config-manager)'
+    fi
+
+    case ${DIST_ID}:${DIST_VERSION} in
+        ol:7*)
+            # Needed for container-selinux
+            yum-config-manager --enable ol7_addons
+            ;;
+        fedora*)
+            dnf install -y findutils
+    esac
+
+    install_rpm_containerd
+
+    # find all rpm packages, exclude src package
+    echo "[DEBUG] Installing engine rpms"
+    packages=$(find "docker-ce/components/packaging/rpm/rpmbuild/RPMS/" -type f -name "*.rpm" | sed '/src/d')
+
+    # install all non-source packages
+    (
+        set -x
+        ${pkg_manager} install -y ${packages}
+    )
+}
+
+verify
