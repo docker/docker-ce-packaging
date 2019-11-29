@@ -8,6 +8,8 @@ GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 GEN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
 EPOCH?=5
+DOCKER_BUILDKIT=1
+BUILD_TARGET=final
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
@@ -19,6 +21,11 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	$(BUILD_IMAGE_FLAG) \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	--build-arg COMMON_FILES=$(COMMON_FILES) \
+	--build-arg VERSION=$(word 2, $(DEB_VERSION)) \
+	--build-arg DOCKER_GITCOMMIT=$(GITCOMMIT) \
+	--build-arg PLATFORM \
+	--target=$(BUILD_TARGET) \
+	$(BUILD_OPTS) \
 	-t debbuild-$@/$(ARCH) \
 	-f $@/Dockerfile \
 	.
@@ -56,6 +63,12 @@ clean: ## remove build artifacts
 .PHONY: deb
 deb: ubuntu debian ## build all deb packages except for raspbian
 
+.PHONY: binaries
+binaries: BUILD_TARGET=binaries
+binaries: BUILD_OPTS=--output type=local,dest=build
+binaries: deb
+
+
 .PHONY: ubuntu
 ubuntu: $(UBUNTU_VERSIONS) ## build all ubuntu deb packages
 
@@ -69,8 +82,8 @@ raspbian: $(RASPBIAN_VERSIONS) ## build all raspbian deb packages
 $(DISTROS): sources/cli.tgz sources/engine.tgz sources/docker.service sources/docker.socket sources/plugin-installers.tgz
 	@echo "== Building packages for $@ =="
 	$(BUILD)
-	$(RUN)
-	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+#	$(RUN)
+#	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
 
 sources/engine.tgz:
 	mkdir -p $(@D)
