@@ -41,7 +41,8 @@ function verify_deb() {
 
     (
         set -x
-        apt-get -y install --no-install-recommends ${packages}
+        dpkg --ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1  -i ${packages}
+        apt-get install -y -f
     )
 }
 
