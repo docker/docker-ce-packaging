@@ -37,19 +37,22 @@ ARG BUILDTIME
 ARG PLATFORM
 ARG PRODUCT
 ARG DEFAULT_PRODUCT_LICENSE
+ARG TINI_COMMIT
 ENV VERSION ${VERSION}
 ENV GITCOMMIT ${GITCOMMIT}
 ENV BUILDTIME ${BUILDTIME}
 ENV PLATFORM ${PLATFORM}
 ENV PRODUCT ${PRODUCT}
 ENV DEFAULT_PRODUCT_LICENSE ${DEFAULT_PRODUCT_LICENSE}
+ENV TINI_COMMIT ${TINI_COMMIT}
+SHELL ["/bin/bash", "-c"]
 # TODO The way we set the version could easily be simplified not to depend on hack/...
-RUN bash ./hack/make/.go-autogen
-RUN go build -o /dockerd \
-    -tags 'autogen apparmor seccomp selinux journald' \
+RUN source ./hack/make/.go-autogen; \
+    go build -o /sbin/dockerd \
+    -tags 'apparmor seccomp selinux journald' \
     -i \
     -buildmode=pie \
-    -a -ldflags '-w'\
+    -a -ldflags "-w ${LDFLAGS}" \
     github.com/docker/docker/cmd/dockerd
 
 # docker-proxy
