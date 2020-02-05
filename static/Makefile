@@ -6,6 +6,7 @@ BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
 
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
+LDD_RUN=ldd >/dev/null 2>/dev/null
 DIR_TO_HASH:=build/linux
 DOCKER_CLI_GOLANG_IMG=golang:$(GO_VERSION)
 
@@ -43,6 +44,7 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
+		if $(LDD_RUN) $(ENGINE_DIR)/bundles/binary-daemon/$$f; then echo "$$f is not static, exiting..."; exit 1; fi; \
 		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker/$$f; \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
@@ -51,6 +53,7 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	mkdir -p build/linux/docker-rootless-extras
 	for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do \
 		if [ -f $(ENGINE_DIR)/bundles/binary-daemon/$$f ]; then \
+	  		if $(LDD_RUN) $(ENGINE_DIR)/bundles/binary-daemon/$$f; then echo "$$f is not static, exiting..."; exit 1; fi; \
 			cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker-rootless-extras/$$f; \
 		fi \
 	done
