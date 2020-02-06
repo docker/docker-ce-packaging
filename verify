@@ -41,7 +41,21 @@ function verify_deb() {
 
     (
         set -x
-        apt-get -y install --no-install-recommends ${packages}
+        # Install the locally built packages using 'dpkg' because installing with
+        # 'apt-get' would attempt to install dependency packages (such as the CLI)
+        # from download.docker.com instead of the locally built CLI package. Given
+        # that 'dpkg -i' does not install any dependency (but will fail if depen-
+        # dencies are missing), we use the '--ignore-depends' option to ignore
+        # packages we know to be missing at this stage, and '--force-depends' to
+        # only warn about any other missing dependency.
+        #
+        # Afterwards, we run 'apt-get install' with the '--fix-broken' option to
+        # trigger installation of the dependencies, which should succceed succesfully.
+        dpkg \
+            --ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1 \
+            --force-depends \
+            -i ${packages}
+        apt-get -y install --no-install-recommends --fix-broken ${packages}
     )
 }
 
