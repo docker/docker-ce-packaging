@@ -14,85 +14,91 @@ set -e
 source install-containerd-helpers
 
 function verify() {
-    if dpkg --version > /dev/null 2> /dev/null; then
-        verify_deb
-    elif rpm --version > /dev/null 2> /dev/null; then
-        verify_rpm
-    else
-        echo "[ERROR] Unable to determine base os:"
-        cat /etc/os-release
-        exit 1
-    fi
+	if dpkg --version >/dev/null 2>/dev/null; then
+		verify_deb
+	elif rpm --version >/dev/null 2>/dev/null; then
+		verify_rpm
+	else
+		echo "[ERROR] Unable to determine base os:"
+		cat /etc/os-release
+		exit 1
+	fi
 }
 
 function verify_deb() {
-    apt-get update
-    apt-get -y install lsb-release software-properties-common curl apt-transport-https gnupg2
+	apt-get update
+	apt-get -y install \
+		apt-transport-https \
+		curl \
+		gnupg2 \
+		lsb-release \
+		software-properties-common
 
-    DIST_ID=$(source /etc/os-release; echo "$ID")
-    DIST_VERSION=$(lsb_release -sc)
-    ARCH=$(dpkg --print-architecture)
+	DIST_ID=$(source /etc/os-release; echo "$ID")
+	DIST_VERSION=$(lsb_release -sc)
+	ARCH=$(dpkg --print-architecture)
 
-    install_debian_containerd
+	install_debian_containerd
 
-    packages=$(find "docker-ce/components/packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
-    # All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
-    packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
+	packages=$(find "docker-ce/components/packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
+	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
+	packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
 
-    (
-        set -x
-        # Install the locally built packages using 'dpkg' because installing with
-        # 'apt-get' would attempt to install dependency packages (such as the CLI)
-        # from download.docker.com instead of the locally built CLI package. Given
-        # that 'dpkg -i' does not install any dependency (but will fail if depen-
-        # dencies are missing), we use the '--ignore-depends' option to ignore
-        # packages we know to be missing at this stage, and '--force-depends' to
-        # only warn about any other missing dependency.
-        #
-        # Afterwards, we run 'apt-get install' with the '--fix-broken' option to
-        # trigger installation of the dependencies, which should succceed succesfully.
-        dpkg \
-            --ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1 \
-            --force-depends \
-            -i ${packages}
-        apt-get -y install --no-install-recommends --fix-broken ${packages}
-    )
+	(
+		set -x
+		# Install the locally built packages using 'dpkg' because installing with
+		# 'apt-get' would attempt to install dependency packages (such as the CLI)
+		# from download.docker.com instead of the locally built CLI package. Given
+		# that 'dpkg -i' does not install any dependency (but will fail if depen-
+		# dencies are missing), we use the '--ignore-depends' option to ignore
+		# packages we know to be missing at this stage, and '--force-depends' to
+		# only warn about any other missing dependency.
+		#
+		# Afterwards, we run 'apt-get install' with the '--fix-broken' option to
+		# trigger installation of the dependencies, which should succceed succesfully.
+		dpkg \
+			--ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1 \
+			--force-depends \
+			-i ${packages}
+		apt-get -y install --no-install-recommends --fix-broken ${packages}
+	)
 }
 
 function verify_rpm() {
-    DIST_ID=$(. /etc/os-release; echo "${ID}")
-    DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
-    ARCH=$(uname -m)
+	DIST_ID=$(. /etc/os-release; echo "${ID}")
+	DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
+	ARCH=$(uname -m)
 
-    pkg_manager="yum"
-    pkg_config_manager="yum-config-manager"
-    if dnf --version; then
-        pkg_manager="dnf"
-        pkg_config_manager="dnf config-manager"
-        dnf clean all && dnf upgrade -y
-        ${pkg_manager} install -y 'dnf-command(config-manager)'
-    fi
+	pkg_manager="yum"
+	pkg_config_manager="yum-config-manager"
+	if dnf --version; then
+		pkg_manager="dnf"
+		pkg_config_manager="dnf config-manager"
+		dnf clean all && dnf upgrade -y
+		${pkg_manager} install -y 'dnf-command(config-manager)'
+	fi
 
-    case ${DIST_ID}:${DIST_VERSION} in
-        ol:7*)
-            # Needed for container-selinux
-            yum-config-manager --enable ol7_addons
-            ;;
-        fedora*)
-            dnf install -y findutils
-    esac
+	case ${DIST_ID}:${DIST_VERSION} in
+	ol:7*)
+		# Needed for container-selinux
+		yum-config-manager --enable ol7_addons
+		;;
+	fedora*)
+		dnf install -y findutils
+		;;
+	esac
 
-    install_rpm_containerd
+	install_rpm_containerd
 
-    # find all rpm packages, exclude src package
-    echo "[DEBUG] Installing engine rpms"
-    packages=$(find "docker-ce/components/packaging/rpm/rpmbuild/RPMS/" -type f -name "*.rpm" | sed '/src/d')
+	# find all rpm packages, exclude src package
+	echo "[DEBUG] Installing engine rpms"
+	packages=$(find "docker-ce/components/packaging/rpm/rpmbuild/RPMS/" -type f -name "*.rpm" | sed '/src/d')
 
-    # install all non-source packages
-    (
-        set -x
-        ${pkg_manager} install -y ${packages}
-    )
+	# install all non-source packages
+	(
+		set -x
+		${pkg_manager} install -y ${packages}
+	)
 }
 
 verify
