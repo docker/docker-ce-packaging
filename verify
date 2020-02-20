@@ -27,8 +27,9 @@ function verify() {
 
 function verify_deb() {
 	apt-get update
-	apt-get -y install \
+	apt-get -y install --no-install-recommends \
 		apt-transport-https \
+		ca-certificates \
 		curl \
 		gnupg2 \
 		lsb-release \
