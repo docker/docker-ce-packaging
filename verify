@@ -36,7 +36,6 @@ function verify_deb() {
 
 	DIST_ID=$(source /etc/os-release; echo "$ID")
 	DIST_VERSION=$(lsb_release -sc)
-	ARCH=$(dpkg --print-architecture)
 
 	install_debian_containerd
 
@@ -67,7 +66,6 @@ function verify_deb() {
 function verify_rpm() {
 	DIST_ID=$(. /etc/os-release; echo "${ID}")
 	DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
-	ARCH=$(uname -m)
 
 	pkg_manager="yum"
 	pkg_config_manager="yum-config-manager"
@@ -81,7 +79,7 @@ function verify_rpm() {
 	case ${DIST_ID}:${DIST_VERSION} in
 	ol:7*)
 		# Needed for container-selinux
-		yum-config-manager --enable ol7_addons
+		${pkg_config_manager} --enable ol7_addons
 		;;
 	fedora*)
 		dnf install -y findutils

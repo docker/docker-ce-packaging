@@ -12,6 +12,12 @@ set -x extglob
 function install_rpm_containerd() {
 	# Install containerd dependency for non-zypper dependecies
 	echo "[DEBUG] Installing engine dependencies"
+
+	pkg_config_manager="yum-config-manager"
+	if dnf --version; then
+		pkg_config_manager="dnf config-manager"
+	fi
+
 	${pkg_config_manager} \
 		--add-repo \
 		https://download.docker.com/linux/centos/docker-ce.repo
@@ -20,11 +26,12 @@ function install_rpm_containerd() {
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
 function install_debian_containerd() {
 	echo "[DEBUG] Installing containerd"
-	curl -fsSL https://download.docker.com/linux/${DIST_ID}/gpg | apt-key add -
+	curl -fsSL "https://download.docker.com/linux/${DIST_ID}/gpg" | apt-key add -
 
 	if [[ ${DIST_VERSION} == "sid" ]]; then
 		DIST_VERSION='buster'
 	fi
+	ARCH=$(dpkg --print-architecture)
 	echo "deb [arch=${ARCH}] https://download.docker.com/linux/${DIST_ID} ${DIST_VERSION} stable" >/etc/apt/sources.list.d/docker.list
 
 	apt-get update
