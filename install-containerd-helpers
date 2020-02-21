@@ -26,6 +26,11 @@ function install_rpm_containerd() {
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
 function install_debian_containerd() {
 	echo "[DEBUG] Installing containerd"
+
+	#TODO include this step in the get.docker.com installation script
+	# Make sure ca-certificates are up-to-date
+	update-ca-certificates -f
+
 	curl -fsSL "https://download.docker.com/linux/${DIST_ID}/gpg" | apt-key add -
 
 	if [[ ${DIST_VERSION} == "sid" ]]; then
