@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+###
+# Script Name:  verify
+#
+# Description: This runs a smoke test to verify that the packages can be installed correctly
+###
+
+set -e -x extglob
+
+# Steps taken from: https://docs.docker.com/install/linux/docker-ce/centos/
+function install_containerd() {
+	# Install containerd dependency for non-zypper dependecies
+	echo "[DEBUG] Installing engine dependencies"
+
+	pkg_config_manager="yum-config-manager"
+	if dnf --version; then
+		pkg_config_manager="dnf config-manager"
+	fi
+
+	${pkg_config_manager} \
+		--add-repo \
+		"https://download.docker.com/linux/${DIST_ID}/docker-ce.repo"
+}
+
+function verify() {
+	DIST_ID=$(. /etc/os-release; echo "${ID}")
+	DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
+
+	pkg_manager="yum"
+	pkg_config_manager="yum-config-manager"
+	if dnf --version; then
+		pkg_manager="dnf"
+		pkg_config_manager="dnf config-manager"
+		dnf clean all && dnf upgrade -y
+		${pkg_manager} install -y 'dnf-command(config-manager)'
+	fi
+
+	case ${DIST_ID}:${DIST_VERSION} in
+	ol:7*)
+		# Needed for container-selinux
+		${pkg_config_manager} --enable ol7_addons
+		;;
+	fedora*)
+		dnf install -y findutils
+		;;
+	esac
+
+	install_containerd
+
+	# find all rpm packages, exclude src package
+	echo "[DEBUG] Installing engine rpms"
+	packages=$(find "/build" -type f -name "*.rpm" | sed '/src/d')
+
+	# install all non-source packages
+	(
+		set -x
+		${pkg_manager} install -y ${packages}
+	)
+
+	# Verify docker version is the one expected.
+	expected_ver=$1
+	expected_gitcommit=$2
+	docker_ver=`docker --version`
+	installed_ver=`echo $docker_ver | awk '{print$3}'`
+	installed_gitcommit=`echo $docker_ver | awk '{print$5}'`
+	echo $docker_ver
+	if [[ $installed_ver =~ ^$expected_ver ]]; then
+		echo "PASSED! docker version matches expected $expected_ver"
+	else
+		echo "FAILED! docker version does not match expected $expected_ver"
+		exit 1
+	fi
+	if [[ $installed_gitcommit =~ ^$expected_gitcommit ]]; then
+		echo "PASSED! docker git commit matches expected $expected_gitcommit"
+	else
+		echo "FAILED! docker git commit does not match expected $expected_gitcommit"
+		exit 2
+	fi
+}
+
+verify

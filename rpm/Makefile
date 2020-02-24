@@ -4,12 +4,11 @@ CLI_DIR:=$(realpath $(CURDIR)/../../cli)
 ENGINE_DIR:=$(realpath $(CURDIR)/../../engine)
 PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
 GITCOMMIT=$(shell cd $(ENGINE_DIR) && git rev-parse --short HEAD)
-STATIC_VERSION:=$(shell ../static/gen-static-ver $(ENGINE_DIR) $(VERSION))
 GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-stretch
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(CLI_DIR) $(VERSION))
-CHOWN=docker run --rm -i -v $(CURDIR):/v -w /v alpine chown
 
+# Build docker image used to build packages
 DOCKERFILE=Dockerfile
 ifdef NEEDS_ARCH_SPECIFIC
 	DOCKERFILE=Dockerfile.$(ARCH)
@@ -25,6 +24,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	-f $@/$(DOCKERFILE) \
 	.
 
+# Build packages
 SPEC_FILES?=docker-ce.spec docker-ce-cli.spec
 SPECS?=$(addprefix SPECS/, $(SPEC_FILES))
 RPMBUILD=docker run --privileged --rm -i \
@@ -39,6 +39,17 @@ RPMBUILD_FLAGS?=-ba\
 	--define '_origversion $(word 4, $(GEN_RPM_VER))' \
 	$(SPECS)
 RUN?=$(RPMBUILD) rpmbuild-$@/$(ARCH) $(RPMBUILD_FLAGS)
+CHOWN=docker run --rm -i -v $(CURDIR):/v -w /v alpine chown
+
+# Checks built packages
+VERIFY=docker run --rm -i \
+	-v $(CURDIR)/rpmbuild:/build \
+	-v $(CURDIR)/verify:/verify \
+	-w / \
+	--entrypoint=./verify \
+	rpmbuild-$@/$(ARCH) \
+	$(GEN_RPM_VER) \
+	$(GITCOMMIT)
 
 SOURCE_FILES=engine.tgz cli.tgz docker.service docker.socket plugin-installers.tgz
 SOURCES=$(addprefix rpmbuild/SOURCES/, $(SOURCE_FILES))
@@ -71,6 +82,8 @@ $(FEDORA_RELEASES) $(CENTOS_RELEASES): $(SOURCES)
 	$(BUILD)
 	$(RUN)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) rpmbuild
+	@echo "== Testing packages for $@ =="
+	$(VERIFY)
 
 rpmbuild/SOURCES/engine.tgz:
 	mkdir -p rpmbuild/SOURCES
