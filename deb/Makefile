@@ -4,17 +4,16 @@ CLI_DIR:=$(realpath $(CURDIR)/../../cli)
 ENGINE_DIR:=$(realpath $(CURDIR)/../../engine)
 PLUGINS_DIR:=$(realpath $(CURDIR)/../plugins)
 GITCOMMIT?=$(shell cd $(CLI_DIR) && git rev-parse --short HEAD)
-STATIC_VERSION:=$(shell ../static/gen-static-ver $(ENGINE_DIR) $(VERSION))
 GO_BASE_IMAGE=golang
 GO_IMAGE=$(GO_BASE_IMAGE):$(GO_VERSION)-stretch
 DEB_VERSION=$(shell ./gen-deb-ver $(CLI_DIR) "$(VERSION)")
-CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
 EPOCH?=5
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
 endif
 
+# Build docker image used to build packages
 COMMON_FILES=common
 BUILD?=DOCKER_BUILDKIT=1 \
 	docker build \
@@ -23,7 +22,8 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	--build-arg COMMON_FILES=$(COMMON_FILES) \
 	-t debbuild-$@/$(ARCH) \
 	-f $(CURDIR)/$@/Dockerfile .
-# Additional flags may be necessary at some point
+
+# Build packages
 RUN_FLAGS=
 RUN=docker run --rm -i \
 	-e EPOCH='$(EPOCH)' \
@@ -34,6 +34,17 @@ RUN=docker run --rm -i \
 	-v $(CURDIR)/debbuild/$@:/build \
 	$(RUN_FLAGS) \
 	debbuild-$@/$(ARCH)
+CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
+
+# Checks built packages
+VERIFY=docker run --rm -i \
+	-v $(CURDIR)/debbuild/$@:/build \
+	-v $(CURDIR)/verify:/verify \
+	-w / \
+	--entrypoint=./verify \
+	debbuild-$@/$(ARCH) \
+	$(DEB_VERSION) \
+	$(GITCOMMIT)
 
 SOURCE_FILES=cli.tgz engine.tgz docker.service docker.socket plugin-installers.tgz
 SOURCES=$(addprefix sources/, $(SOURCE_FILES))
@@ -72,6 +83,8 @@ $(DISTROS): $(SOURCES)
 	$(BUILD)
 	$(RUN)
 	$(CHOWN) -R $(shell id -u):$(shell id -g) debbuild/$@
+	@echo "== Testing packages for $@ =="
+	$(VERIFY)
 
 sources/engine.tgz:
 	mkdir -p $(@D)

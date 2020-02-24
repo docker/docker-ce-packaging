@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+###
+# Script Name:  verify
+#
+# Description: This runs a smoke test to verify that the packages can be installed correctly
+###
+
+set -e -x extglob
+
+# Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
+function install_containerd() {
+	echo "[DEBUG] Installing containerd"
+
+	#TODO include this step in the get.docker.com installation script
+	# Make sure ca-certificates are up-to-date
+	update-ca-certificates -f
+
+	curl -fsSL "https://download.docker.com/linux/${DIST_ID}/gpg" | apt-key add -
+
+	if [[ ${DIST_VERSION} == "sid" ]]; then
+		DIST_VERSION='buster'
+	fi
+	ARCH=$(dpkg --print-architecture)
+	echo "deb [arch=${ARCH}] https://download.docker.com/linux/${DIST_ID} ${DIST_VERSION} stable" >/etc/apt/sources.list.d/docker.list
+
+	apt-get update
+}
+
+function verify() {
+	apt-get update
+	apt-get -y install --no-install-recommends \
+		apt-transport-https \
+		ca-certificates \
+		curl \
+		gnupg2 \
+		lsb-release \
+		software-properties-common
+
+	DIST_ID=$(source /etc/os-release; echo "$ID")
+	DIST_VERSION=$(lsb_release -sc)
+
+	install_containerd
+
+	packages=$(find "/build" -type f -name "*.deb")
+	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
+	packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
+
+	(
+		set -x
+		# Install the locally built packages using 'dpkg' because installing with
+		# 'apt-get' would attempt to install dependency packages (such as the CLI)
+		# from download.docker.com instead of the locally built CLI package. Given
+		# that 'dpkg -i' does not install any dependency (but will fail if depen-
+		# dencies are missing), we use the '--ignore-depends' option to ignore
+		# packages we know to be missing at this stage, and '--force-depends' to
+		# only warn about any other missing dependency.
+		#
+		# Afterwards, we run 'apt-get install' with the '--fix-broken' option to
+		# trigger installation of the dependencies, which should succceed succesfully.
+		dpkg \
+			--ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1 \
+			--force-depends \
+			-i ${packages}
+		apt-get -y install --no-install-recommends --fix-broken ${packages}
+		
+		# Verify docker version is the one expected.
+		expected_ver=$1
+		expected_gitcommit=$2
+		docker_ver=`docker --version`
+		installed_ver=`echo $docker_ver | awk '{print$3}'`
+		installed_gitcommit=`echo $docker_ver | awk '{print$5}'`
+		echo $docker_ver
+		if [[ $installed_ver =~ ^$expected_ver ]]; then
+			echo "PASSED! docker version matches expected $expected_ver"
+		else
+			echo "FAILED! docker version does not match expected $expected_ver"
+			exit 1
+		fi
+		if [[ $installed_gitcommit =~ ^$expected_gitcommit ]]; then
+			echo "PASSED! docker git commit matches expected $expected_gitcommit"
+		else
+			echo "FAILED! docker git commit does not match expected $expected_gitcommit"
+			exit 2
+		fi
+	)
+}
+
+verify
