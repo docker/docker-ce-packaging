@@ -20,7 +20,7 @@ function install_rpm_containerd() {
 
 	${pkg_config_manager} \
 		--add-repo \
-		https://download.docker.com/linux/centos/docker-ce.repo
+		"https://download.docker.com/linux/${DIST_ID}/docker-ce.repo"
 }
 
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
