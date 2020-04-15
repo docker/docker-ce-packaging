@@ -40,7 +40,7 @@ function verify_deb() {
 
 	install_debian_containerd
 
-	packages=$(find "docker-ce/components/packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
+	packages=$(find "docker-ce/packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
 	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
 	packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
 
@@ -91,7 +91,7 @@ function verify_rpm() {
 
 	# find all rpm packages, exclude src package
 	echo "[DEBUG] Installing engine rpms"
-	packages=$(find "docker-ce/components/packaging/rpm/rpmbuild/RPMS/" -type f -name "*.rpm" | sed '/src/d')
+	packages=$(find "docker-ce/packaging/rpm/rpmbuild/RPMS/" -type f -name "*.rpm" | sed '/src/d')
 
 	# install all non-source packages
 	(
