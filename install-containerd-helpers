@@ -10,34 +10,44 @@ set -x extglob
 
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/centos/
 function install_rpm_containerd() {
+	if [ "${PACKAGE_REPO}" = "stage" ]; then
+		REPO_URL="https://download-stage.docker.com/linux/${DIST_ID}/docker-ce-staging.repo"
+	else
+		REPO_URL="https://download.docker.com/linux/${DIST_ID}/docker-ce.repo"
+	fi
+
 	# Install containerd dependency for non-zypper dependecies
-	echo "[DEBUG] Installing engine dependencies"
+	echo "[DEBUG] Installing engine dependencies from ${REPO_URL}"
 
 	pkg_config_manager="yum-config-manager"
 	if dnf --version; then
 		pkg_config_manager="dnf config-manager"
 	fi
 
-	${pkg_config_manager} \
-		--add-repo \
-		"https://download.docker.com/linux/${DIST_ID}/docker-ce.repo"
+	${pkg_config_manager} --add-repo "${REPO_URL}"
 }
 
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
 function install_debian_containerd() {
-	echo "[DEBUG] Installing containerd"
+	if [ "${PACKAGE_REPO}" = "stage" ]; then
+		REPO_URL="https://download-stage.docker.com/linux/${DIST_ID}"
+	else
+		REPO_URL="https://download.docker.com/linux/${DIST_ID}"
+	fi
+
+	echo "[DEBUG] Installing engine dependencies from ${REPO_URL}"
 
 	#TODO include this step in the get.docker.com installation script
 	# Make sure ca-certificates are up-to-date
 	update-ca-certificates -f
 
-	curl -fsSL "https://download.docker.com/linux/${DIST_ID}/gpg" | apt-key add -
+	curl -fsSL "${REPO_URL}/gpg" | apt-key add -
 
 	if [[ ${DIST_VERSION} == "sid" ]]; then
 		DIST_VERSION='buster'
 	fi
 	ARCH=$(dpkg --print-architecture)
-	echo "deb [arch=${ARCH}] https://download.docker.com/linux/${DIST_ID} ${DIST_VERSION} stable" >/etc/apt/sources.list.d/docker.list
+	echo "deb [arch=${ARCH}] ${REPO_URL} ${DIST_VERSION} stable" >/etc/apt/sources.list.d/docker.list
 
 	apt-get update
 }
