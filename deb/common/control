@@ -46,6 +46,7 @@ Conflicts: docker (<< 1.5~),
            docker.io,
            lxc-docker,
            lxc-docker-virtual-package
+Provides: docker.io
 Replaces: docker-engine
 Description: Docker: the open-source application container engine
  Docker is a product for you to build, ship and run any application as a
