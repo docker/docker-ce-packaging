@@ -84,6 +84,11 @@ export DOCKER_GITCOMMIT=%{_gitcommit_engine}
 mkdir -p /go/src/github.com/docker
 ln -s ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
 
+%if 1%{?_with_btrfs}
+DOCKER_BUILDTAGS+=' exclude_graphdriver_btrfs'
+export DOCKER_BUILDTAGS
+%endif
+
 pushd ${RPM_BUILD_DIR}/src/engine
 for component in tini "proxy dynamic";do
     TMP_GOPATH="/go" hack/dockerfile/install/install.sh $component
