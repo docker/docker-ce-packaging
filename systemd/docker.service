@@ -43,5 +43,8 @@ Delegate=yes
 # kill only the docker process, not all processes in the cgroup
 KillMode=process
 
+# ensure to cleanup pid file when the daemon stops
+PIDFile=/var/run/docker.pid
+
 [Install]
 WantedBy=multi-user.target
