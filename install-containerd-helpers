@@ -19,12 +19,22 @@ function install_rpm_containerd() {
 	# Install containerd dependency for non-zypper dependecies
 	echo "[DEBUG] Installing engine dependencies from ${REPO_URL}"
 
-	pkg_config_manager="yum-config-manager"
-	if dnf --version; then
-		pkg_config_manager="dnf config-manager"
-	fi
+	# Note: we enable test channel to be able to test non-stable containerd packages as well.
+	# Once a containerd package becomes stable it will also be available in the test channel,
+	# so this logic works for both cases.
+	# (See also same logic in install_debian_containerd)
 
-	${pkg_config_manager} --add-repo "${REPO_URL}"
+	if dnf --version; then
+		dnf config-manager --add-repo "${REPO_URL}"
+		dnf config-manager --set-disabled docker-ce-*
+		dnf config-manager --set-enabled docker-ce-test
+		dnf makecache
+	else
+		yum-config-manager --add-repo "${REPO_URL}"
+		yum-config-manager --disable docker-ce-*
+		yum-config-manager --enable docker-ce-test
+		yum makecache
+	fi
 }
 
 # Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
@@ -47,7 +57,12 @@ function install_debian_containerd() {
 		DIST_VERSION='buster'
 	fi
 	ARCH=$(dpkg --print-architecture)
-	echo "deb [arch=${ARCH}] ${REPO_URL} ${DIST_VERSION} stable" >/etc/apt/sources.list.d/docker.list
+
+	# Note: we enable test channel to be able to test non-stable containerd packages as well.
+	# Once a containerd package becomes stable it will also be available in the test channel,
+	# so this logic works for both cases.
+	# (See also same logic in install_rpm_containerd)
+	echo "deb [arch=${ARCH}] ${REPO_URL} ${DIST_VERSION} test" > /etc/apt/sources.list.d/docker.list
 
 	apt-get update
 }
