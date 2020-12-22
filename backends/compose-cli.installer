@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -ex
+
+source "$(dirname "$0")/../plugins/.common"
+
+GOPATH=$(go env GOPATH)
+REPO=https://github.com/docker/compose-cli.git
+COMMIT=v1.0.6
+DEST=${GOPATH}/src/github.com/docker/compose-cli
+
+build() {
+    if [ ! -d "${DEST}" ]; then
+        git clone "${REPO}" "${DEST}"
+    fi
+    (
+        cd "${DEST}"
+        git fetch --all
+        git checkout -q "${COMMIT}"
+
+        GO111MODULE=on go mod download
+        GO111MODULE=on make -f builder.Makefile cli
+    )
+}
+
+install_backend() {
+    (
+        cd "${DEST}"
+        cp bin/docker bin/docker-compose-cli-backend
+        install_binary bin/docker-compose-cli-backend
+    )
+}
+
+build_or_install "$@"

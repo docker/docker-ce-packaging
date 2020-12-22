@@ -1,6 +1,7 @@
 include ../common.mk
 
 PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
+BACKENDS_DIR=$(realpath $(CURDIR)/../backends)
 GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
@@ -70,7 +71,7 @@ centos: $(CENTOS_RELEASES) ## build all centos rpm packages
 rhel: $(RHEL_RELEASES) ## build all rhel rpm packages
 
 .PHONY: $(DISTROS)
-$(DISTROS): rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/docker.service rpmbuild/SOURCES/docker.socket rpmbuild/SOURCES/plugin-installers.tgz
+$(DISTROS): rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/docker.service rpmbuild/SOURCES/docker.socket rpmbuild/SOURCES/plugin-installers.tgz rpmbuild/SOURCES/backend-installers.tgz
 	@echo "== Building packages for $@ =="
 	$(CHOWN) -R root:root rpmbuild
 	$(BUILD)
@@ -107,3 +108,10 @@ rpmbuild/SOURCES/plugin-installers.tgz: $(wildcard ../plugins/*)
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/plugin-installers.tgz --exclude .git plugins
+
+rpmbuild/SOURCES/backend-installers.tgz: $(wildcard ../backends/*)
+	docker run --rm -w /v \
+		-v $(BACKENDS_DIR):/backends \
+		-v $(CURDIR)/$(@D):/v \
+		alpine \
+		tar -C / -c -z -f /v/backend-installers.tgz --exclude .git backends

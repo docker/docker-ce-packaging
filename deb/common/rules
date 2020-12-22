@@ -18,6 +18,13 @@ override_dh_auto_build:
 		for installer in plugins/*.installer; do \
 			LDFLAGS='' bash $${installer} build; \
 		done
+	# Build the CLI backends
+	# Make sure to set LDFLAGS="" since, dpkg-buildflags sets it to some weird values
+	set -e;cd /sources && \
+		tar xzf backend-installers.tgz; \
+		for installer in backends/*.installer; do \
+			LDFLAGS='' bash $${installer} build; \
+		done
 
 override_dh_auto_test:
 	./engine/bundles/dynbinary-daemon/dockerd -v
@@ -37,6 +44,13 @@ override_dh_auto_install:
 			DESTDIR=/root/build-deb/debian/docker-ce-cli \
 			PREFIX=/usr/libexec/docker/cli-plugins \
 				bash $${installer} install_plugin; \
+		done
+	set -e;cd /sources && \
+		tar xzf backend-installers.tgz; \
+		for installer in backends/*.installer; do \
+			DESTDIR=/root/build-deb/debian/docker-ce-cli \
+			PREFIX=/usr/libexec/docker/cli-backends \
+				bash $${installer} install_backend; \
 		done
 	# docker-ce install
 	install -D -m 0644 /sources/docker.service debian/docker-ce/lib/systemd/system/docker.service

@@ -8,7 +8,8 @@ Summary: The open-source application container engine
 Group: Tools/Docker
 License: ASL 2.0
 Source0: cli.tgz
-Source1: plugin-installers.tgz
+Source1: backend-installers.tgz
+Source2: plugin-installers.tgz
 URL: https://www.docker.com
 Vendor: Docker
 Packager: Docker <support@docker.com>
@@ -40,7 +41,7 @@ for deploying and scaling web apps, databases, and backend services without
 depending on a particular stack or provider.
 
 %prep
-%setup -q -c -n src -a 1
+%setup -q -c -n src -a 1 -a 2
 
 %build
 mkdir -p /go/src/github.com/docker
@@ -52,6 +53,19 @@ popd
 
 # Build all associated plugins
 pushd ${RPM_BUILD_DIR}/src/plugins
+for installer in *.installer; do
+    bash ${installer} build
+done
+popd
+
+if [ "$SUITE" == "7" ]; then
+    yum install -y http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
+    yum install -y git
+fi
+git version
+
+# Build all associated backends
+pushd ${RPM_BUILD_DIR}/src/backends
 for installer in *.installer; do
     bash ${installer} build
 done
@@ -72,6 +86,15 @@ for installer in *.installer; do
     DESTDIR=${RPM_BUILD_ROOT} \
         PREFIX=%{_libexecdir}/docker/cli-plugins \
         bash ${installer} install_plugin
+done
+popd
+
+# install backends
+pushd ${RPM_BUILD_DIR}/src/backends
+for installer in *.installer; do
+    DESTDIR=${RPM_BUILD_ROOT} \
+        PREFIX=%{_libexecdir}/docker/cli-backends \
+        bash ${installer} install_backend
 done
 popd
 
@@ -100,6 +123,7 @@ done
 %files
 %doc build-docs/LICENSE build-docs/MAINTAINERS build-docs/NOTICE build-docs/README.md
 %{_bindir}/docker
+%{_libexecdir}/docker/cli-backends/*
 %{_libexecdir}/docker/cli-plugins/*
 %{_datadir}/bash-completion/completions/docker
 %{_datadir}/zsh/vendor-completions/_docker

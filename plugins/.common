@@ -29,6 +29,9 @@ build_or_install() {
         install_plugin)
             install_plugin
             ;;
+        install_backend)
+            install_backend
+            ;;
         *)
             echo "Are you sure that's a command? o.O"
             exit 1

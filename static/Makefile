@@ -45,13 +45,13 @@ hash_files:
 	$(HASH_CMD) "$(DIR_TO_HASH)"
 
 .PHONY: cross-mac
-cross-mac: cross-all-cli cross-mac-plugins ## create tgz with darwin x86_64 client only
+cross-mac: cross-all-cli cross-mac-plugins cross-mac-backends ## create tgz with darwin x86_64 client only
 	mkdir -p build/mac/docker
 	cp $(CLI_DIR)/build/docker-darwin-amd64 build/mac/docker/docker
 	tar -C build/mac -c -z -f build/mac/docker-$(GEN_STATIC_VER).tgz docker
 
 .PHONY: cross-win
-cross-win: cross-all-cli cross-win-engine cross-win-plugins ## create zip file with windows x86_64 client and server
+cross-win: cross-all-cli cross-win-engine cross-win-plugins cross-win-backends ## create zip file with windows x86_64 client and server
 	mkdir -p build/win/docker
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/docker/docker.exe
 	cp $(ENGINE_DIR)/bundles/cross/windows/amd64/dockerd-$(GEN_STATIC_VER).exe build/win/docker/dockerd.exe
@@ -100,5 +100,28 @@ cross-win-plugins: CLI_BUILD_DIR := win
 cross-win-plugins:
 	mkdir -p build/$(CLI_BUILD_DIR)/docker/cli-plugins
 	docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
+	$(CHOWN) -R $(shell id -u):$(shell id -g) build
+	find build/$(CLI_BUILD_DIR)/docker -type f -not -name "*.exe" -exec mv {} {}.exe \;
+
+BUILD_BACKEND_RUN_VARS = --rm \
+	-e GOOS=$(SPOOF_GOOS) \
+	-v "$(CURDIR)/build/$(CLI_BUILD_DIR)/docker/cli-backends":/out \
+	-v "$(CURDIR)/../backends":/backends:ro \
+	-v "$(CURDIR)/scripts/build-cli-backends":/build:ro
+
+.PHONY: cross-mac-backends
+cross-mac-backends: SPOOF_GOOS := darwin
+cross-mac-backends: CLI_BUILD_DIR := mac
+cross-mac-backends:
+	mkdir -p build/$(CLI_BUILD_DIR)/docker
+	docker run $(BUILD_BACKEND_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
+	$(CHOWN) -R $(shell id -u):$(shell id -g) build
+
+.PHONY: cross-win-backends
+cross-win-backends: SPOOF_GOOS := windows
+cross-win-backends: CLI_BUILD_DIR := win
+cross-win-backends:
+	mkdir -p build/$(CLI_BUILD_DIR)/docker/cli-backends
+	docker run $(BUILD_BACKEND_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 	find build/$(CLI_BUILD_DIR)/docker -type f -not -name "*.exe" -exec mv {} {}.exe \;

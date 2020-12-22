@@ -1,6 +1,7 @@
 include ../common.mk
 
 PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
+BACKENDS_DIR=$(realpath $(CURDIR)/../backends)
 GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
@@ -66,7 +67,7 @@ debian: $(DEBIAN_VERSIONS) ## build all debian deb packages
 raspbian: $(RASPBIAN_VERSIONS) ## build all raspbian deb packages
 
 .PHONY: $(DISTROS)
-$(DISTROS): sources/cli.tgz sources/engine.tgz sources/docker.service sources/docker.socket sources/plugin-installers.tgz
+$(DISTROS): sources/cli.tgz sources/engine.tgz sources/docker.service sources/docker.socket sources/plugin-installers.tgz sources/backend-installers.tgz
 	@echo "== Building packages for $@ =="
 	$(BUILD)
 	$(RUN)
@@ -102,3 +103,10 @@ sources/plugin-installers.tgz: $(wildcard ../plugins/*)
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/plugin-installers.tgz --exclude .git plugins
+
+sources/backend-installers.tgz: $(wildcard ../backends/*)
+	docker run --rm -w /v \
+		-v $(BACKENDS_DIR):/backends \
+		-v $(CURDIR)/$(@D):/v \
+		alpine \
+		tar -C / -c -z -f /v/backend-installers.tgz --exclude .git backends
