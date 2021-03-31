@@ -62,6 +62,13 @@ function verify_deb() {
 			-i ${packages}
 		apt-get -y install --no-install-recommends --fix-broken ${packages}
 	)
+	docker --version
+	if [ "$(uname -m)" = "x86_64" ]; then
+		docker scan --accept-license --version;
+	fi
+	dockerd --version
+	containerd --version
+	runc --version
 }
 
 function verify_rpm() {
@@ -98,6 +105,15 @@ function verify_rpm() {
 		set -x
 		${pkg_manager} install -y ${packages}
 	)
+
+	docker --version
+	if [ "$(uname -m)" = "x86_64" ]; then
+		docker scan --accept-license --version;
+	fi
+	dockerd --version
+	containerd --version
+	runc --version
+
 }
 
 verify
