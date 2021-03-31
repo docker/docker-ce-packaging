@@ -63,9 +63,10 @@ function verify_deb() {
 		apt-get -y install --no-install-recommends --fix-broken ${packages}
 	)
 	docker --version
-	if [ "$(uname -m)" = "x86_64" ]; then
-		docker scan --accept-license --version;
-	fi
+	# FIXME this tries to connect to the docker daemon, which isn't started
+	#if [ "$(uname -m)" = "x86_64" ]; then
+	#	docker scan --accept-license --version;
+	#fi
 	dockerd --version
 	containerd --version
 	runc --version
@@ -107,9 +108,10 @@ function verify_rpm() {
 	)
 
 	docker --version
-	if [ "$(uname -m)" = "x86_64" ]; then
-		docker scan --accept-license --version;
-	fi
+	# FIXME this tries to connect to the docker daemon, which isn't started
+	#if [ "$(uname -m)" = "x86_64" ]; then
+	#	docker scan --accept-license --version;
+	#fi
 	dockerd --version
 	containerd --version
 	runc --version
