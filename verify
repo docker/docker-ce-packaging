@@ -44,6 +44,16 @@ function verify_deb() {
 	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
 	packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
 
+	# For apt-get install, we don't want to install docker-scan-plugin, as it would
+	# downgrade the already installed local package with an older version from
+	# download.docker.com.
+	# We search for packages starting with "docker-ce", which excludes "docker-scan-plugin"
+	# as it doesn't have the "docker-ce" prefix. We match on "docker-c" so that we also
+	# match "docker-ce.deb"
+	apt_packages=$(find "packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "docker-c*.deb")
+	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
+	apt_packages=$(echo "${apt_packages}" | awk '$0="./"$0' | xargs)
+
 	(
 		set -x
 		# Install the locally built packages using 'dpkg' because installing with
@@ -56,12 +66,23 @@ function verify_deb() {
 		#
 		# Afterwards, we run 'apt-get install' with the '--fix-broken' option to
 		# trigger installation of the dependencies, which should succceed succesfully.
+		# shellcheck disable=SC2086
 		dpkg \
 			--ignore-depends=containerd.io,iptables,libdevmapper,libdevmapper1.02.1 \
 			--force-depends \
 			-i ${packages}
-		apt-get -y install --no-install-recommends --fix-broken ${packages}
+
+		# shellcheck disable=SC2086
+		apt-get -y install --no-install-recommends --fix-broken ${apt_packages}
 	)
+	docker --version
+	# FIXME this tries to connect to the docker daemon, which isn't started
+	#if [ "$(uname -m)" = "x86_64" ]; then
+	#	docker scan --accept-license --version;
+	#fi
+	dockerd --version
+	containerd --version
+	runc --version
 }
 
 function verify_rpm() {
@@ -98,6 +119,16 @@ function verify_rpm() {
 		set -x
 		${pkg_manager} install -y ${packages}
 	)
+
+	docker --version
+	# FIXME this tries to connect to the docker daemon, which isn't started
+	#if [ "$(uname -m)" = "x86_64" ]; then
+	#	docker scan --accept-license --version;
+	#fi
+	dockerd --version
+	containerd --version
+	runc --version
+
 }
 
 verify
