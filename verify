@@ -73,7 +73,7 @@ function verify_deb() {
 			-i ${packages}
 
 		# shellcheck disable=SC2086
-		apt-get -y install --no-install-recommends --fix-broken ${apt_packages}
+		apt-get -y install --no-install-recommends --no-upgrade --fix-broken ${apt_packages}
 	)
 	docker --version
 	# FIXME this tries to connect to the docker daemon, which isn't started
