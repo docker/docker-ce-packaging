@@ -53,16 +53,9 @@ function install_debian_containerd() {
 
 	curl -fsSL "${REPO_URL}/gpg" | apt-key add -
 
-	if [[ ${DIST_VERSION} == "sid" ]]; then
-		# Debian "sid" is not an actual distro version. Sid represents the "unstable"
-		# channel ("next stable in-progress"). Currently, it is equivalent to "bullseye",
-		# but once "bullseye" is stable, it becomes "bookworm", "trixy", etc (see the
-		# list of Debian releases at https://wiki.debian.org/DebianReleases).
-		#
-		# FIXME: this override should not be hard-coded, but instead we should try to
-		#        get this name from information in /var/lib/apt/lists/. Also see
-		#        https://github.com/docker/containerd-packaging/pull/219 for details.
-		DIST_VERSION='bullseye'
+	if [ "${DIST_VERSION}" = "sid" ]; then
+		echo 'Debian sid ("unstable") cannot be used for packaging: replace with the actual codename'
+		exit 1
 	fi
 	ARCH=$(dpkg --print-architecture)
 

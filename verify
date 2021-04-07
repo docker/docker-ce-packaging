@@ -40,6 +40,10 @@ function verify_deb() {
 
 	DIST_ID=$(source /etc/os-release; echo "$ID")
 	DIST_VERSION=$(lsb_release -sc)
+	if [ "${DIST_VERSION}" = "sid" ]; then
+		echo 'Debian sid ("unstable") cannot be used for packaging: replace with the actual codename'
+		exit 1
+	fi
 
 	install_debian_containerd
 
