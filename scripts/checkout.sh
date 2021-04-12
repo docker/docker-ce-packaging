@@ -14,11 +14,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Example usage:
+# 	checkout ./local_git_checkout/ 20.10             # checks out branch
+# 	checkout ./local_git_checkout/ v20.10.6          # checks out tag
+# 	checkout ./local_git_checkout/ 20.10@370c289     # checks out commit from branch
+# 	checkout ./local_git_checkout/ v20.10.6@370c289  # checks out tag verifying commit
 checkout() (
 	set -ex
 	SRC="$1"
-	REF="$2"
+	REF=$(echo "$2" | cut -d@ -f1)
+	COMMIT=$(echo "$2" | cut -d@ -f2)
 	REF_FETCH="$REF"
+	CHECKOUT="$REF"
+	# if commit is specified, check that out
+	if [ -n "$COMMIT" ]; then
+		CHECKOUT="$COMMIT"
+	fi
 	# if ref is branch or tag, retrieve its canonical form
 	REF=$(git -C "$SRC" ls-remote --refs --heads --tags origin "$REF" | awk '{print $2}')
 	if [ -n "$REF" ]; then
@@ -28,7 +39,7 @@ checkout() (
 		REF="FETCH_HEAD"
 	fi
 	git -C "$SRC" fetch --update-head-ok --depth 1 origin "$REF_FETCH"
-	git -C "$SRC" checkout -q "$REF"
+	git -C "$SRC" checkout -q "$CHECKOUT"
 )
 
 
