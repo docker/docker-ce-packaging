@@ -33,6 +33,7 @@ RUN?=docker run --rm \
 	-e VERSION=$(word 2, $(GEN_DEB_VER)) \
 	-e CLI_GITCOMMIT=$(CLI_GITCOMMIT) \
 	-e ENGINE_GITCOMMIT=$(ENGINE_GITCOMMIT) \
+	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
 	-e SCAN_VERSION=$(DOCKER_SCAN_REF) \
 	-e SCAN_GITCOMMIT=$(SCAN_GITCOMMIT) \
 	-v $(CURDIR)/debbuild/$@:/build \
@@ -77,7 +78,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "debbuild/$@"
 
 .PHONY: sources
-sources: sources/cli.tgz sources/engine.tgz sources/scan-cli-plugin.tgz sources/plugin-installers.tgz
+sources: sources/cli.tgz sources/engine.tgz sources/compose.tgz sources/scan-cli-plugin.tgz sources/plugin-installers.tgz
 
 sources/engine.tgz:
 	mkdir -p $(@D)
@@ -94,6 +95,14 @@ sources/cli.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
+
+sources/compose.tgz:
+	mkdir -p $(@D)
+	docker run --rm -w /v \
+		-v $(realpath $(CURDIR)/../src/github.com/docker/compose):/compose \
+		-v $(CURDIR)/$(@D):/v \
+		alpine \
+		tar -C / -c -z -f /v/compose.tgz --exclude .git compose
 
 sources/scan-cli-plugin.tgz:
 	mkdir -p $(@D)
