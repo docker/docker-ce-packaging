@@ -12,8 +12,6 @@ URL: https://github.com/docker/compose-cli/
 Vendor: Docker
 Packager: Docker <support@docker.com>
 
-Requires: docker-ce-cli
-
 BuildRequires: bash
 
 %description
