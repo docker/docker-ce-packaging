@@ -16,6 +16,7 @@ Packager: Docker <support@docker.com>
 # required packages on install
 Requires: /bin/sh
 Requires: /usr/sbin/groupadd
+Requires: docker-compose-plugin
 # TODO change once we support scan-plugin on other architectures
 %ifarch x86_64
 Requires: docker-scan-plugin(x86-64)
