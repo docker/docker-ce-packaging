@@ -90,7 +90,7 @@ popd
 
 %check
 ver="$(engine/bundles/dynbinary-daemon/dockerd --version)"; \
-    test "$ver" = "Docker version %{_origversion}, build %{_gitcommit_engine}" && echo "PASS: daemon version OK" || echo "FAIL: daemon version ($ver) did not match"
+    test "$ver" = "Docker version %{_origversion}, build %{_gitcommit_engine}" && echo "PASS: daemon version OK" || (echo "FAIL: daemon version ($ver) did not match" && exit 1)
 
 %install
 # install daemon binary
