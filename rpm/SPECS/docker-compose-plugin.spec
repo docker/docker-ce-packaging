@@ -12,6 +12,14 @@ URL: https://github.com/docker/compose/
 Vendor: Docker
 Packager: Docker <support@docker.com>
 
+# CentOS 7 and RHEL 7 do not yet support weak dependencies.
+#
+# Note that we're not using <= 7 here, to account for other RPM distros, such
+# as Fedora, which would not have the rhel macro set (so default to 0).
+%if 0%{?rhel} != 7
+Enhances: docker-ce-cli
+%endif
+
 BuildRequires: bash
 
 %description
