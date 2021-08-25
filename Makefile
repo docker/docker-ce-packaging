@@ -41,6 +41,10 @@ src/github.com/docker/scan-cli-plugin:
 	git init $@
 	git -C $@ remote add origin "$(DOCKER_SCAN_REPO)"
 
+src/github.com/docker/compose:
+	git init $@
+	git -C $@ remote add origin "$(DOCKER_COMPOSE_REPO)"
+
 
 .PHONY: checkout-cli
 checkout-cli: src/github.com/docker/cli
@@ -54,8 +58,12 @@ checkout-docker: src/github.com/docker/docker
 checkout-scan-cli-plugin: src/github.com/docker/scan-cli-plugin
 	./scripts/checkout.sh src/github.com/docker/scan-cli-plugin "$(DOCKER_SCAN_REF)"
 
+.PHONY: checkout-compose
+checkout-compose: src/github.com/docker/compose
+	./scripts/checkout.sh src/github.com/docker/compose "$(DOCKER_COMPOSE_REF)"
+
 .PHONY: checkout
-checkout: checkout-cli checkout-docker checkout-scan-cli-plugin ## checkout source at the given reference(s)
+checkout: checkout-cli checkout-docker checkout-scan-cli-plugin checkout-compose ## checkout source at the given reference(s)
 
 .PHONY: clean
 clean: clean-src ## remove build artifacts
