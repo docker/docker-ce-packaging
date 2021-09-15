@@ -13,7 +13,7 @@ SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cl
 BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
-	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
+	BUILD_IMAGE_FLAG=--build-arg BUILD_IMAGE=$(BUILD_IMAGE)
 endif
 BUILD?=DOCKER_BUILDKIT=1 \
 	docker build \
@@ -61,7 +61,7 @@ RUN?=docker run --rm \
 FEDORA_RELEASES ?= fedora-37 fedora-36 fedora-35
 CENTOS_RELEASES ?= centos-7 centos-8 centos-9
 ifeq ($(ARCH),s390x)
-RHEL_RELEASES ?= rhel-7
+RHEL_RELEASES ?= rhel-7 rhel-8 rhel-9
 else
 RHEL_RELEASES ?=
 endif
@@ -80,7 +80,7 @@ clean: ## remove build artifacts
 	-docker builder prune -f --filter until=24h
 
 .PHONY: rpm
-rpm: fedora centos ## build all rpm packages
+rpm: fedora centos rhel ## build all rpm packages
 
 .PHONY: fedora
 fedora: $(FEDORA_RELEASES) ## build all fedora rpm packages
@@ -90,6 +90,9 @@ centos-8 centos-9: RPMBUILD_EXTRA_FLAGS=--define '_without_btrfs 1'
 
 .PHONY: centos
 centos: $(CENTOS_RELEASES) ## build all centos rpm packages
+
+.PHONY: rhel-8 rhel-9
+rhel-8 rhel-9: RPMBUILD_EXTRA_FLAGS=--define '_without_btrfs 1'
 
 .PHONY: rhel
 rhel: $(RHEL_RELEASES) ## build all rhel rpm packages
