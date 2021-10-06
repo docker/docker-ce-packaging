@@ -40,7 +40,7 @@ clean: ## remove build artifacts
 static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
-static-linux: static-cli static-engine ## create tgz with linux x86_64 client and server
+static-linux: static-cli static-engine static-plugins ## create tgz with linux x86_64 client and server
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
@@ -115,13 +115,23 @@ BUILD_PLUGIN_RUN_VARS = --rm \
 	-v "$(CURDIR)/../plugins":/plugins:ro \
 	-v "$(CURDIR)/scripts/build-cli-plugins":/build:ro
 
+.PHONY: cross-static-plugins
+cross-static-plugins: cross-static-plugins-amd64 cross-static-plugins-arm64
+
+.PHONY: cross-static-plugins-%
+cross-static-plugins-%: CLI_BUILD_DIR := linux
+cross-static-plugins-%:
+	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins
+	GOOS=linux GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
+	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
+
 .PHONY: cross-mac-plugins
 cross-mac-plugins: cross-mac-plugins-amd64 cross-mac-plugins-arm64
 
 .PHONY: cross-mac-plugins-%
 cross-mac-plugins-%: CLI_BUILD_DIR := mac
 cross-mac-plugins-%:
-	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker
+	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins
 	GOOS=darwin GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
 
