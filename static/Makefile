@@ -40,12 +40,13 @@ clean: ## remove build artifacts
 static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
-static-linux: static-cli static-engine static-plugins ## create tgz with linux x86_64 client and server
+static-linux: static-cli static-engine cross-static-plugins-amd64 ## create tgz with linux x86_64 client and server
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
 		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker/$$f; \
 	done
+	cp -r build/linux/amd64/docker/ build/linux/docker
 	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
 
 	# extra binaries for running rootless
@@ -87,8 +88,9 @@ cross-win: cross-win-engine cross-win-plugins
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 
 .PHONY: cross-arm
-cross-arm: cross-all-cli ## create tgz with linux armhf client only
+cross-arm: cross-all-cli cross-static-plugins-arm64 ## create tgz with linux armhf client only
 	mkdir -p build/arm/docker
+	cp -r build/linux/arm64/docker/cli-plugins build/arm/docker/
 	cp $(CLI_DIR)/build/docker-linux-arm build/arm/docker/docker
 	tar -C build/arm -c -z -f build/arm/docker-$(GEN_STATIC_VER).tgz docker
 
