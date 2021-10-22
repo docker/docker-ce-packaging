@@ -9,7 +9,7 @@ test_steps = [
 				try {
 					checkout scm
 					sh "make REF=$branch checkout"
-					sh "make -C deb ubuntu-focal ubuntu-hirsute debian-bullseye"
+					sh "make -C deb ubuntu-focal ubuntu-hirsute ubuntu-impish debian-bullseye"
 				} finally {
 					sh "make clean"
 				}
@@ -35,7 +35,7 @@ test_steps = [
 				try {
 					checkout scm
 					sh "make REF=$branch checkout"
-					sh "make -C rpm centos-7 centos-8 fedora-34"
+					sh "make -C rpm centos-7 centos-8 fedora-35"
 				} finally {
 					sh "make clean"
 				}
