@@ -23,8 +23,8 @@ VERSION?=0.0.1-dev
 
 # DOCKER_CLI_REPO and DOCKER_ENGINE_REPO define the source repositories to clone
 # the source from. These can be overridden to build from a fork.
-DOCKER_CLI_REPO    ?= https://github.com/docker/cli.git
-DOCKER_ENGINE_REPO ?= https://github.com/docker/docker.git
+DOCKER_CLI_REPO    ?= https://github.com/crazy-max/docker-cli.git
+DOCKER_ENGINE_REPO ?= https://github.com/errordeveloper/docker.git
 DOCKER_SCAN_REPO   ?= https://github.com/docker/scan-cli-plugin.git
 
 # REF can be used to specify the same branch or tag to use for *both* the CLI
@@ -34,8 +34,8 @@ DOCKER_SCAN_REPO   ?= https://github.com/docker/scan-cli-plugin.git
 #
 # For other situations, specify DOCKER_CLI_REF and/or DOCKER_ENGINE_REF separately.
 REF                ?= HEAD
-DOCKER_CLI_REF     ?= $(REF)
-DOCKER_ENGINE_REF  ?= $(REF)
+DOCKER_CLI_REF     ?= vendor-gomod
+DOCKER_ENGINE_REF  ?= go-mod
 DOCKER_SCAN_REF    ?= v0.12.0
 
 export BUILDTIME
