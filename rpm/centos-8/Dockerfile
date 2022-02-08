@@ -1,7 +1,7 @@
 ARG GO_IMAGE
 ARG DISTRO=centos
-ARG SUITE=8
-ARG BUILD_IMAGE=${DISTRO}:${SUITE}
+ARG SUITE=stream8
+ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:${SUITE}
 
 FROM ${GO_IMAGE} AS golang
 
@@ -20,9 +20,9 @@ ENV SUITE=${SUITE}
 
 # In aarch64 (arm64) images, the altarch repo is specified as repository, but
 # failing, so replace the URL.
-RUN if [ -f /etc/yum.repos.d/CentOS-Linux-Sources.repo ]; then sed -i 's/altarch/centos/g' /etc/yum.repos.d/CentOS-Linux-Sources.repo; fi
+RUN if [ -f /etc/yum.repos.d/CentOS-Stream-Sources.repo ]; then sed -i 's/altarch/centos/g' /etc/yum.repos.d/CentOS-Stream-Sources.repo; fi
 
-RUN if [ -f /etc/yum.repos.d/CentOS-Linux-PowerTools.repo ]; then sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/CentOS-Linux-PowerTools.repo; fi
+RUN if [ -f /etc/yum.repos.d/CentOS-Stream-PowerTools.repo ]; then sed -i 's/enabled=0/enabled=1/g' /etc/yum.repos.d/CentOS-Stream-PowerTools.repo; fi
 
 # RHEL8 / CentOS 8 changed behavior and no longer "rpm --import" or
 # "rpmkeys --import"as part of rpm package's %post scriplet. See
