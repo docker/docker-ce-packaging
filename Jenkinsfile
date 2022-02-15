@@ -4,7 +4,7 @@ def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
 
 def pkgs = [
     [target: "centos-7",                 image: "centos:7",                               arches: ["amd64", "aarch64"]],          // (EOL: June 30, 2024)
-    [target: "centos-8",                 image: "centos:8",                               arches: ["amd64", "aarch64"]],
+    [target: "centos-8",                 image: "quay.io/centos/centos:stream8",          arches: ["amd64", "aarch64"]],
     [target: "debian-buster",            image: "debian:buster",                          arches: ["amd64", "aarch64", "armhf"]], // Debian 10 (EOL: 2024)
     [target: "debian-bullseye",          image: "debian:bullseye",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 11 (Next stable)
     [target: "fedora-34",                image: "fedora:34",                              arches: ["amd64", "aarch64"]],          // EOL: May 17, 2022

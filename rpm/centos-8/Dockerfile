@@ -1,7 +1,7 @@
 ARG GO_IMAGE
 ARG DISTRO=centos
-ARG SUITE=stream8
-ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:${SUITE}
+ARG SUITE=8
+ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:stream${SUITE}
 
 FROM ${GO_IMAGE} AS golang
 
