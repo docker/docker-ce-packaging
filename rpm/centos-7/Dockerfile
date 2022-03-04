@@ -18,6 +18,26 @@ ARG SUITE
 ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
 
+# Use recent Git version
+ARG GIT_VERSION="2.30.0"
+RUN yum install -y \
+    curl-devel \
+    expat-devel \
+    gettext-devel \
+    openssl-devel \
+    perl-CPAN \
+    perl-devel \
+    wget \
+    zlib-devel \
+  && yum --setopt=group_package_types=mandatory,default,optional groupinstall -y "Development Tools" \
+  && wget https://github.com/git/git/archive/v${GIT_VERSION}.tar.gz -O git.tar.gz \
+  && tar -zxf git.tar.gz \
+  && cd git-* \
+  && make prefix=/usr/local all \
+  && make prefix=/usr/local install \
+  && rm -rf /git* \
+  && git --version
+
 # In aarch64 (arm64) images, the altarch repo is specified as repository, but
 # failing, so replace the URL.
 RUN if [ -f /etc/yum.repos.d/CentOS-Sources.repo ]; then sed -i 's/altarch/centos/g' /etc/yum.repos.d/CentOS-Sources.repo; fi
