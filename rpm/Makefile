@@ -54,7 +54,7 @@ RUN?=docker run --rm \
 	rpmbuild-$@/$(ARCH) $(RPMBUILD_FLAGS)
 
 FEDORA_RELEASES ?= fedora-36 fedora-35 fedora-34
-CENTOS_RELEASES ?= centos-7 centos-8
+CENTOS_RELEASES ?= centos-7 centos-8 centos-9
 ifeq ($(ARCH),s390x)
 RHEL_RELEASES ?= rhel-7
 else
@@ -80,8 +80,8 @@ rpm: fedora centos ## build all rpm packages
 .PHONY: fedora
 fedora: $(FEDORA_RELEASES) ## build all fedora rpm packages
 
-.PHONY: centos-8
-centos-8: RPMBUILD_EXTRA_FLAGS=--define '_without_btrfs 1'
+.PHONY: centos-8 centos-9
+centos-8 centos-9: RPMBUILD_EXTRA_FLAGS=--define '_without_btrfs 1'
 
 .PHONY: centos
 centos: $(CENTOS_RELEASES) ## build all centos rpm packages
