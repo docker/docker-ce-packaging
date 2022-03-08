@@ -69,7 +69,7 @@ depending on a particular stack or provider.
 %build
 mkdir -p /go/src/github.com/docker
 rm -f /go/src/github.com/docker/cli
-ln -s ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
+ln -snf ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
 pushd /go/src/github.com/docker/cli
 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} GO_LINKMODE=dynamic ./scripts/build/binary && DISABLE_WARN_OUTSIDE_CONTAINER=1 make manpages # cli
 popd
