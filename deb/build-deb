@@ -7,6 +7,8 @@ mkdir -p /root/build-deb/engine
 tar -C /root/build-deb -xzf /sources/engine.tgz
 mkdir -p /root/build-deb/cli
 tar -C /root/build-deb -xzf /sources/cli.tgz
+mkdir -p /root/build-deb/compose
+tar -C /root/build-deb -xzf /sources/compose.tgz
 mkdir -p /root/build-deb/scan-cli-plugin
 tar -C /root/build-deb -xzf /sources/scan-cli-plugin.tgz
 
@@ -14,6 +16,7 @@ tar -C /root/build-deb -xzf /sources/scan-cli-plugin.tgz
 mkdir -p /go/src/github.com/docker
 ln -snf /root/build-deb/engine /go/src/github.com/docker/docker
 ln -snf /root/build-deb/cli /go/src/github.com/docker/cli
+ln -snf /root/build-deb/compose /go/src/github.com/docker/compose
 ln -snf /root/build-deb/scan-cli-plugin /go/src/github.com/docker/scan-cli-plugin
 
 EPOCH="${EPOCH:-}"
