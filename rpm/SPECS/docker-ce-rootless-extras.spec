@@ -50,7 +50,14 @@ install -D -p -m 0755 engine/contrib/dockerd-rootless-setuptool.sh ${RPM_BUILD_R
 install -D -p -m 0755 /usr/local/bin/rootlesskit ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit
 install -D -p -m 0755 /usr/local/bin/rootlesskit-docker-proxy ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit-docker-proxy
 
+for f in AUTHORS LICENSE MAINTAINERS NOTICE README.md SECURITY.md; do
+    install -D -p -m 0644 "engine/$f" "docker-ce-rootless-extras-docs/$f"
+done
+
 %files
+%doc docker-ce-rootless-extras-docs/*
+%license docker-ce-rootless-extras-docs/LICENSE
+%license docker-ce-rootless-extras-docs/NOTICE
 %{_bindir}/dockerd-rootless.sh
 %{_bindir}/dockerd-rootless-setuptool.sh
 %{_bindir}/rootlesskit

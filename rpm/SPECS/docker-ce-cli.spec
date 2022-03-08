@@ -99,14 +99,15 @@ install -p -m 644 cli/man/man5/*.5 ${RPM_BUILD_ROOT}%{_mandir}/man5
 install -d ${RPM_BUILD_ROOT}%{_mandir}/man8
 install -p -m 644 cli/man/man8/*.8 ${RPM_BUILD_ROOT}%{_mandir}/man8
 
-mkdir -p build-docs
-for cli_file in LICENSE MAINTAINERS NOTICE README.md; do
-    cp "cli/$cli_file" "build-docs/$cli_file"
+for f in AUTHORS LICENSE MAINTAINERS NOTICE README.md; do
+    install -D -p -m 0644 "engine/$f" "build-docs/$f"
 done
 
 # list files owned by the package here
 %files
-%doc build-docs/LICENSE build-docs/MAINTAINERS build-docs/NOTICE build-docs/README.md
+%doc build-docs/*
+%license build-docs/LICENSE
+%license build-docs/NOTICE
 %{_bindir}/docker
 %{_datadir}/bash-completion/completions/docker
 %{_datadir}/zsh/vendor-completions/_docker

@@ -102,7 +102,14 @@ install -D -p -m 0755 /usr/local/bin/docker-init ${RPM_BUILD_ROOT}%{_bindir}/doc
 install -D -m 0644 engine/contrib/init/systemd/docker.service ${RPM_BUILD_ROOT}%{_unitdir}/docker.service
 install -D -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT}%{_unitdir}/docker.socket
 
+for f in AUTHORS LICENSE MAINTAINERS NOTICE README.md SECURITY.md; do
+    install -D -p -m 0644 "engine/$f" "docker-ce-docs/$f"
+done
+
 %files
+%doc docker-ce-docs/*
+%license docker-ce-docs/LICENSE
+%license docker-ce-docs/NOTICE
 %{_bindir}/dockerd
 %{_bindir}/docker-proxy
 %{_bindir}/docker-init
