@@ -102,6 +102,18 @@ Description: Rootless support for Docker.
   Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
 Homepage: https://docs.docker.com/engine/security/rootless/
 
+Package: docker-compose-plugin
+Priority: optional
+Architecture: linux-any
+Enhances: docker-ce-cli
+Description: Docker Compose (V2) plugin for the Docker CLI.
+ .
+ This plugin provides the 'docker compose' subcommand.
+ .
+ The binary can also be run standalone as a direct replacement for
+ Docker Compose V1 ('docker-compose').
+Homepage: https://github.com/docker/compose
+
 Package: docker-scan-plugin
 Priority: optional
 # TODO change once we support scan-plugin on other architectures (see dpkg-architecture -L)

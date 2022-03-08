@@ -15,7 +15,7 @@ clean-src:
 	$(RM) -r src
 
 .PHONY: src
-src: src/github.com/docker/cli src/github.com/docker/docker src/github.com/docker/scan-cli-plugin ## clone source
+src: src/github.com/docker/cli src/github.com/docker/docker src/github.com/docker/compose src/github.com/docker/scan-cli-plugin ## clone source
 
 ifdef CLI_DIR
 src/github.com/docker/cli:
@@ -37,6 +37,10 @@ src/github.com/docker/docker:
 	git -C $@ remote add origin "$(DOCKER_ENGINE_REPO)"
 endif
 
+src/github.com/docker/compose:
+	git init $@
+	git -C $@ remote add origin "$(DOCKER_COMPOSE_REPO)"
+
 src/github.com/docker/scan-cli-plugin:
 	git init $@
 	git -C $@ remote add origin "$(DOCKER_SCAN_REPO)"
@@ -50,12 +54,16 @@ checkout-cli: src/github.com/docker/cli
 checkout-docker: src/github.com/docker/docker
 	./scripts/checkout.sh src/github.com/docker/docker "$(DOCKER_ENGINE_REF)"
 
+.PHONY: checkout-compose
+checkout-compose: src/github.com/docker/compose
+	./scripts/checkout.sh src/github.com/docker/compose "$(DOCKER_COMPOSE_REF)"
+
 .PHONY: checkout-scan-cli-plugin
 checkout-scan-cli-plugin: src/github.com/docker/scan-cli-plugin
 	./scripts/checkout.sh src/github.com/docker/scan-cli-plugin "$(DOCKER_SCAN_REF)"
 
 .PHONY: checkout
-checkout: checkout-cli checkout-docker checkout-scan-cli-plugin ## checkout source at the given reference(s)
+checkout: checkout-cli checkout-docker checkout-compose checkout-scan-cli-plugin ## checkout source at the given reference(s)
 
 .PHONY: clean
 clean: clean-src ## remove build artifacts

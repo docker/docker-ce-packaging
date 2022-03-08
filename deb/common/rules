@@ -18,6 +18,15 @@ override_dh_auto_build:
 	cd /go/src/github.com/docker/cli && \
 		LDFLAGS='' DISABLE_WARN_OUTSIDE_CONTAINER=1 make VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) dynbinary manpages
 
+	# Build the compose plugin
+	# FIXME: using GOPROXY, to work around:
+	# go: github.com/Azure/azure-sdk-for-go@v48.2.0+incompatible: reading github.com/Azure/azure-sdk-for-go/go.mod at revision v48.2.0: unknown revision v48.2.0
+	cd /go/src/github.com/docker/compose \
+	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on go mod download \
+	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
+	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on GIT_TAG=$(COMPOSE_VERSION) \
+		make COMPOSE_BINARY=/usr/libexec/docker/cli-plugins/docker-compose -f builder.Makefile compose-plugin
+
 	# Build the scan-plugin
 	# TODO change once we support scan-plugin on other architectures
 	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
@@ -41,6 +50,9 @@ override_dh_auto_test:
 
 	ver="$$(cli/build/docker --version)"; \
 		test "$$ver" = "Docker version $(VERSION), build $(CLI_GITCOMMIT)" && echo "PASS: cli version OK" || (echo "FAIL: cli version ($$ver) did not match" && exit 1)
+
+	ver="$$(/usr/libexec/docker/cli-plugins/docker-compose docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $$1 == "Version" { print $$2 }')"; \
+		test "$$ver" = "$(COMPOSE_VERSION)" && echo "PASS: docker-compose version OK" || (echo "FAIL: docker-compose version ($$ver) did not match" && exit 1)
 
 	# FIXME: --version currently doesn't work as it makes a connection to the daemon, so using the plugin metadata instead
 	# TODO change once we support scan-plugin on other architectures
@@ -71,6 +83,9 @@ override_dh_auto_install:
 	install -D -m 0755 /usr/local/bin/docker-proxy debian/docker-ce/usr/bin/docker-proxy
 	install -D -m 0755 /usr/local/bin/docker-init debian/docker-ce/usr/bin/docker-init
 
+	# docker-compose-plugin install
+	install -D -m 0755 /usr/libexec/docker/cli-plugins/docker-compose debian/docker-compose-plugin/usr/libexec/docker/cli-plugins/docker-compose
+
 	# docker-scan-plugin install
 	# TODO change once we support scan-plugin on other architectures
 	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
@@ -97,6 +112,10 @@ override_dh_install:
 	dh_apparmor --profile-name=docker-ce -pdocker-ce
 
 override_dh_gencontrol:
+	# Use separate version for the compose-plugin package, then generate the other control files as usual
+	# TODO override "Source" field in control as well (to point to compose, as it doesn't match the package name)
+	dh_gencontrol -pdocker-compose-plugin -- -v$${COMPOSE_VERSION#v}~$${DISTRO}-$${SUITE}
+
 	# Use separate version for the scan-plugin package, then generate the other control files as usual
 	# TODO override "Source" field in control as well (to point to scan-cli-plugin, as it doesn't match the package name)
 	# TODO change once we support scan-plugin on other architectures (see dpkg-architecture -L)
