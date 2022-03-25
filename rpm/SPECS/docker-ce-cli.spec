@@ -8,7 +8,6 @@ Summary: The open-source application container engine
 Group: Tools/Docker
 License: ASL 2.0
 Source0: cli.tgz
-Source1: plugin-installers.tgz
 URL: https://www.docker.com
 Vendor: Docker
 Packager: Docker <support@docker.com>
@@ -65,7 +64,7 @@ for deploying and scaling web apps, databases, and backend services without
 depending on a particular stack or provider.
 
 %prep
-%setup -q -c -n src -a 1
+%setup -q -c -n src -a 0
 
 %build
 mkdir -p /go/src/github.com/docker
@@ -75,16 +74,6 @@ pushd /go/src/github.com/docker/cli
 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} GO_LINKMODE=dynamic ./scripts/build/binary && DISABLE_WARN_OUTSIDE_CONTAINER=1 make manpages # cli
 popd
 
-# Build all associated plugins
-pushd ${RPM_BUILD_DIR}/src/plugins
-for installer in *.installer; do
-    if [ "${installer}" != "scan.installer" ]; then
-        bash ${installer} build
-    fi
-done
-popd
-
-
 %check
 ver="$(cli/build/docker --version)"; \
     test "$ver" = "Docker version %{_origversion}, build %{_gitcommit_cli}" && echo "PASS: cli version OK" || (echo "FAIL: cli version ($ver) did not match" && exit 1)
@@ -93,17 +82,6 @@ ver="$(cli/build/docker --version)"; \
 # install binary
 install -d ${RPM_BUILD_ROOT}%{_bindir}
 install -p -m 755 cli/build/docker ${RPM_BUILD_ROOT}%{_bindir}/docker
-
-# install plugins
-pushd ${RPM_BUILD_DIR}/src/plugins
-for installer in *.installer; do
-    if [ "${installer}" != "scan.installer" ]; then
-        DESTDIR=${RPM_BUILD_ROOT} \
-        PREFIX=%{_libexecdir}/docker/cli-plugins \
-        bash ${installer} install_plugin
-    fi
-done
-popd
 
 # add bash, zsh, and fish completions
 install -d ${RPM_BUILD_ROOT}%{_datadir}/bash-completion/completions

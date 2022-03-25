@@ -72,7 +72,7 @@ buildx:
 	docker buildx inspect | grep -q 'Driver: docker-container' || docker buildx create --use
 
 .PHONY: cross-mac
-cross-mac: buildx cross-mac-plugins
+cross-mac: buildx
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=darwin/amd64,darwin/arm64 binary
 	dest=$$PWD/build/mac; cd $(CLI_DIR)/build && for platform in *; do \
 		arch=$$(echo $$platform | cut -d_ -f2); \
@@ -82,7 +82,7 @@ cross-mac: buildx cross-mac-plugins
 	done
 
 .PHONY: cross-win
-cross-win: cross-win-engine cross-win-plugins
+cross-win: cross-win-engine
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
 	mkdir -p build/win/amd64/docker
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
@@ -116,31 +116,3 @@ cross-all-cli:
 .PHONY: cross-win-engine
 cross-win-engine:
 	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_CROSSPLATFORMS=windows/amd64 DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" cross
-
-BUILD_PLUGIN_RUN_VARS = --rm \
-	-e GOOS \
-	-e GOARCH \
-	-v "$(CURDIR)/build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins":/out \
-	-v "$(CURDIR)/../plugins":/plugins:ro \
-	-v "$(CURDIR)/scripts/build-cli-plugins":/build:ro
-
-.PHONY: cross-mac-plugins
-cross-mac-plugins: cross-mac-plugins-amd64 cross-mac-plugins-arm64
-
-.PHONY: cross-mac-plugins-%
-cross-mac-plugins-%: CLI_BUILD_DIR := mac
-cross-mac-plugins-%:
-	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker
-	GOOS=darwin GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
-	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
-
-.PHONY: cross-win-plugins
-cross-win-plugins: cross-win-plugins-amd64
-
-.PHONY: cross-win-plugins-%
-cross-win-plugins-%: CLI_BUILD_DIR := win
-cross-win-plugins-%:
-	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins
-	GOOS=windows GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
-	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
-	find build/$(CLI_BUILD_DIR)/$*/docker -type f -not -name "*.exe" -exec mv {} {}.exe \;

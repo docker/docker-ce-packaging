@@ -101,7 +101,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "rpmbuild/$@"
 
 .PHONY: sources
-sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/buildx.tgz rpmbuild/SOURCES/compose.tgz rpmbuild/SOURCES/scan-cli-plugin.tgz rpmbuild/SOURCES/plugin-installers.tgz
+sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/buildx.tgz rpmbuild/SOURCES/compose.tgz rpmbuild/SOURCES/scan-cli-plugin.tgz
 
 rpmbuild/SOURCES/engine.tgz:
 	mkdir -p $(@D)
@@ -142,13 +142,6 @@ rpmbuild/SOURCES/scan-cli-plugin.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/scan-cli-plugin.tgz --exclude .git scan-cli-plugin
-
-rpmbuild/SOURCES/plugin-installers.tgz: $(wildcard ../plugins/*)
-	docker run --rm -w /v \
-		-v $(PLUGINS_DIR):/plugins \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/plugin-installers.tgz --exclude .git plugins
 
 # See ARCHES in common.mk. Could not figure out how to match both distro and arch.
 BUNDLES:=$(addsuffix .tar.gz,$(addprefix rpmbuild/bundles-ce-%-,$(ARCHES)))
