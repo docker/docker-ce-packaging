@@ -2,6 +2,8 @@ include ../common.mk
 
 CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
 ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
+BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
+
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
 DIR_TO_HASH:=build/linux
@@ -40,7 +42,7 @@ clean: ## remove build artifacts
 static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
-static-linux: static-cli static-engine ## create tgz with linux x86_64 client and server
+static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
@@ -56,6 +58,9 @@ static-linux: static-cli static-engine ## create tgz with linux x86_64 client an
 		fi \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
+
+	# buildx
+	tar -C $(BUILDX_DIR)/bin -c -z -f build/linux/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
 
 .PHONY: hash_files
 hash_files:
@@ -99,6 +104,10 @@ static-cli:
 .PHONY: static-engine
 static-engine:
 	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" binary
+
+.PHONY: static-buildx-plugin
+static-buildx-plugin:
+	cd $(BUILDX_DIR) && docker buildx bake --set binaries.platform=$(TARGETPLATFORM) binaries && mv ./bin/buildx ./bin/docker-buildx
 
 .PHONY: cross-all-cli
 cross-all-cli:
