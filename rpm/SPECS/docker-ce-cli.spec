@@ -18,7 +18,15 @@ Requires: /bin/sh
 Requires: /usr/sbin/groupadd
 # TODO change once we support scan-plugin on other architectures
 %ifarch x86_64
+# CentOS 7 and RHEL 7 do not yet support weak dependencies
+#
+# Note that we're not using <= 7 here, to account for other RPM distros, such
+# as Fedora, which would not have the rhel macro set (so default to 0).
+%if 0%{?rhel} == 7
 Requires: docker-scan-plugin(x86-64)
+%else
+Recommends: docker-scan-plugin(x86-64)
+%endif
 %endif
 
 BuildRequires: make
