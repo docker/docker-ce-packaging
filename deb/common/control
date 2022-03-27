@@ -63,7 +63,8 @@ Package: docker-ce-cli
 Architecture: linux-any
 Depends: ${shlibs:Depends}
 # TODO change once we support scan-plugin on other architectures
-Recommends: docker-compose-plugin,
+Recommends: docker-buildx-plugin,
+            docker-compose-plugin,
             docker-scan-plugin [amd64]
 Conflicts: docker (<< 1.5~),
            docker-engine,
@@ -102,6 +103,14 @@ Description: Rootless support for Docker.
   This package contains RootlessKit, but does not contain VPNKit.
   Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
 Homepage: https://docs.docker.com/engine/security/rootless/
+
+Package: docker-buildx-plugin
+Priority: optional
+Replaces: docker-ce-cli
+Architecture: linux-any
+Enhances: docker-ce-cli
+Description: Docker Buildx cli plugin.
+Homepage: https://github.com/docker/buildx
 
 Package: docker-compose-plugin
 Priority: optional

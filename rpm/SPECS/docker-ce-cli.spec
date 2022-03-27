@@ -22,8 +22,10 @@ Requires: /usr/sbin/groupadd
 # Note that we're not using <= 7 here, to account for other RPM distros, such
 # as Fedora, which would not have the rhel macro set (so default to 0).
 %if 0%{?rhel} == 7
+Requires: docker-buildx-plugin
 Requires: docker-compose-plugin
 %else
+Recommends: docker-buildx-plugin
 Recommends: docker-compose-plugin
 %endif
 
@@ -128,7 +130,6 @@ done
 %files
 %doc build-docs/LICENSE build-docs/MAINTAINERS build-docs/NOTICE build-docs/README.md
 %{_bindir}/docker
-%{_libexecdir}/docker/cli-plugins/*
 %{_datadir}/bash-completion/completions/docker
 %{_datadir}/zsh/vendor-completions/_docker
 %{_datadir}/fish/vendor_completions.d/docker.fish

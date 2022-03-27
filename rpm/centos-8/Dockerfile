@@ -38,6 +38,7 @@ RUN \
     yum-builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/*.spec; \
   else \
     yum-builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/docker-c*.spec; \
+    yum-builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/docker-b*.spec; \
   fi
 
 COPY --from=golang /usr/local/go /usr/local/go

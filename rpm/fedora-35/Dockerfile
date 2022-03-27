@@ -26,6 +26,7 @@ RUN \
     dnf builddep -y /root/rpmbuild/SPECS/*.spec; \
   else \
     dnf builddep -y /root/rpmbuild/SPECS/docker-c*.spec; \
+    dnf builddep -y /root/rpmbuild/SPECS/docker-b*.spec; \
   fi
 
 COPY --from=golang /usr/local/go /usr/local/go
