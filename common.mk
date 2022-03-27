@@ -28,6 +28,7 @@ DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
 DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
 DOCKER_SCAN_REPO    ?= https://github.com/docker/scan-cli-plugin.git
 DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
+DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 
 # REF can be used to specify the same branch or tag to use for *both* the CLI
 # and Engine source code. This can be useful if both the CLI and Engine have a
@@ -40,6 +41,7 @@ DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
 DOCKER_SCAN_REF    ?= v0.17.0
 DOCKER_COMPOSE_REF ?= v2.3.4
+DOCKER_BUILDX_REF  ?= v0.8.1
 
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE

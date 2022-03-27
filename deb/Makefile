@@ -33,6 +33,7 @@ RUN?=docker run --rm \
 	-e VERSION=$(word 2, $(GEN_DEB_VER)) \
 	-e CLI_GITCOMMIT=$(CLI_GITCOMMIT) \
 	-e ENGINE_GITCOMMIT=$(ENGINE_GITCOMMIT) \
+	-e BUILDX_VERSION=$(DOCKER_BUILDX_REF) \
 	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
 	-e SCAN_VERSION=$(DOCKER_SCAN_REF) \
 	-e SCAN_GITCOMMIT=$(SCAN_GITCOMMIT) \
@@ -78,7 +79,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "debbuild/$@"
 
 .PHONY: sources
-sources: sources/cli.tgz sources/engine.tgz sources/compose.tgz sources/scan-cli-plugin.tgz sources/plugin-installers.tgz
+sources: sources/cli.tgz sources/engine.tgz sources/buildx.tgz sources/compose.tgz sources/scan-cli-plugin.tgz
 
 sources/engine.tgz:
 	mkdir -p $(@D)
@@ -96,6 +97,14 @@ sources/cli.tgz:
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
 
+sources/buildx.tgz:
+	mkdir -p $(@D)
+	docker run --rm -w /v \
+		-v $(realpath $(CURDIR)/../src/github.com/docker/buildx):/buildx \
+		-v $(CURDIR)/$(@D):/v \
+		alpine \
+		tar -C / -c -z -f /v/buildx.tgz --exclude .git buildx
+
 sources/compose.tgz:
 	mkdir -p $(@D)
 	docker run --rm -w /v \
@@ -111,13 +120,6 @@ sources/scan-cli-plugin.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/scan-cli-plugin.tgz --exclude .git scan-cli-plugin
-
-sources/plugin-installers.tgz: $(wildcard ../plugins/*)
-	docker run --rm -w /v \
-		-v $(PLUGINS_DIR):/plugins \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/plugin-installers.tgz --exclude .git plugins
 
 # See ARCHES in common.mk. Could not figure out how to match both distro and arch.
 BUNDLES:=$(addsuffix .tar.gz,$(addprefix debbuild/bundles-ce-%-,$(ARCHES)))

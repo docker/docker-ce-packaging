@@ -31,6 +31,7 @@ RUN \
     yum-builddep -y /root/rpmbuild/SPECS/*.spec; \
   else \
     yum-builddep -y /root/rpmbuild/SPECS/docker-c*.spec; \
+    yum-builddep -y /root/rpmbuild/SPECS/docker-b*.spec; \
   fi
 
 COPY --from=golang /usr/local/go /usr/local/go

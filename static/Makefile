@@ -2,6 +2,8 @@ include ../common.mk
 
 CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
 ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
+BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
+
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
 DIR_TO_HASH:=build/linux
@@ -40,7 +42,7 @@ clean: ## remove build artifacts
 static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
-static-linux: static-cli static-engine ## create tgz with linux x86_64 client and server
+static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
@@ -57,6 +59,9 @@ static-linux: static-cli static-engine ## create tgz with linux x86_64 client an
 	done
 	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
 
+	# buildx
+	tar -C $(BUILDX_DIR)/bin -c -z -f build/linux/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
+
 .PHONY: hash_files
 hash_files:
 	@echo "Hashing directory $(DIR_TO_HASH)"
@@ -67,7 +72,7 @@ buildx:
 	docker buildx inspect | grep -q 'Driver: docker-container' || docker buildx create --use
 
 .PHONY: cross-mac
-cross-mac: buildx cross-mac-plugins
+cross-mac: buildx
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=darwin/amd64,darwin/arm64 binary
 	dest=$$PWD/build/mac; cd $(CLI_DIR)/build && for platform in *; do \
 		arch=$$(echo $$platform | cut -d_ -f2); \
@@ -77,7 +82,7 @@ cross-mac: buildx cross-mac-plugins
 	done
 
 .PHONY: cross-win
-cross-win: cross-win-engine cross-win-plugins
+cross-win: cross-win-engine
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
 	mkdir -p build/win/amd64/docker
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
@@ -100,6 +105,10 @@ static-cli:
 static-engine:
 	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" binary
 
+.PHONY: static-buildx-plugin
+static-buildx-plugin:
+	cd $(BUILDX_DIR) && docker buildx bake --set binaries.platform=$(TARGETPLATFORM) binaries && mv ./bin/buildx ./bin/docker-buildx
+
 .PHONY: cross-all-cli
 cross-all-cli:
 	$(MAKE) -C $(CLI_DIR) -f docker.Makefile VERSION=$(GEN_STATIC_VER) cross
@@ -107,31 +116,3 @@ cross-all-cli:
 .PHONY: cross-win-engine
 cross-win-engine:
 	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_CROSSPLATFORMS=windows/amd64 DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" cross
-
-BUILD_PLUGIN_RUN_VARS = --rm \
-	-e GOOS \
-	-e GOARCH \
-	-v "$(CURDIR)/build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins":/out \
-	-v "$(CURDIR)/../plugins":/plugins:ro \
-	-v "$(CURDIR)/scripts/build-cli-plugins":/build:ro
-
-.PHONY: cross-mac-plugins
-cross-mac-plugins: cross-mac-plugins-amd64 cross-mac-plugins-arm64
-
-.PHONY: cross-mac-plugins-%
-cross-mac-plugins-%: CLI_BUILD_DIR := mac
-cross-mac-plugins-%:
-	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker
-	GOOS=darwin GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
-	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
-
-.PHONY: cross-win-plugins
-cross-win-plugins: cross-win-plugins-amd64
-
-.PHONY: cross-win-plugins-%
-cross-win-plugins-%: CLI_BUILD_DIR := win
-cross-win-plugins-%:
-	mkdir -p build/$(CLI_BUILD_DIR)/$*/docker/cli-plugins
-	GOOS=windows GOARCH=$* docker run $(BUILD_PLUGIN_RUN_VARS) $(DOCKER_CLI_GOLANG_IMG) /build
-	$(CHOWN) -R $(shell id -u):$(shell id -g) build/$(CLI_BUILD_DIR)/$*
-	find build/$(CLI_BUILD_DIR)/$*/docker -type f -not -name "*.exe" -exec mv {} {}.exe \;

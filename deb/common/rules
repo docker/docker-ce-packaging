@@ -16,6 +16,11 @@ override_dh_auto_build:
 	# Build the CLI
 	cd /go/src/github.com/docker/cli && VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) LDFLAGS='' GO_LINKMODE=dynamic ./scripts/build/binary && DISABLE_WARN_OUTSIDE_CONTAINER=1 LDFLAGS='' make manpages
 
+	# Build buildx plugin
+	cd /go/src/github.com/docker/buildx \
+	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
+	&& CGO_ENABLED=0 GO111MODULE=on go build -mod=vendor -o /usr/libexec/docker/cli-plugins/docker-buildx -ldflags "-X github.com/docker/buildx/version.Version=$(BUILDX_VERSION) -X github.com/docker/buildx/version.Revision=$(git rev-parse HEAD) -X github.com/docker/buildx/version.Package=github.com/docker/buildx" ./cmd/buildx
+
 	# Build the compose plugin
 	# FIXME: using GOPROXY, to work around:
 	# go: github.com/Azure/azure-sdk-for-go@v48.2.0+incompatible: reading github.com/Azure/azure-sdk-for-go/go.mod at revision v48.2.0: unknown revision v48.2.0
@@ -34,20 +39,15 @@ override_dh_auto_build:
 		&& mv bin/docker-scan /usr/libexec/docker/cli-plugins/; \
 	fi
 
-	# Build the CLI plugins
-	# Make sure to set LDFLAGS="" since, dpkg-buildflags sets it to some weird values
-	set -e;cd /sources && \
-		tar xzf plugin-installers.tgz; \
-		for installer in plugins/*.installer; do \
-			LDFLAGS='' bash $${installer} build; \
-		done
-
 override_dh_auto_test:
 	ver="$$(engine/bundles/dynbinary-daemon/dockerd --version)"; \
 		test "$$ver" = "Docker version $(VERSION), build $(ENGINE_GITCOMMIT)" && echo "PASS: daemon version OK" || (echo "FAIL: daemon version ($$ver) did not match" && exit 1)
 
 	ver="$$(cli/build/docker --version)"; \
 		test "$$ver" = "Docker version $(VERSION), build $(CLI_GITCOMMIT)" && echo "PASS: cli version OK" || (echo "FAIL: cli version ($$ver) did not match" && exit 1)
+
+	ver="$$(/usr/libexec/docker/cli-plugins/docker-buildx docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $$1 == "Version" { print $$2 }')"; \
+		test "$$ver" = "$(BUILDX_VERSION)" && echo "PASS: docker-buildx version OK" || (echo "FAIL: docker-buildx version ($$ver) did not match" && exit 1)
 
 	ver="$$(/usr/libexec/docker/cli-plugins/docker-compose docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $$1 == "Version" { print $$2 }')"; \
 		test "$$ver" = "$(COMPOSE_VERSION)" && echo "PASS: docker-compose version OK" || (echo "FAIL: docker-compose version ($$ver) did not match" && exit 1)
@@ -67,19 +67,16 @@ override_dh_auto_install:
 	install -D -m 0644 cli/contrib/completion/fish/docker.fish debian/docker-ce-cli/usr/share/fish/vendor_completions.d/docker.fish
 	install -D -m 0644 cli/contrib/completion/zsh/_docker debian/docker-ce-cli/usr/share/zsh/vendor-completions/_docker
 	install -D -m 0755 cli/build/docker debian/docker-ce-cli/usr/bin/docker
-	set -e;cd /sources && \
-		tar xzf plugin-installers.tgz; \
-		for installer in plugins/*.installer; do \
-			DESTDIR=/root/build-deb/debian/docker-ce-cli \
-			PREFIX=/usr/libexec/docker/cli-plugins \
-				bash $${installer} install_plugin; \
-		done
+
 	# docker-ce install
 	install -D -m 0644 engine/contrib/init/systemd/docker.service debian/docker-ce/lib/systemd/system/docker.service
 	install -D -m 0644 engine/contrib/init/systemd/docker.socket debian/docker-ce/lib/systemd/system/docker.socket
 	install -D -m 0755 $(shell readlink -e engine/bundles/dynbinary-daemon/dockerd) debian/docker-ce/usr/bin/dockerd
 	install -D -m 0755 $(shell readlink -e engine/bundles/dynbinary-daemon/docker-proxy) debian/docker-ce/usr/bin/docker-proxy
 	install -D -m 0755 /usr/local/bin/docker-init debian/docker-ce/usr/bin/docker-init
+
+	# docker-buildx-plugin install
+	install -D -m 0755 /usr/libexec/docker/cli-plugins/docker-buildx debian/docker-buildx-plugin/usr/libexec/docker/cli-plugins/docker-buildx
 
 	# docker-compose-plugin install
 	install -D -m 0755 /usr/libexec/docker/cli-plugins/docker-compose debian/docker-compose-plugin/usr/libexec/docker/cli-plugins/docker-compose
@@ -110,6 +107,10 @@ override_dh_install:
 	dh_apparmor --profile-name=docker-ce -pdocker-ce
 
 override_dh_gencontrol:
+	# Use separate version for the buildx-plugin package, then generate the other control files as usual
+	# TODO override "Source" field in control as well (to point to buildx, as it doesn't match the package name)
+	dh_gencontrol -pdocker-buildx-plugin -- -v$${BUILDX_VERSION#v}~$${DISTRO}-$${SUITE}
+
 	# Use separate version for the compose-plugin package, then generate the other control files as usual
 	# TODO override "Source" field in control as well (to point to compose, as it doesn't match the package name)
 	dh_gencontrol -pdocker-compose-plugin -- -v$${COMPOSE_VERSION#v}~$${DISTRO}-$${SUITE}
