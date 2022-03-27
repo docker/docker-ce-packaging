@@ -12,7 +12,13 @@ URL: https://github.com/docker/scan-cli-plugin/
 Vendor: Docker
 Packager: Docker <support@docker.com>
 
-Requires: docker-ce-cli
+# CentOS 7 and RHEL 7 do not yet support weak dependencies.
+#
+# Note that we're not using <= 7 here, to account for other RPM distros, such
+# as Fedora, which would not have the rhel macro set (so default to 0).
+%if 0%{?rhel} != 7
+Enhances: docker-ce-cli
+%endif
 
 # TODO change once we support scan-plugin on other architectures
 BuildArch: x86_64
