@@ -15,6 +15,7 @@ ARCHES:=amd64 aarch64 armhf armel s390x ppc64le
 BUILDTIME=$(shell date -u -d "@$${SOURCE_DATE_EPOCH:-$$(date +%s)}" --rfc-3339 ns 2> /dev/null | sed -e 's/ /T/')
 CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
 DEFAULT_PRODUCT_LICENSE:=Community Engine
+PACKAGER_NAME?=
 DOCKER_GITCOMMIT:=abcdefg
 GO_VERSION:=1.17.8
 PLATFORM=Docker Engine - Community
@@ -42,4 +43,5 @@ DOCKER_COMPOSE_REF ?= v2.3.4
 
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
+export PACKAGER_NAME
 export PLATFORM
