@@ -63,7 +63,8 @@ Package: docker-ce-cli
 Architecture: linux-any
 Depends: ${shlibs:Depends}
 # TODO change once we support scan-plugin on other architectures
-Recommends: docker-scan-plugin [amd64]
+Recommends: docker-compose-plugin,
+            docker-scan-plugin [amd64]
 Conflicts: docker (<< 1.5~),
            docker-engine,
            docker-engine-cs,
