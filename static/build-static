@@ -243,3 +243,11 @@ case ${TARGETOS} in
 		)
 		;;
 esac
+
+# create bundle
+(
+	set -x
+	cd "${buildDir}"
+	rm -r */
+	tar -zvcf "${CURDIR}/build/bundles-ce-static-${TARGETOS}-${BUNDLEARCH}.tar.gz" .
+)

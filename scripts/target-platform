@@ -92,3 +92,43 @@ if [ -z "$TARGETARCH" ]; then
 		TARGETPLATFORM="$TARGETPLATFORM/$TARGETVARIANT"
 	fi
 fi
+
+# bundle arch
+case "$TARGETARCH$TARGETVARIANT" in
+	"amd64")
+		BUNDLEARCH="x86_64"
+		;;
+	"386")
+		BUNDLEARCH="i386"
+		;;
+	"arm64")
+		BUNDLEARCH="aarch64"
+		;;
+	"armv7")
+		BUNDLEARCH="armhf"
+		;;
+	"armv6")
+		BUNDLEARCH="armel"
+		;;
+	"riscv64")
+		BUNDLEARCH="riscv64"
+		;;
+	"ppc64le")
+		BUNDLEARCH="ppc64le"
+		;;
+	"s390x")
+		BUNDLEARCH="s390x"
+		;;
+	"mips")
+		BUNDLEARCH="mips"
+		;;
+	"mipsle")
+		BUNDLEARCH="mipsle"
+		;;
+	"mips64")
+		BUNDLEARCH="mips64"
+		;;
+	"mips64le")
+		BUNDLEARCH="mips64le"
+		;;
+esac
