@@ -60,10 +60,14 @@ jobs:
         run: |
           make TARGETPLATFORM=${{ matrix.platform }} static
       -
-        name: Upload static packages
+        name: List files
+        run: |
+          tree -nh ./static/build
+      -
+        name: Upload static bundle
         uses: actions/upload-artifact@v2
         with:
           name: static-${{ env.PLATFORM_PAIR }}
-          path: static/build/${{ matrix.platform }}/*.*
+          path: static/build/*.tar.gz
           if-no-files-found: error
           retention-days: 7
