@@ -15,11 +15,6 @@ staticVersion="$VERSION"
 if [[ "$VERSION" == *-dev ]]; then
 	export TZ=UTC
 
-	DATE_COMMAND="date"
-	if [[ $(uname) == "Darwin" ]]; then
-		DATE_COMMAND="docker run --rm alpine date"
-	fi
-
 	# based on golang's pseudo-version: https://groups.google.com/forum/#!topic/golang-dev/a5PqQuBljF4
 	#
 	# using a "pseudo-version" of the form v0.0.0-yyyymmddhhmmss-abcdefabcdef,
@@ -30,7 +25,16 @@ if [[ "$VERSION" == *-dev ]]; then
 	# as a pre-release before version v0.0.0, so that the go command prefers any
 	# tagged release over any pseudo-version.
 	gitUnix="$($GIT_COMMAND log -1 --pretty='%ct')"
-	gitDate="$($DATE_COMMAND --utc --date "@$gitUnix" +'%Y%m%d%H%M%S')"
+
+	if [ "$(uname)" = "Darwin" ]; then
+		# Using BSD date (macOS), which doesn't suppoort the --date option
+		# date -jf "<input format>" "<input value>" +"<output format>" (https://unix.stackexchange.com/a/86510)
+		gitDate="$(TZ=UTC date -jf "%s" "$gitUnix" +'%Y%m%d%H%M%S')"
+	else
+		# Using GNU date (Linux)
+		gitDate="$(TZ=UTC date --utc --date "@$gitUnix" +'%Y%m%d%H%M%S')"
+	fi
+
 	gitCommit="$($GIT_COMMAND log -1 --pretty='%h')"
 	# generated version is now something like '0.0.0-20180719213702-cd5e2db'
 	staticVersion="0.0.0-${gitDate}-${gitCommit}"
