@@ -62,6 +62,12 @@ override_dh_auto_test:
 override_dh_strip:
 	# Go has lots of problems with stripping, so just don't
 
+# http://manpages.debian.org/dh_dwz
+override_dh_dwz:
+	# dh_dwz in debhelper versions less than 13 has issues with files that are missing debug symbols (once we update to debhelper-compat 13+ this can be removed)
+	@# https://packages.debian.org/debhelper
+	@# https://packages.ubuntu.com/debhelper
+
 override_dh_auto_install:
 	# docker-ce-cli install
 	install -D -m 0644 cli/contrib/completion/fish/docker.fish debian/docker-ce-cli/usr/share/fish/vendor_completions.d/docker.fish
@@ -69,8 +75,6 @@ override_dh_auto_install:
 	install -D -m 0755 cli/build/docker debian/docker-ce-cli/usr/bin/docker
 
 	# docker-ce install
-	install -D -m 0644 engine/contrib/init/systemd/docker.service debian/docker-ce/lib/systemd/system/docker.service
-	install -D -m 0644 engine/contrib/init/systemd/docker.socket debian/docker-ce/lib/systemd/system/docker.socket
 	install -D -m 0755 $(shell readlink -e engine/bundles/dynbinary-daemon/dockerd) debian/docker-ce/usr/bin/dockerd
 	install -D -m 0755 $(shell readlink -e engine/bundles/dynbinary-daemon/docker-proxy) debian/docker-ce/usr/bin/docker-proxy
 	install -D -m 0755 /usr/local/bin/docker-init debian/docker-ce/usr/bin/docker-init
@@ -97,6 +101,10 @@ override_dh_auto_install:
 override_dh_installinit:
 	# use "docker" as our service name, not "docker-ce"
 	dh_installinit --name=docker
+
+override_dh_installsystemd:
+	# use "docker" as our service name, not "docker-ce"
+	dh_installsystemd --name=docker
 
 override_dh_shlibdeps:
 	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info

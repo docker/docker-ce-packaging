@@ -1,0 +1,3 @@
+# *technically* this "5:21~" should be something more specific like "5:22.06.1-1~" (the first released version to introduce this "rm_conffile" line), but as long as it's strictly *newer* than the last version to ship the conffile and stricly *older* than the first version with the rm_conffile line, it should work fine (so we're using the will-never-exist major version of "21" as our in-between release for the 20.xx to 22.xx)
+rm_conffile /etc/init/docker.conf 5:21~
+# this should stick around in the package until there are no more users who will ever upgrade from "5:20.xx" to something newer (it's reasonably harmless for this to stay indefinitely)

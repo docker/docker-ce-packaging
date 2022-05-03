@@ -17,7 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         target:
+          - debian-buster
           - debian-bullseye
+          - ubuntu-bionic
+          - ubuntu-focal
+          - ubuntu-impish
+          - ubuntu-jammy
     steps:
       -
         name: Checkout
