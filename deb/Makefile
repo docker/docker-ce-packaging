@@ -28,6 +28,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 RUN_FLAGS=
 RUN?=docker run --rm \
 	-e PLATFORM \
+	-e GOPROXY=https://proxy.golang.org \
 	-e EPOCH='$(EPOCH)' \
 	-e DEB_VERSION=$(word 1, $(GEN_DEB_VER)) \
 	-e VERSION=$(word 2, $(GEN_DEB_VER)) \
