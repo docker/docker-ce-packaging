@@ -1,7 +1,9 @@
 %global debug_package %{nil}
 
 # BTRFS is enabled by default, but can be disabled by defining _without_btrfs
-%{!?_with_btrfs: %{!?_without_btrfs: %define _with_btrfs 1}}
+%if %{undefined _with_btrfs} && %{undefined _without_btrfs}
+%define _with_btrfs 1
+%endif
 
 Name: docker-ce
 Version: %{_version}
@@ -24,7 +26,10 @@ Requires: container-selinux >= 2:2.74
 Requires: libseccomp >= 2.3
 Requires: systemd
 Requires: iptables
+%if %{undefined rhel} || 0%{?rhel} < 9
+# Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
 Requires: libcgroup
+%endif
 Requires: containerd.io >= 1.4.1
 Requires: tar
 Requires: xz
