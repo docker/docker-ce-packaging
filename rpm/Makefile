@@ -47,6 +47,7 @@ RPMBUILD_FLAGS?=-ba\
 RUN_FLAGS=
 RUN?=docker run --rm \
 	-e PLATFORM \
+	-e GOPROXY=https://proxy.golang.org \
 	-v $(CURDIR)/rpmbuild/SOURCES:/root/rpmbuild/SOURCES:ro \
 	-v $(CURDIR)/rpmbuild/$@/RPMS:/root/rpmbuild/RPMS \
 	-v $(CURDIR)/rpmbuild/$@/SRPMS:/root/rpmbuild/SRPMS \
