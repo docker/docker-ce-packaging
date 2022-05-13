@@ -12,7 +12,6 @@ ENV GOPATH=/go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 ENV AUTO_GOPATH 1
 ENV DOCKER_BUILDTAGS exclude_graphdriver_btrfs seccomp selinux
-ENV RUNC_BUILDTAGS seccomp selinux
 ARG DISTRO
 ARG SUITE
 ENV DISTRO=${DISTRO}
