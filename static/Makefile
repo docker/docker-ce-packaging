@@ -22,10 +22,7 @@ endif
 
 ifneq ($(strip $(RUNC_VERSION)),)
 # Set custom build-args to override the runc version to build for static packages.
-# The Dockerfile for 20.10 and earlier used RUNC_COMMIT, later versions use
-# RUNC_VERSION. We can remove RUNC_COMMIT once 20.10.x reaches EOL.
 DOCKER_BUILD_OPTS +=--build-arg=RUNC_VERSION=$(RUNC_VERSION)
-DOCKER_BUILD_OPTS +=--build-arg=RUNC_COMMIT=$(RUNC_VERSION)
 endif
 
 .PHONY: help
