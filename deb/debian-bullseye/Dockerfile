@@ -15,7 +15,6 @@ ENV GO111MODULE=off
 ENV GOPATH /go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 ENV DOCKER_BUILDTAGS apparmor seccomp selinux
-ENV RUNC_BUILDTAGS apparmor seccomp selinux
 
 ARG COMMON_FILES
 COPY ${COMMON_FILES} /root/build-deb/debian
