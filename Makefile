@@ -97,3 +97,13 @@ static: checkout ## build static-compiled packages
 	for p in $(DOCKER_BUILD_PKGS); do \
 		$(MAKE) -C $@ VERSION=$(VERSION) GO_VERSION=$(GO_VERSION) TARGETPLATFORM=$(TARGETPLATFORM) CONTAINERD_VERSION=$(CONTAINERD_VERSION) RUNC_VERSION=$(RUNC_VERSION) $${p}; \
 	done
+
+.PHONY: verify
+verify: ## verify installation of packages
+# to verify using packages from staging, use: make VERIFY_PACKAGE_REPO=stage IMAGE=ubuntu:focal verify
+	docker run $(VERIFY_PLATFORM) --rm -i \
+		-v "$$(pwd):/v" \
+		-e DEBIAN_FRONTEND=noninteractive \
+		-e PACKAGE_REPO=$(VERIFY_PACKAGE_REPO) \
+		-w /v \
+		$(IMAGE) ./verify
