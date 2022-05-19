@@ -6,7 +6,7 @@
 # Description: This runs a smoke test to verify that the packages can be installed corrected
 ###
 
-# packaging/build/${DIST_ID}/${DIST_VERSION}/${ARCH} - location of all packages
+# build/${DIST_ID}/${DIST_VERSION}/${ARCH} - location of all packages
 # Manually Testing: docker run --rm -it -v $(pwd):/v -w /v "centos:7" ./verify
 
 set -e
@@ -47,7 +47,7 @@ function verify_deb() {
 
 	install_debian_containerd
 
-	packages=$(find "packaging/deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
+	packages=$(find "deb/debbuild/${DIST_ID}-${DIST_VERSION}/" -type f -name "*.deb")
 	# All local packages need to be prefixed with `./` or else apt-get doesn't understand where to pull from
 	packages=$(echo "${packages}" | awk '$0="./"$0' | xargs)
 
@@ -120,7 +120,7 @@ function verify_rpm() {
 
 	# find all rpm packages, exclude src package
 	echo "[DEBUG] Installing engine rpms"
-	packages=$(find "packaging/rpm/rpmbuild/${DIST_ID}-${DIST_VERSION}/RPMS/" -type f -name "*.rpm" | sed '/src/d')
+	packages=$(find "rpm/rpmbuild/${DIST_ID}-${DIST_VERSION}/RPMS/" -type f -name "*.rpm" | sed '/src/d')
 
 	# install all non-source packages
 	(

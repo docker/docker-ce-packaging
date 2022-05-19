@@ -44,12 +44,12 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
                 sh 'docker info'
             }
             stage("build") {
-                try {
-                    checkout scm
-                    sh "make REF=$branch ${pkg.target}"
-                } finally {
-                    sh "make clean"
-                }
+                checkout scm
+                sh "make clean"
+                sh "make REF=$branch ${pkg.target}"
+            }
+            stage("verify") {
+                sh "make IMAGE=${pkg.image} verify"
             }
         }
     }
