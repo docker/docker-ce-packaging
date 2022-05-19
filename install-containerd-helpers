@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+###
+# Script Name:  install-containerd-helpers
+#
+# Description: A library that containers helpers to install containerd on different
+#              distributions based on a package manager
+###
+set -x extglob
+
+# Steps taken from: https://docs.docker.com/install/linux/docker-ce/centos/
+function install_rpm_containerd() {
+	if [ "${PACKAGE_REPO}" = "stage" ]; then
+		REPO_URL="https://download-stage.docker.com/linux/${DIST_ID}/docker-ce-staging.repo"
+	else
+		REPO_URL="https://download.docker.com/linux/${DIST_ID}/docker-ce.repo"
+	fi
+
+	# Install containerd dependency for non-zypper dependecies
+	echo "[DEBUG] Installing engine dependencies from ${REPO_URL}"
+
+	# Note: we enable test channel to be able to test non-stable containerd packages as well.
+	# Once a containerd package becomes stable it will also be available in the test channel,
+	# so this logic works for both cases.
+	# (See also same logic in install_debian_containerd)
+
+	if dnf --version; then
+		dnf config-manager --add-repo "${REPO_URL}"
+		dnf config-manager --set-disabled docker-ce-*
+		dnf config-manager --set-enabled docker-ce-test
+		dnf makecache
+	else
+		yum-config-manager --add-repo "${REPO_URL}"
+		yum-config-manager --disable docker-ce-*
+		yum-config-manager --enable docker-ce-test
+		yum makecache
+	fi
+}
+
+# Steps taken from: https://docs.docker.com/install/linux/docker-ce/ubuntu/
+function install_debian_containerd() {
+	if [ "${PACKAGE_REPO}" = "stage" ]; then
+		REPO_URL="https://download-stage.docker.com/linux/${DIST_ID}"
+	else
+		REPO_URL="https://download.docker.com/linux/${DIST_ID}"
+	fi
+
+	echo "[DEBUG] Installing engine dependencies from ${REPO_URL}"
+
+	#TODO include this step in the get.docker.com installation script
+	# Make sure ca-certificates are up-to-date
+	update-ca-certificates -f
+
+	curl -fsSL "${REPO_URL}/gpg" | apt-key add -
+
+	if [ "${DIST_VERSION}" = "sid" ]; then
+		echo 'Debian sid ("unstable") cannot be used for packaging: replace with the actual codename'
+		exit 1
+	fi
+	ARCH=$(dpkg --print-architecture)
+
+	# Note: we enable test channel to be able to test non-stable containerd packages as well.
+	# Once a containerd package becomes stable it will also be available in the test channel,
+	# so this logic works for both cases.
+	# (See also same logic in install_rpm_containerd)
+	echo "deb [arch=${ARCH}] ${REPO_URL} ${DIST_VERSION} test" > /etc/apt/sources.list.d/docker.list
+
+	apt-get update
+}
