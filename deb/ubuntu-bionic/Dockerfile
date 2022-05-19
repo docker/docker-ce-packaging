@@ -8,8 +8,7 @@ FROM ${GO_IMAGE} AS golang
 FROM ${BUILD_IMAGE}
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SUITE
-RUN apt-get update && apt-get install -y curl devscripts equivs git debhelper/${SUITE}-backports dwz/${SUITE}-backports
+RUN apt-get update && apt-get install -y curl devscripts equivs git
 
 ENV GOPROXY=direct
 ENV GO111MODULE=off
