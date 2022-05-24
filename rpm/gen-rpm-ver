@@ -23,18 +23,18 @@ rpmRelease=3
 # Docker 18.01.0-ce-cs1-rc1: version=18.01.0.ce.cs1, release=0.1.rc1
 # Docker 18.01.0-ce-dev nightly: version=18.01.0.ce, release=0.0.YYYYMMDD.HHMMSS.gitHASH
 
-if [[ "$rpmVersion" =~ .*-tp[0-9]+$ ]]; then
-	tpVersion=${rpmVersion#*-tp}
+if [[ "$rpmVersion" =~ .*-tp[.0-9]+$ ]]; then
+	testVersion=${rpmVersion#*-tp}
 	rpmVersion=${rpmVersion%-tp*}
-	rpmRelease="0.${tpVersion}.tp${tpVersion}"
-elif [[ "$rpmVersion" =~ .*-beta[0-9]+$ ]]; then
-	betaVersion=${rpmVersion#*-beta}
+	rpmRelease="0.${testVersion##.}.tp${testVersion}"
+elif [[ "$rpmVersion" =~ .*-beta[.0-9]+$ ]]; then
+	testVersion=${rpmVersion#*-beta}
 	rpmVersion=${rpmVersion%-beta*}
-	rpmRelease="1.${betaVersion}.beta${betaVersion}"
-elif [[ "$rpmVersion" =~ .*-rc[0-9]+$ ]]; then
-	rcVersion=${rpmVersion#*-rc}
+	rpmRelease="1.${testVersion##.}.beta${testVersion}"
+elif [[ "$rpmVersion" =~ .*-rc[.0-9]+$ ]]; then
+	testVersion=${rpmVersion#*-rc}
 	rpmVersion=${rpmVersion%-rc*}
-	rpmRelease="2.${rcVersion}.rc${rcVersion}"
+	rpmRelease="2.${testVersion##.}.rc${testVersion}"
 fi
 
 DOCKER_GITCOMMIT=$($GIT_COMMAND rev-parse --short HEAD)

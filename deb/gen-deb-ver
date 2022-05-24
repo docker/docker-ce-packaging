@@ -24,19 +24,19 @@ gen_deb_version() {
 	increment="$3"
 	testVersion="${fullVersion#*-$pattern}"
 	baseVersion="${fullVersion%-"$pattern"*}"
-	echo "$baseVersion-$increment.$testVersion.$pattern$testVersion"
+	echo "$baseVersion-$increment.${testVersion##.}.$pattern$testVersion"
 }
 
 case "$debVersion" in
 	*-dev)
 		;;
-	*-tp[0-9]*)
+	*-tp[.0-9]*)
 		debVersion="$(gen_deb_version "$debVersion" tp 0)"
 		;;
-	*-beta[0-9]*)
+	*-beta[.0-9]*)
 		debVersion="$(gen_deb_version "$debVersion" beta 1)"
 		;;
-	*-rc[0-9]*)
+	*-rc[.0-9]*)
 		debVersion="$(gen_deb_version "$debVersion" rc 2)"
 		;;
 	*)
