@@ -42,14 +42,10 @@ if [ -n "$($GIT_COMMAND status --porcelain --untracked-files=no)" ]; then
 	DOCKER_GITCOMMIT="$DOCKER_GITCOMMIT-unsupported"
 fi
 
-# if we have a "-dev" suffix or have change in Git, let's make this package version more complex so it works better
-if [[ "$rpmVersion" == *-dev ]] || [ -n "$($GIT_COMMAND status --porcelain)" ]; then
+# if we have a "-dev" suffix or have change in Git, this is a nightly build, and
+# we'll create a pseudo version based on commit-date and -sha.
+if [[ "$VERSION" == *-dev ]] || [ -n "$($GIT_COMMAND status --porcelain)" ]; then
 	export TZ=UTC
-
-	DATE_COMMAND="date"
-	if [[ $(uname) == "Darwin" ]]; then
-		DATE_COMMAND="docker run --rm alpine date"
-	fi
 
 	# based on golang's pseudo-version: https://groups.google.com/forum/#!topic/golang-dev/a5PqQuBljF4
 	#
@@ -61,14 +57,23 @@ if [[ "$rpmVersion" == *-dev ]] || [ -n "$($GIT_COMMAND status --porcelain)" ]; 
 	# as a pre-release before version v0.0.0, so that the go command prefers any
 	# tagged release over any pseudo-version.
 	gitUnix="$($GIT_COMMAND log -1 --pretty='%ct')"
-	gitDate="$($DATE_COMMAND --utc --date "@$gitUnix" +'%Y%m%d%H%M%S')"
+
+	if [ "$(uname)" = "Darwin" ]; then
+		# Using BSD date (macOS), which doesn't support the --date option
+		# date -jf "<input format>" "<input value>" +"<output format>" (https://unix.stackexchange.com/a/86510)
+		gitDate="$(TZ=UTC date -u -jf "%s" "$gitUnix" +'%Y%m%d%H%M%S')"
+	else
+		# Using GNU date (Linux)
+		gitDate="$(TZ=UTC date -u --date "@$gitUnix" +'%Y%m%d%H%M%S')"
+	fi
+
 	gitCommit="$($GIT_COMMAND log -1 --pretty='%h')"
 	# generated version is now something like '0.0.0-20180719213702-cd5e2db'
-	rpmVersion="0.0.0-${gitDate}-${gitCommit}"
-	rpmRelease="0"
-	origVersion=$rpmVersion
+	origVersion="0.0.0-${gitDate}-${gitCommit}" # (using hyphens)
+	rpmVersion="0.0.0~${gitDate}.${gitCommit}"  # (using tilde and periods)
+	rpmRelease=0
 fi
 
-# Replace any other dashes with periods
+# Replace any remaining dashes with periods
 rpmVersion="${rpmVersion//-/.}"
 echo "$rpmVersion $rpmRelease $DOCKER_GITCOMMIT $origVersion"
