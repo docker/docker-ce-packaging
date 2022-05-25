@@ -11,8 +11,11 @@ fi
 
 GIT_COMMAND="git -C $REPO_DIR"
 
-staticVersion="$VERSION"
-if [[ "$VERSION" == *-dev ]]; then
+staticVersion="${VERSION#v}"
+
+# if we have a "-dev" suffix or have change in Git, this is a nightly build, and
+# we'll create a pseudo version based on commit-date and -sha.
+if [[ "$VERSION" == *-dev ]] || [ -n "$($GIT_COMMAND status --porcelain)" ]; then
 	export TZ=UTC
 
 	# based on golang's pseudo-version: https://groups.google.com/forum/#!topic/golang-dev/a5PqQuBljF4
@@ -27,17 +30,17 @@ if [[ "$VERSION" == *-dev ]]; then
 	gitUnix="$($GIT_COMMAND log -1 --pretty='%ct')"
 
 	if [ "$(uname)" = "Darwin" ]; then
-		# Using BSD date (macOS), which doesn't suppoort the --date option
+		# Using BSD date (macOS), which doesn't support the --date option
 		# date -jf "<input format>" "<input value>" +"<output format>" (https://unix.stackexchange.com/a/86510)
-		gitDate="$(TZ=UTC date -jf "%s" "$gitUnix" +'%Y%m%d%H%M%S')"
+		gitDate="$(TZ=UTC date -u -jf "%s" "$gitUnix" +'%Y%m%d%H%M%S')"
 	else
 		# Using GNU date (Linux)
-		gitDate="$(TZ=UTC date --utc --date "@$gitUnix" +'%Y%m%d%H%M%S')"
+		gitDate="$(TZ=UTC date -u --date "@$gitUnix" +'%Y%m%d%H%M%S')"
 	fi
 
 	gitCommit="$($GIT_COMMAND log -1 --pretty='%h')"
 	# generated version is now something like '0.0.0-20180719213702-cd5e2db'
-	staticVersion="0.0.0-${gitDate}-${gitCommit}"
+	staticVersion="0.0.0-${gitDate}-${gitCommit}" # (using hyphens)
 fi
 
 echo "$staticVersion"
