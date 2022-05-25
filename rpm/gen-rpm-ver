@@ -12,30 +12,66 @@ fi
 GIT_COMMAND="git -C $REPO_DIR"
 origVersion="$VERSION"
 rpmVersion="${VERSION#v}"
-rpmRelease=3
 
-# rpmRelease versioning is as follows
-# Docker 18.01.0-ce:  version=18.01.0.ce, release=3
-# Docker 18.01.0-ce-tp1: version=18.01.0.ce, release=0.1.tp1
-# Docker 18.01.0-ce-beta1: version=18.01.0.ce, release=1.1.beta1
-# Docker 18.01.0-ce-rc1: version=18.01.0.ce, release=2.1.rc1
-# Docker 18.01.0-ce-cs1: version=18.01.0.ce.cs1, release=1
-# Docker 18.01.0-ce-cs1-rc1: version=18.01.0.ce.cs1, release=0.1.rc1
-# Docker 18.01.0-ce-dev nightly: version=18.01.0.ce, release=0.0.YYYYMMDD.HHMMSS.gitHASH
+# rpm "Release:" field ($rpmRelease) is used to set the "_release" macro, which
+# is an incremental number for builds of the same release (Version: / #rpmVersion).
+#
+# This field can be:
+#
+# - Version: 0   : Package was built, but no matching upstream release (e.g., can be used for "nightly" builds)
+# - Version: 1   : Package was built for an upstream (pre)release version
+# - Version: > 1 : Only to be used for packaging-only changes (new package built for a version for which a package was already built/released)
+#
+# For details, see the Fedora packaging guide:
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_complex_versioning_with_a_reasonable_upstream
+#
+# Note that older versions of the rpm spec allowed more traditional information
+# in this field, which is still allowed, but considered deprecated; see
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_complex_versioning_with_a_reasonable_upstream
+#
+# In our case, this means that all releases, except for "nightly" builds should
+# use "Version: 1". Only in an exceptional case, where we need to publish a new
+# package (build) for an existing release, "Version: 2" should be used; this script
+# does not currently account for that situation.
+#
+# Assuming all tagged version of rpmRelease correspond with an upstream release,
+# this means that versioning is as follows:
+#
+# Docker 22.06.0:         version=22.06.0, release=1
+# Docker 22.06.0-alpha.1: version=22.06.0, release=1
+# Docker 22.06.0-beta.1:  version=22.06.0, release=1
+# Docker 22.06.0-rc.1:    version=22.06.0, release=1
+# Docker 22.06.0-dev:     version=0.0.0~YYYYMMDDHHMMSS.gitHASH, release=0
+rpmRelease=1
 
-if [[ "$rpmVersion" =~ .*-tp[.0-9]+$ ]]; then
-	testVersion=${rpmVersion#*-tp}
-	rpmVersion=${rpmVersion%-tp*}
-	rpmRelease="0.${testVersion##.}.tp${testVersion}"
-elif [[ "$rpmVersion" =~ .*-beta[.0-9]+$ ]]; then
-	testVersion=${rpmVersion#*-beta}
-	rpmVersion=${rpmVersion%-beta*}
-	rpmRelease="1.${testVersion##.}.beta${testVersion}"
-elif [[ "$rpmVersion" =~ .*-rc[.0-9]+$ ]]; then
-	testVersion=${rpmVersion#*-rc}
-	rpmVersion=${rpmVersion%-rc*}
-	rpmRelease="2.${testVersion##.}.rc${testVersion}"
-fi
+# rpm packages require a tilde (~) instead of a hyphen (-) as separator between
+# the version # and pre-release suffixes, otherwise pre-releases are sorted AFTER
+# non-pre-release versions, which would prevent users from updating from a pre-
+# release version to the "ga" version.
+#
+# For details, see the Fedora packaging guide:
+# https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/#_handling_non_sorting_versions_with_tilde_dot_and_caret
+#
+# > The tilde symbol (‘~’) is used before a version component which must sort
+# > earlier than any non-tilde component. It is used for any pre-release versions
+# > which wouldn’t otherwise sort appropriately.
+# >
+# > For example, with upstream releases 0.4.0, 0.4.1, 0.5.0-rc1, 0.5.0-rc2, 0.5.0,
+# > the two "release candidates" should use 0.5.0~rc1 and 0.5.0~rc2 in the Version:
+# > field. Bugfix or "patchlevel" releases that some upstream make should be handled
+# > using simple versioning. The separator used by upstream may need to be replaced
+# > by a dot or dropped.
+# >
+# > For example, if the same upstream released 0.5.0-post1 as a bugfix version,
+# > this "post-release" should use 0.5.0.post1 in the Version: field. Note that
+# > 0.5.0.post1 sorts lower than both 0.5.1 and 0.5.0.1.
+#
+# The code below replaces hyphens with tildes. Note that an intermediate $tilde
+# variable is needed to make this work on all versions of Bash. In some versions
+# of Bash, the tilde would be substituted with $HOME (even when escaped (\~) or
+# quoted ('~').
+tilde='~'
+rpmVersion="${rpmVersion//-/$tilde}"
 
 DOCKER_GITCOMMIT=$($GIT_COMMAND rev-parse --short HEAD)
 if [ -n "$($GIT_COMMAND status --porcelain --untracked-files=no)" ]; then

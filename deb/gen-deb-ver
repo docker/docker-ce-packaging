@@ -13,39 +13,20 @@ GIT_COMMAND="git -C $REPO_DIR"
 origVersion="$VERSION"
 debVersion="${VERSION#v}"
 
-gen_deb_version() {
-	# Adds an increment to the deb version to get proper order
-	# 18.01.0-tp1   -> 18.01.0-0.1-tp1
-	# 18.01.0-beta1 -> 18.01.0-1.1-beta1
-	# 18.01.0-rc1   -> 18.01.0-2.1-rc1
-	# 18.01.0       -> 18.01.0-3
-	fullVersion="$1"
-	pattern="$2"
-	increment="$3"
-	testVersion="${fullVersion#*-$pattern}"
-	baseVersion="${fullVersion%-"$pattern"*}"
-	echo "$baseVersion-$increment.${testVersion##.}.$pattern$testVersion"
-}
-
-case "$debVersion" in
-	*-dev)
-		;;
-	*-tp[.0-9]*)
-		debVersion="$(gen_deb_version "$debVersion" tp 0)"
-		;;
-	*-beta[.0-9]*)
-		debVersion="$(gen_deb_version "$debVersion" beta 1)"
-		;;
-	*-rc[.0-9]*)
-		debVersion="$(gen_deb_version "$debVersion" rc 2)"
-		;;
-	*)
-		debVersion="$debVersion-3"
-		;;
-esac
-
-tilde='~'                            # ouch Bash 4.2 vs 4.3, you keel me
-debVersion="${debVersion//-/$tilde}" # using \~ or '~' here works in 4.3, but not 4.2; just ~ causes $HOME to be inserted, hence the $tilde
+# deb packages require a tilde (~) instead of a hyphen (-) as separator between
+# the version # and pre-release suffixes, otherwise pre-releases are sorted AFTER
+# non-pre-release versions, which would prevent users from updating from a pre-
+# release version to the "ga" version.
+#
+# For details, see this thread on the Debian mailing list:
+# https://lists.debian.org/debian-policy/1998/06/msg00099.html
+#
+# The code below replaces hyphens with tildes. Note that an intermediate $tilde
+# variable is needed to make this work on all versions of Bash. In some versions
+# of Bash, the tilde would be substituted with $HOME (even when escaped (\~) or
+# quoted ('~').
+tilde='~'
+debVersion="${debVersion//-/$tilde}"
 
 # if we have a "-dev" suffix or have change in Git, this is a nightly build, and
 # we'll create a pseudo version based on commit-date and -sha.
