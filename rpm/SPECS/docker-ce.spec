@@ -82,7 +82,7 @@ depending on a particular stack or provider.
 
 export DOCKER_GITCOMMIT=%{_gitcommit_engine}
 mkdir -p /go/src/github.com/docker
-ln -s ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
+ln -snf ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
 
 pushd ${RPM_BUILD_DIR}/src/engine
 TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
