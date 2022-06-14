@@ -21,6 +21,7 @@ Enhances: docker-ce-cli
 %endif
 
 BuildRequires: bash
+BuildRequires: golang
 
 %description
 Docker Compose (V2) plugin for the Docker CLI.
