@@ -23,7 +23,9 @@ Enhances: docker-ce-cli
 # TODO change once we support scan-plugin on other architectures
 BuildArch: x86_64
 BuildRequires: bash
+%if 0%{?fedora} < 36 || 0%{?rhel} == 7
 BuildRequires: golang
+%endif
 
 %description
 Docker Scan plugin for the Docker CLI.

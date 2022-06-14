@@ -21,7 +21,9 @@ Enhances: docker-ce-cli
 %endif
 
 BuildRequires: bash
+%if 0%{?fedora} < 36 || 0%{?rhel} == 7
 BuildRequires: golang
+%endif
 
 %description
 Docker Compose (V2) plugin for the Docker CLI.

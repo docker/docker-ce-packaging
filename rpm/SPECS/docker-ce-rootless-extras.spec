@@ -20,7 +20,9 @@ Requires: slirp4netns >= 0.4
 Requires: fuse-overlayfs >= 0.7
 
 BuildRequires: bash
+%if 0%{?fedora} < 36 || 0%{?rhel} == 7
 BuildRequires: golang
+%endif
 
 # conflicting packages
 Conflicts: rootlesskit

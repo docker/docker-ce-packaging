@@ -52,7 +52,9 @@ BuildRequires: selinux-policy-devel
 BuildRequires: systemd-devel
 BuildRequires: tar
 BuildRequires: which
+%if 0%{?fedora} < 36 || 0%{?rhel} == 7
 BuildRequires: golang
+%endif
 
 # conflicting packages
 Conflicts: docker
