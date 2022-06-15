@@ -44,7 +44,7 @@ Recommends: docker-scan-plugin(x86-64)
 BuildRequires: make
 BuildRequires: libtool-ltdl-devel
 BuildRequires: git
-%if 0%{?fedora} < 36 || 0%{?rhel} == 7
+%if 0%{?fedora} > 35 || 0%{?rhel} != 7
 BuildRequires: golang
 %endif
 
