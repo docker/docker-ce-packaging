@@ -54,7 +54,7 @@ BuildRequires: tar
 BuildRequires: which
 %if 0%{?fedora} > 35 || 0%{?rhel} > 7
 BuildRequires: golang
-%endi
+%endif
 
 # conflicting packages
 Conflicts: docker

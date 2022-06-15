@@ -25,7 +25,7 @@ BuildArch: x86_64
 BuildRequires: bash
 %if 0%{?fedora} > 35 || 0%{?rhel} > 7
 BuildRequires: golang
-%endi
+%endif
 
 %description
 Docker Scan plugin for the Docker CLI.
