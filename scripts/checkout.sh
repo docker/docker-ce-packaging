@@ -15,7 +15,7 @@
 #   limitations under the License.
 
 checkout() (
-	set -ex
+	set -e
 	SRC="$1"
 	REF="$2"
 	REF_FETCH="$REF"
@@ -27,10 +27,12 @@ checkout() (
 	else
 		REF="FETCH_HEAD"
 	fi
-	git -C "$SRC" fetch --update-head-ok --depth 1 origin "$REF_FETCH"
-	git -C "$SRC" checkout -q "$REF"
+	(
+		set -x
+		git -C "$SRC" fetch --update-head-ok --depth 1 origin "$REF_FETCH"
+		git -C "$SRC" checkout -q "$REF"
+	)
 )
-
 
 # Only execute checkout function above if this file is executed, not sourced from another script
 prog=checkout.sh # needs to be in sync with this file's name
