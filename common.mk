@@ -70,3 +70,20 @@ export DOCKER_ENGINE_REF
 export DOCKER_SCAN_REF
 export DOCKER_COMPOSE_REF
 export DOCKER_BUILDX_REF
+
+# utilities
+BOLD := $(shell tput -T linux bold)
+RED := $(shell tput -T linux setaf 1)
+GREEN := $(shell tput -T linux setaf 2)
+YELLOW := $(shell tput -T linux setaf 3)
+BLUE := $(shell tput -T linux setaf 4)
+PURPLE := $(shell tput -T linux setaf 5)
+CYAN := $(shell tput -T linux setaf 6)
+
+RESET := $(shell tput -T linux sgr0)
+TITLE := $(BOLD)$(YELLOW)
+SUCCESS := $(BOLD)$(GREEN)
+
+define title
+    @printf '$(TITLE)$(1)$(RESET)\n'
+endef

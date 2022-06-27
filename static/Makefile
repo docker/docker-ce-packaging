@@ -17,19 +17,21 @@ export CONTAINERD_VERSION
 export RUNC_VERSION
 
 .PHONY: help
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "$(BOLD)$(CYAN)%-25s$(RESET)%s\n", $$1, $$2}'
+help: ## show make targets
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf " \033[36m%-20s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: clean
 clean: ## remove build artifacts
+	$(call title,Removing build artifacts)
 	@[ ! -d build ] || $(CHOWN) -R $(shell id -u):$(shell id -g) build
 	@$(RM) -r build
 
 .PHONY: build
 build: ## build static package
+	$(call title,Building static package for $(TARGETPLATFORM))
 	./build-static "$(CURDIR)" "$(TARGETPLATFORM)"
 
 .PHONY: hash_files
 hash_files: ## hash files
-	@echo "Hashing directory $(DIR_TO_HASH)"
+	$(call title,Hashing directory $(DIR_TO_HASH))
 	$(HASH_CMD) "$(DIR_TO_HASH)"
