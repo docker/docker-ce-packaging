@@ -1,7 +1,5 @@
 #!groovy
 
-def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
-
 def pkgs = [
     [target: "centos-7",                 image: "centos:7",                               arches: ["amd64", "aarch64"]],          // (EOL: June 30, 2024)
     [target: "centos-8",                 image: "quay.io/centos/centos:stream8",          arches: ["amd64", "aarch64"]],
@@ -19,15 +17,16 @@ def pkgs = [
     [target: "ubuntu-jammy",             image: "ubuntu:jammy",                           arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 22.04 LTS (End of support: April, 2027. EOL: April, 2032)
 ]
 
-def genBuildStep(LinkedHashMap pkg, String arch) {
-    def nodeLabel = "linux&&${arch}"
-    def platform = ""
-    def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
+def statics = [
+    [os: "linux",       arches: ["amd64", "armv6", "armv7", "aarch64"]],
+    [os: "darwin",      arches: ["amd64", "aarch64"]],
+    [os: "windows",     arches: ["amd64"]],
+]
 
+def genPkgStep(LinkedHashMap pkg, String arch) {
+    def nodeLabel = "linux&&${arch}"
+    def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
     if (arch == 'armhf') {
-        // Running armhf builds on EC2 requires --platform parameter
-        // Otherwise it accidentally pulls armel images which then breaks the verify step
-        platform = "--platform=linux/${arch}"
         nodeLabel = "${nodeLabel}&&ubuntu"
     } else {
         nodeLabel = "${nodeLabel}&&ubuntu-2004"
@@ -42,6 +41,7 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
             stage("info") {
                 sh 'docker version'
                 sh 'docker info'
+                sh 'env|sort'
             }
             stage("build") {
                 checkout scm
@@ -55,78 +55,57 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
     }
 }
 
-def build_package_steps = [
-    'static-linux': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
-            stage("static-linux") {
-                // This is just a "dummy" stage to make the distro/arch visible
-                // in Jenkins' BlueOcean view, which truncates names....
-                sh 'echo starting...'
-            }
-            stage("info") {
-                sh 'docker version'
-                sh 'docker info'
-            }
-            stage("build") {
-                try {
-                    checkout scm
-                    sh "make REF=$branch DOCKER_BUILD_PKGS='static-linux' static"
-                } finally {
-                    sh "make clean"
-                }
-            }
-        }
-    },
-    'cross-mac': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
-            stage("cross-mac") {
-                // This is just a "dummy" stage to make the distro/arch visible
-                // in Jenkins' BlueOcean view, which truncates names....
-                sh 'echo starting...'
-            }
-            stage("info") {
-                sh 'docker version'
-                sh 'docker info'
-            }
-            stage("build") {
-                try {
-                    checkout scm
-                    sh "make REF=$branch DOCKER_BUILD_PKGS='cross-mac' static"
-                } finally {
-                    sh "make clean"
-                }
-            }
-        }
-    },
-    'cross-win': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
-            stage("cross-win") {
-                // This is just a "dummy" stage to make the distro/arch visible
-                // in Jenkins' BlueOcean view, which truncates names....
-                sh 'echo starting...'
-            }
-            stage("info") {
-                sh 'docker version'
-                sh 'docker info'
-            }
-            stage("build") {
-                try {
-                    checkout scm
-                    sh "make REF=$branch DOCKER_BUILD_PKGS='cross-win' static"
-                } finally {
-                    sh "make clean"
-                }
-            }
-        }
-    },
-]
-
-def genPackageSteps(opts) {
+def genPkgSteps(opts) {
     return opts.arches.collectEntries {
-        ["${opts.image}-${it}": genBuildStep(opts, it)]
+        ["${opts.image}-${it}": genPkgStep(opts, it)]
     }
 }
 
-build_package_steps << pkgs.collectEntries { genPackageSteps(it) }
+def genStaticStep(LinkedHashMap pkg, String arch) {
+    def config = [
+        amd64:   [label: "x86_64",      targetarch: "amd64"],
+        aarch64: [label: "aarch64",     targetarch: "arm64"],
+        armv6:   [label: "aarch64",     targetarch: "arm/v6"],
+        armv7:   [label: "aarch64",     targetarch: "arm/v7"],
+        ppc64le: [label: "ppc64le",     targetarch: "ppc64le"],
+        s390x  : [label: "s390x",       targetarch: "s390x"],
+    ][arch]
+    def nodeLabel = "linux&&${config.label}"
+    if (config.label == 'x86_64') {
+        nodeLabel = "${nodeLabel}&&ubuntu"
+    }
+    def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
+    return { ->
+        wrappedNode(label: nodeLabel, cleanWorkspace: true) {
+            stage("static-${pkg.os}-${arch}") {
+                // This is just a "dummy" stage to make the distro/arch visible
+                // in Jenkins' BlueOcean view, which truncates names....
+                sh 'echo starting...'
+            }
+            stage("info") {
+                sh 'docker version'
+                sh 'docker info'
+                sh 'env|sort'
+            }
+            stage("build") {
+                try {
+                    checkout scm
+                    sh "make REF=$branch TARGETPLATFORM=${pkg.os}/${config.targetarch} static"
+                } finally {
+                    sh "make clean"
+                }
+            }
+        }
+    }
+}
 
-parallel(build_package_steps)
+def genStaticSteps(opts) {
+    return opts.arches.collectEntries {
+        ["static-${opts.os}-${it}": genStaticStep(opts, it)]
+    }
+}
+
+def parallelStages = pkgs.collectEntries { genPkgSteps(it) }
+parallelStages << statics.collectEntries { genStaticSteps(it) }
+
+parallel(parallelStages)
