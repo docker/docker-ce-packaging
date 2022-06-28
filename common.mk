@@ -50,7 +50,23 @@ VERIFY_PACKAGE_REPO ?= staging
 # Optional flags like --platform=linux/armhf
 VERIFY_PLATFORM ?=
 
+# Export vars as envs
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
 export PACKAGER_NAME
 export PLATFORM
+export VERSION
+export GO_VERSION
+
+export DOCKER_CLI_REPO
+export DOCKER_ENGINE_REPO
+export DOCKER_SCAN_REPO
+export DOCKER_COMPOSE_REPO
+export DOCKER_BUILDX_REPO
+
+export REF
+export DOCKER_CLI_REF
+export DOCKER_ENGINE_REF
+export DOCKER_SCAN_REF
+export DOCKER_COMPOSE_REF
+export DOCKER_BUILDX_REF
