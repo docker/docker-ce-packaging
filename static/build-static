@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -e
+
+source "../scripts/target-platform"
+
+CURDIR="$1"
+TARGETPLATFORM="${2:-$CURPLATFORM}"
+
+if [ -z "$CURDIR" ] || [ -z "$TARGETPLATFORM" ]; then
+	# shellcheck disable=SC2016
+	echo 'usage: ./build-static ${CURDIR} ${TARGETPLATFORM}'
+	exit 1
+fi
+
+source "../scripts/target-platform"
+
+build_cli() {
+	[ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
+	(
+		cd "${CLI_DIR}"
+		set -x
+		docker buildx build \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--build-arg CGO_ENABLED="${cgo_enabled}" \
+			--build-arg DEFAULT_PRODUCT_LICENSE \
+			--build-arg PACKAGER_NAME \
+			--build-arg PLATFORM \
+			--build-arg PRODUCT \
+			--build-arg VERSION="${STATIC_VERSION}" \
+			--output ./build \
+			--platform "${TARGETPLATFORM}" \
+			--target binary .
+	)
+}
+
+build_engine() {
+	[ -d "${ENGINE_DIR:?}/bundles" ] && rm -r "${ENGINE_DIR:?}/bundles"
+	(
+		cd "${ENGINE_DIR}"
+		mkdir -p autogen # FIXME: remove when https://github.com/moby/moby/pull/43431 merged
+		set -x
+		docker buildx build \
+			--build-arg CGO_ENABLED="${cgo_enabled}" \
+			--build-arg CONTAINERD_VERSION \
+			--build-arg DEFAULT_PRODUCT_LICENSE \
+			--build-arg PACKAGER_NAME \
+			--build-arg PLATFORM \
+			--build-arg PRODUCT \
+			--build-arg RUNC_VERSION \
+			--build-arg VERSION="${STATIC_VERSION}" \
+			--output ./bundles \
+			--platform "${TARGETPLATFORM}" \
+			--target binary .
+		mkdir -p ./bundles/"${TARGETPLATFORM}"
+		cp -r ./bundles/binary-daemon/* "./bundles/${TARGETPLATFORM}/"
+	)
+}
+
+build_engine_cross() {
+	[ -d "${ENGINE_DIR:?}/bundles" ] && rm -r "${ENGINE_DIR:?}/bundles"
+	(
+		cd "${ENGINE_DIR}"
+		mkdir -p autogen # FIXME: remove when https://github.com/moby/moby/pull/43431 merged
+		set -x
+		docker buildx build \
+			--build-arg CGO_ENABLED="${cgo_enabled}" \
+			--build-arg CONTAINERD_VERSION \
+			--build-arg CROSS=true \
+			--build-arg DEFAULT_PRODUCT_LICENSE \
+			--build-arg DOCKER_CROSSPLATFORMS="${TARGETPLATFORM}" \
+			--build-arg PACKAGER_NAME \
+			--build-arg PLATFORM \
+			--build-arg PRODUCT \
+			--build-arg RUNC_VERSION \
+			--build-arg VERSION="${STATIC_VERSION}" \
+			--output ./bundles \
+			--target cross .
+		mkdir -p "./bundles/${TARGETPLATFORM}"
+		cp ./bundles/cross/"${TARGETPLATFORM}"-daemon/* "./bundles/${TARGETPLATFORM}/"
+	)
+}
+
+build_buildx() {
+	[ -d "${BUILDX_DIR:?}/bin" ] && rm -r "${BUILDX_DIR:?}/bin"
+	(
+		cd "${BUILDX_DIR}"
+		set -x
+		docker buildx build \
+			--platform "${TARGETPLATFORM}" \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--output "./bin" \
+			--target binaries .
+	)
+}
+
+CROSS=true
+if [ "$TARGETOS" = "linux" ] && [ "$CURARCH$CURVARIANT" = "$TARGETARCH$TARGETVARIANT" ]; then
+	CROSS=false
+fi
+
+echo "UNAME=$(uname -m)"
+echo "TARGETPLATFORM=${TARGETPLATFORM}"
+echo "CURPLATFORM=${CURPLATFORM}"
+echo "CROSS=${CROSS}"
+
+cgo_enabled=""
+if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then
+	cgo_enabled="0"
+fi
+
+targetPair="${TARGETOS}_${TARGETARCH}"
+if [ -n "$TARGETVARIANT" ]; then
+	targetPair="${targetPair}_${TARGETVARIANT}"
+fi
+
+buildDir="${CURDIR}/build/${TARGETPLATFORM}"
+
+dockerBuildDir="${buildDir}/docker"
+rootlessExtrasBuildDir="${buildDir}/docker-rootless-extras"
+buildxBuildDir="${buildDir}/docker-buildx"
+
+# create docker-container builder
+docker buildx inspect | grep -q 'Driver: docker-container' || docker buildx create --use
+
+case ${TARGETOS} in
+	linux)
+		build_cli
+		if [ "$CROSS" = "false" ]; then
+			build_engine
+		else
+			build_engine_cross
+		fi
+		build_buildx
+		;;
+	darwin)
+		build_cli
+		build_buildx
+		;;
+	windows)
+		build_cli
+		build_engine_cross
+		build_buildx
+		;;
+esac
+
+# cleanup
+[ -d "${buildDir}" ] && rm -r "${buildDir}"
+
+# docker
+mkdir -p "${dockerBuildDir}"
+case ${TARGETOS} in
+	linux | darwin)
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-* "${dockerBuildDir}/docker"
+		;;
+	windows)
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-*.exe "${dockerBuildDir}/docker.exe"
+		;;
+esac
+case ${TARGETOS} in
+	linux)
+		for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do
+			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
+				cp -L "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" "${dockerBuildDir}/$f"
+			fi
+		done
+		;;
+	windows)
+		cp "${ENGINE_DIR}"/bundles/"${TARGETPLATFORM}"/dockerd-*.exe "${dockerBuildDir}/dockerd.exe"
+		cp "${ENGINE_DIR}"/bundles/"${TARGETPLATFORM}"/docker-proxy-*.exe "${dockerBuildDir}/docker-proxy.exe"
+		;;
+esac
+# package docker
+case ${TARGETOS} in
+	linux | darwin)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-${STATIC_VERSION}.tgz" docker
+		)
+		;;
+	windows)
+		(
+			cd "${buildDir}"
+			set -x
+			zip -r "docker-${STATIC_VERSION}.zip" docker
+		)
+		;;
+esac
+
+# rootless extras
+case ${TARGETOS} in
+	linux)
+		for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do
+			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
+				mkdir -p "${rootlessExtrasBuildDir}"
+				cp -L "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" "${rootlessExtrasBuildDir}/$f"
+			fi
+		done
+		;;
+esac
+# package rootless extras
+if [ -d "${rootlessExtrasBuildDir}" ]; then
+	case ${TARGETOS} in
+		linux)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-rootless-extras-${STATIC_VERSION}.tgz" docker-rootless-extras
+			)
+			;;
+	esac
+fi
+
+# buildx
+mkdir -p "${buildxBuildDir}"
+case ${TARGETOS} in
+	linux | darwin)
+		cp "${BUILDX_DIR}/bin/${targetPair}/buildx" "${buildxBuildDir}/docker-buildx"
+		;;
+	windows)
+		cp "${BUILDX_DIR}/bin/${targetPair}/buildx.exe" "${buildxBuildDir}/docker-buildx.exe"
+		;;
+esac
+# package buildx
+case ${TARGETOS} in
+	linux | darwin)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-buildx-plugin-${DOCKER_BUILDX_REF#v}.tgz" docker-buildx
+		)
+		;;
+	windows)
+		(
+			cd "${buildDir}"
+			set -x
+			zip -r "docker-buildx-plugin-${DOCKER_BUILDX_REF#v}.zip" docker-buildx
+		)
+		;;
+esac

@@ -11,7 +11,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  pkg:
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -29,3 +29,41 @@ jobs:
         name: Build
         run: |
           make ${{ matrix.target }}
+
+  static:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm/v6
+          - linux/arm/v7
+          - linux/arm64
+          - darwin/amd64
+          - darwin/arm64
+          - windows/amd64
+    steps:
+      -
+        name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Build
+        run: |
+          make TARGETPLATFORM=${{ matrix.platform }} static
+      -
+        name: Upload static packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: static-${{ env.PLATFORM_PAIR }}
+          path: static/build/${{ matrix.platform }}/*.*
+          if-no-files-found: error
+          retention-days: 7
