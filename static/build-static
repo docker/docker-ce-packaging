@@ -1,27 +1,34 @@
 #!/usr/bin/env bash
 set -e
 
-source "../scripts/target-platform"
+function xx-info() {
+	"$XX_DIR"/base/xx-info "$1"
+}
 
 CURDIR="$1"
-TARGETPLATFORM="${2:-$CURPLATFORM}"
-
-if [ -z "$CURDIR" ] || [ -z "$TARGETPLATFORM" ]; then
+if [ -z "$CURDIR" ]; then
 	# shellcheck disable=SC2016
-	echo 'usage: ./build-static ${CURDIR} ${TARGETPLATFORM}'
+	echo 'CURDIR is required. See README.md for usage.'
 	exit 1
 fi
 
-source "../scripts/target-platform"
+TARGETPLATFORM="$2"
+if [ -z "$TARGETPLATFORM" ]; then
+	TARGETPLATFORM="$(xx-info os)/$(xx-info arch)"
+	if [ -n "$(xx-info variant)" ]; then
+		TARGETPLATFORM="$TARGETPLATFORM/$(xx-info variant)"
+	fi
+fi
+# TARGETPLATFORM is also used by xx-info
+export TARGETPLATFORM
 
 build_cli() {
-	[ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
 	(
 		cd "${CLI_DIR}"
 		set -x
 		docker buildx build \
 			--build-arg BUILDKIT_MULTI_PLATFORM=true \
-			--build-arg CGO_ENABLED="${cgo_enabled}" \
+			--build-arg GO_LINKMODE=static \
 			--build-arg DEFAULT_PRODUCT_LICENSE \
 			--build-arg PACKAGER_NAME \
 			--build-arg PLATFORM \
@@ -34,13 +41,11 @@ build_cli() {
 }
 
 build_engine() {
-	[ -d "${ENGINE_DIR:?}/bundles" ] && rm -r "${ENGINE_DIR:?}/bundles"
 	(
 		cd "${ENGINE_DIR}"
 		mkdir -p autogen # FIXME: remove when https://github.com/moby/moby/pull/43431 merged
 		set -x
 		docker buildx build \
-			--build-arg CGO_ENABLED="${cgo_enabled}" \
 			--build-arg CONTAINERD_VERSION \
 			--build-arg DEFAULT_PRODUCT_LICENSE \
 			--build-arg PACKAGER_NAME \
@@ -57,13 +62,11 @@ build_engine() {
 }
 
 build_engine_cross() {
-	[ -d "${ENGINE_DIR:?}/bundles" ] && rm -r "${ENGINE_DIR:?}/bundles"
 	(
 		cd "${ENGINE_DIR}"
 		mkdir -p autogen # FIXME: remove when https://github.com/moby/moby/pull/43431 merged
 		set -x
 		docker buildx build \
-			--build-arg CGO_ENABLED="${cgo_enabled}" \
 			--build-arg CONTAINERD_VERSION \
 			--build-arg CROSS=true \
 			--build-arg DEFAULT_PRODUCT_LICENSE \
@@ -81,7 +84,6 @@ build_engine_cross() {
 }
 
 build_buildx() {
-	[ -d "${BUILDX_DIR:?}/bin" ] && rm -r "${BUILDX_DIR:?}/bin"
 	(
 		cd "${BUILDX_DIR}"
 		set -x
@@ -94,7 +96,6 @@ build_buildx() {
 }
 
 build_compose() {
-	[ -d "${COMPOSE_DIR:?}/bin" ] && rm -r "${COMPOSE_DIR:?}/bin"
 	(
 		cd "${COMPOSE_DIR}"
 		set -x
@@ -104,7 +105,6 @@ build_compose() {
 }
 
 build_scan() {
-	[ -d "${SCAN_DIR:?}/bin" ] && rm -r "${SCAN_DIR:?}/bin"
 	(
 		cd "${SCAN_DIR}"
 		set -x
@@ -114,24 +114,18 @@ build_scan() {
 }
 
 CROSS=true
-if [ "$TARGETOS" = "linux" ] && [ "$CURARCH$CURVARIANT" = "$TARGETARCH$TARGETVARIANT" ]; then
+if [ "$(xx-info march)" = "$(uname -m)" ] && [ "$(xx-info os)" = "linux" ]; then
 	CROSS=false
 fi
 
-echo "UNAME=$(uname -m)"
+xx-info env
 echo "TARGETPLATFORM=${TARGETPLATFORM}"
-echo "CURPLATFORM=${CURPLATFORM}"
 echo "CROSS=${CROSS}"
 echo "CONTAINERD_VERSION=${CONTAINERD_VERSION}"
 
-cgo_enabled=""
-if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then
-	cgo_enabled="0"
-fi
-
-targetPair="${TARGETOS}_${TARGETARCH}"
-if [ -n "$TARGETVARIANT" ]; then
-	targetPair="${targetPair}_${TARGETVARIANT}"
+targetPair="$(xx-info os)_$(xx-info arch)"
+if [ -n "$(xx-info variant)" ]; then
+	targetPair="${targetPair}_$(xx-info variant)"
 fi
 
 buildDir="${CURDIR}/build/${TARGETPLATFORM}"
@@ -144,10 +138,17 @@ buildxBuildDir="${buildDir}/docker-buildx"
 composeBuildDir="${buildDir}/docker-compose"
 scanBuildDir="${buildDir}/docker-scan"
 
+# clean up previous build output dirs
+[ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
+[ -d "${ENGINE_DIR:?}/bundles" ] && rm -r "${ENGINE_DIR:?}/bundles"
+[ -d "${BUILDX_DIR:?}/bin" ] && rm -r "${BUILDX_DIR:?}/bin"
+[ -d "${COMPOSE_DIR:?}/bin" ] && rm -r "${COMPOSE_DIR:?}/bin"
+[ -d "${SCAN_DIR:?}/dist" ] && rm -r "${SCAN_DIR:?}/dist"
+
 # create docker-container builder
 docker buildx inspect | grep -q 'Driver: docker-container' || docker buildx create --use
 
-case ${TARGETOS} in
+case $(xx-info os) in
 	linux)
 		build_cli
 		if [ "$CROSS" = "false" ]; then
@@ -158,7 +159,7 @@ case ${TARGETOS} in
 		build_buildx
 		build_compose
 		# TODO change once we support scan-plugin on other architectures
-		if [ "${TARGETARCH}" = "amd64" ]; then
+		if [ "$(xx-info arch)" = "amd64" ]; then
 			build_scan
 		fi
 		;;
@@ -174,7 +175,7 @@ case ${TARGETOS} in
 		build_buildx
 		build_compose
 		# TODO change once we support scan-plugin on other architectures
-		if [ "${TARGETARCH}" = "amd64" ]; then
+		if [ "$(xx-info arch)" = "amd64" ]; then
 			build_scan
 		fi
 		;;
@@ -185,16 +186,16 @@ esac
 
 # docker CLI
 mkdir -p "${dockerCLIBuildDir}"
-case ${TARGETOS} in
+case $(xx-info os) in
 	linux | darwin)
-		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-* "${dockerCLIBuildDir}/docker"
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"$(xx-info os)"-* "${dockerCLIBuildDir}/docker"
 		;;
 	windows)
-		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-*.exe "${dockerCLIBuildDir}/docker.exe"
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"$(xx-info os)"-*.exe "${dockerCLIBuildDir}/docker.exe"
 		;;
 esac
 # package docker CLI
-case ${TARGETOS} in
+case $(xx-info os) in
 	linux | darwin)
 		(
 			set -x
@@ -212,7 +213,7 @@ esac
 
 # docker, containerd, and runc
 mkdir -p "${dockerBuildDir}"
-case ${TARGETOS} in
+case $(xx-info os) in
 	linux)
 		for f in dockerd docker-init docker-proxy; do
 			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
@@ -233,7 +234,7 @@ case ${TARGETOS} in
 		;;
 esac
 # package docker, containerd, and runc
-case ${TARGETOS} in
+case $(xx-info os) in
 	darwin)
 		(
 			set -x
@@ -257,7 +258,7 @@ case ${TARGETOS} in
 esac
 
 # rootless extras
-case ${TARGETOS} in
+case $(xx-info os) in
 	linux)
 		for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do
 			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
@@ -269,7 +270,7 @@ case ${TARGETOS} in
 esac
 # package rootless extras
 if [ -d "${rootlessExtrasBuildDir}" ]; then
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux)
 			(
 				set -x
@@ -282,7 +283,7 @@ fi
 # buildx
 if [ -d "${BUILDX_DIR}/bin" ]; then
 	mkdir -p "${buildxBuildDir}"
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
 			cp "${BUILDX_DIR}/bin/${targetPair}/buildx" "${buildxBuildDir}/docker-buildx"
 			;;
@@ -291,7 +292,7 @@ if [ -d "${BUILDX_DIR}/bin" ]; then
 			;;
 	esac
 	# package buildx
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
 			(
 				set -x
@@ -311,8 +312,8 @@ fi
 # compose
 if [ -d "${COMPOSE_DIR}/bin" ]; then
 	mkdir -p "${composeBuildDir}"
-	composeTargetPair="${TARGETOS}"
-	case ${TARGETARCH} in
+	composeTargetPair="$(xx-info os)"
+	case $(xx-info arch) in
 		amd64)
 			composeTargetPair="${composeTargetPair}-x86_64"
 			;;
@@ -320,13 +321,13 @@ if [ -d "${COMPOSE_DIR}/bin" ]; then
 			composeTargetPair="${composeTargetPair}-aarch64"
 			;;
 		*)
-			composeTargetPair="${composeTargetPair}-${TARGETARCH}"
+			composeTargetPair="${composeTargetPair}-$(xx-info arch)"
 			;;
 	esac
-	if [ -n "$TARGETVARIANT" ]; then
-		composeTargetPair="${composeTargetPair}${TARGETVARIANT}"
+	if [ -n "$(xx-info variant)" ]; then
+		composeTargetPair="${composeTargetPair}$(xx-info variant)"
 	fi
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
 			cp "${COMPOSE_DIR}/bin/docker-compose-${composeTargetPair}" "${composeBuildDir}/docker-compose"
 			;;
@@ -335,7 +336,7 @@ if [ -d "${COMPOSE_DIR}/bin" ]; then
 			;;
 	esac
 	# package compose
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
 			(
 				set -x
@@ -355,16 +356,16 @@ fi
 # scan
 if [ -d "${SCAN_DIR}/dist" ]; then
 	mkdir -p "${scanBuildDir}"
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
-			cp "${SCAN_DIR}/dist/docker-scan_${TARGETOS}_${TARGETARCH}" "${scanBuildDir}/docker-scan"
+			cp "${SCAN_DIR}/dist/docker-scan_$(xx-info os)_$(xx-info arch)" "${scanBuildDir}/docker-scan"
 			;;
 		windows)
-			cp "${SCAN_DIR}/dist/docker-scan_${TARGETOS}_${TARGETARCH}.exe" "${scanBuildDir}/docker-scan.exe"
+			cp "${SCAN_DIR}/dist/docker-scan_$(xx-info os)_$(xx-info arch).exe" "${scanBuildDir}/docker-scan.exe"
 			;;
 	esac
 	# package compose
-	case ${TARGETOS} in
+	case $(xx-info os) in
 		linux | darwin)
 			(
 				set -x
@@ -383,9 +384,10 @@ fi
 
 # create bundle
 (
+	# bundle is expected to have a tar.gz extension, unlike the other archives, which use .tgz
+	bundlesFilename="bundles-ce-static-$(xx-info os)-$(xx-info arch)$(xx-info variant).tar.gz"
 	set -x
 	cd "${buildDir}"
 	rm -r */
-	# bundle is expected to have a tar.gz extension, unlike the other archives, which use .tgz
-	tar -zvcf "${CURDIR}/build/bundles-ce-static-${TARGETOS}-${BUNDLEARCH}.tar.gz" .
+	tar -zvcf "${CURDIR}/build/${bundlesFilename}" .
 )

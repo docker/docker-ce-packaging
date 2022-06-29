@@ -54,6 +54,10 @@ src/github.com/docker/scan-cli-plugin:
 	git init $@
 	git -C $@ remote add origin "$(DOCKER_SCAN_REPO)"
 
+src/github.com/tonistiigi/xx:
+	$(call title,Init $(XX_REPO))
+	git init $@
+	git -C $@ remote add origin "$(XX_REPO)"
 
 .PHONY: checkout-cli
 checkout-cli: src/github.com/docker/cli
@@ -83,6 +87,11 @@ checkout-scan-cli-plugin: src/github.com/docker/scan-cli-plugin
 .PHONY: checkout
 checkout: checkout-cli checkout-docker checkout-buildx checkout-compose checkout-scan-cli-plugin ## checkout source at the given reference(s)
 
+.PHONY: checkout-xx
+checkout-xx: src/github.com/tonistiigi/xx
+	$(call title,Checkout $(XX_REPO)#$(XX_REF))
+	./scripts/checkout.sh src/github.com/tonistiigi/xx "$(XX_REF)"
+
 .PHONY: clean
 clean: clean-src ## remove build artifacts
 	$(MAKE) -C rpm clean
@@ -101,9 +110,8 @@ centos-% fedora-% rhel-%: checkout ## build rpm packages for the specified distr
 debian-% raspbian-% ubuntu-%: checkout ## build deb packages for the specified distro
 	$(MAKE) -C deb $@
 
-
 .PHONY: static
-static: checkout ## build static package
+static: checkout checkout-xx ## build static package
 	$(MAKE) -C static build
 
 .PHONY: verify
