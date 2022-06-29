@@ -1,12 +1,15 @@
 include ../common.mk
 
-CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
-ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
-BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
-COMPOSE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/compose)
-SCAN_DIR=$(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin)
+CLI_DIR     = $(realpath $(CURDIR)/../src/github.com/docker/cli)
+ENGINE_DIR  = $(realpath $(CURDIR)/../src/github.com/docker/docker)
+BUILDX_DIR  = $(realpath $(CURDIR)/../src/github.com/docker/buildx)
+COMPOSE_DIR = $(realpath $(CURDIR)/../src/github.com/docker/compose)
+SCAN_DIR    = $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin)
 
-STATIC_VERSION=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
+CLI_VERSION        = $(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
+ENGINE_VERSION     = $(shell ./gen-static-ver $(ENGINE_DIR) $(VERSION))
+CONTAINERD_PKG_VER = $(shell ./gen-containerd-ver $(ENGINE_DIR) $(CONTAINERD_VERSION))
+
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
 DIR_TO_HASH:=build/linux
 
@@ -16,8 +19,10 @@ export BUILDX_DIR
 export COMPOSE_DIR
 export SCAN_DIR
 
-export STATIC_VERSION
+export CLI_VERSION
+export ENGINE_VERSION
 export CONTAINERD_VERSION
+export CONTAINERD_PKG_VER
 export RUNC_VERSION
 
 .PHONY: help
