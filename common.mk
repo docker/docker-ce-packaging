@@ -43,6 +43,10 @@ DOCKER_SCAN_REF    ?= v0.17.0
 DOCKER_COMPOSE_REF ?= v2.6.1
 DOCKER_BUILDX_REF  ?= v0.8.2
 
+# XX is used as cross-compilation helper for static bundles
+XX_REPO ?= https://github.com/tonistiigi/xx.git
+XX_REF  ?= v1.1.1
+
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
 VERIFY_PACKAGE_REPO ?= staging
