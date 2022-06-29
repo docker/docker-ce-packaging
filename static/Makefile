@@ -7,8 +7,8 @@ COMPOSE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/compose)
 SCAN_DIR=$(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin)
 
 STATIC_VERSION=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
-HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
-DIR_TO_HASH:=build/linux
+HASH_CMD=docker run -v $(CURDIR):/sum -w /sum alpine sh hash_files
+DIR_TO_HASH:=build
 
 export CLI_DIR
 export ENGINE_DIR
