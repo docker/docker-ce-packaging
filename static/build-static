@@ -22,6 +22,15 @@ fi
 
 source "../scripts/target-platform"
 
+if [ -z "$CONTAINERD_VERSION" ]; then
+	# Select the default version of containerd based on the docker engine source,
+	# which is needed for naming the produced .tgz file. We normalize the value to
+	# always have a "v" prefix.
+	# TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
+	CONTAINERD_VERSION="$(awk -F'=' '$1 == "ARG CONTAINERD_VERSION" {{sub("v","")}; print "v" $2 }' "${ENGINE_DIR}/Dockerfile.windows")"
+	export CONTAINERD_VERSION
+fi
+
 build_cli() {
 	[ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
 	(
@@ -130,6 +139,7 @@ echo "UNAME=$(uname -m)"
 echo "TARGETPLATFORM=${TARGETPLATFORM}"
 echo "CURPLATFORM=${CURPLATFORM}"
 echo "CROSS=${CROSS}"
+echo "CONTAINERD_VERSION=${CONTAINERD_VERSION}"
 
 cgo_enabled=""
 if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then
@@ -143,7 +153,9 @@ fi
 
 buildDir="${CURDIR}/build/${TARGETPLATFORM}"
 
-dockerBuildDir="${buildDir}/docker"
+dockerCLIBuildDir="${buildDir}/docker-cli"
+dockerBuildDir="${buildDir}/docker-engine"
+containerdBuildDir="${buildDir}/containerd"
 rootlessExtrasBuildDir="${buildDir}/docker-rootless-extras"
 buildxBuildDir="${buildDir}/docker-buildx"
 composeBuildDir="${buildDir}/docker-compose"
@@ -188,21 +200,47 @@ esac
 # cleanup
 [ -d "${buildDir}" ] && rm -r "${buildDir}"
 
-# docker
-mkdir -p "${dockerBuildDir}"
+# docker CLI
+mkdir -p "${dockerCLIBuildDir}"
 case ${TARGETOS} in
 	linux | darwin)
-		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-* "${dockerBuildDir}/docker"
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-* "${dockerCLIBuildDir}/docker"
 		;;
 	windows)
-		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-*.exe "${dockerBuildDir}/docker.exe"
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"${TARGETOS}"-*.exe "${dockerCLIBuildDir}/docker.exe"
 		;;
 esac
+# package docker CLI
+case ${TARGETOS} in
+	linux | darwin)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-cli-${STATIC_VERSION}.tgz" docker-cli
+		)
+		;;
+	windows)
+		(
+			cd "${buildDir}"
+			set -x
+			zip -r "docker-cli-${STATIC_VERSION}.zip" docker-cli
+		)
+		;;
+esac
+
+# docker, containerd, and runc
+mkdir -p "${dockerBuildDir}"
 case ${TARGETOS} in
 	linux)
-		for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do
+		for f in dockerd docker-init docker-proxy; do
 			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
 				cp -L "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" "${dockerBuildDir}/$f"
+			fi
+		done
+		# TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
+		mkdir -p "${containerdBuildDir}"
+		for f in containerd ctr containerd-shim containerd-shim-runc-v2 runc; do
+			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
+				cp -L "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" "${containerdBuildDir}/$f"
 			fi
 		done
 		;;
@@ -211,19 +249,26 @@ case ${TARGETOS} in
 		cp "${ENGINE_DIR}"/bundles/"${TARGETPLATFORM}"/docker-proxy-*.exe "${dockerBuildDir}/docker-proxy.exe"
 		;;
 esac
-# package docker
+# package docker, containerd, and runc
 case ${TARGETOS} in
-	linux | darwin)
+	darwin)
 		(
 			set -x
-			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-${STATIC_VERSION}.tgz" docker
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-engine-${STATIC_VERSION}.tgz" docker-engine
+		)
+		;;
+	linux)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-engine-${STATIC_VERSION}.tgz" docker-engine
+			tar -C "${buildDir}" -c -z -f "${buildDir}/containerd-${CONTAINERD_VERSION#v}.tgz" containerd
 		)
 		;;
 	windows)
 		(
 			cd "${buildDir}"
 			set -x
-			zip -r "docker-${STATIC_VERSION}.zip" docker
+			zip -r "docker-engine-${STATIC_VERSION}.zip" docker-engine
 		)
 		;;
 esac
@@ -358,5 +403,6 @@ fi
 	set -x
 	cd "${buildDir}"
 	rm -r */
+	# bundle is expected to have a tar.gz extension, unlike the other archives, which use .tgz
 	tar -zvcf "${CURDIR}/build/bundles-ce-static-${TARGETOS}-${BUNDLEARCH}.tar.gz" .
 )
