@@ -5,8 +5,8 @@ ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
 BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
 
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
-HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
-DIR_TO_HASH:=build/linux
+HASH_CMD=docker run -v $(CURDIR):/sum -w /sum alpine sh hash_files
+DIR_TO_HASH:=build
 DOCKER_CLI_GOLANG_IMG=golang:$(GO_VERSION)
 
 DOCKER_BUILD_OPTS=
