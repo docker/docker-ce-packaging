@@ -17,9 +17,6 @@ if [ -n "$TARGETPLATFORM" ]; then
 				TARGETVARIANT="$(cut -d"/" -f3 <<<"$TARGETPLATFORM")"
 				: "${TARGETVARIANT:=v7}"
 				;;
-			"mips"*)
-				TARGETVARIANT="$(echo $TARGETPLATFORM | cut -d"/" -f3)"
-				;;
 		esac
 	fi
 fi
@@ -27,16 +24,13 @@ fi
 # current arch/variant
 CUROS="linux"
 case "$(uname -m)" in
-	"x86_64")
+	"x86_64" | "amd64")
 		CURARCH="amd64"
 		;;
 	"i386")
 		CURARCH="386"
 		;;
-	"aarch64")
-		CURARCH="arm64"
-		;;
-	"arm64")
+	"aarch64" | "arm64")
 		CURARCH="arm64"
 		;;
 	"armv8l")
@@ -63,18 +57,6 @@ case "$(uname -m)" in
 		;;
 	"s390x")
 		CURARCH="s390x"
-		;;
-	"mips")
-		CURARCH="mips"
-		;;
-	"mipsle")
-		CURARCH="mipsle"
-		;;
-	"mips64")
-		CURARCH="mips64"
-		;;
-	"mips64le")
-		CURARCH="mips64le"
 		;;
 esac
 CURPLATFORM="$CUROS/$CURARCH"
@@ -118,17 +100,5 @@ case "$TARGETARCH$TARGETVARIANT" in
 		;;
 	"s390x")
 		BUNDLEARCH="s390x"
-		;;
-	"mips")
-		BUNDLEARCH="mips"
-		;;
-	"mipsle")
-		BUNDLEARCH="mipsle"
-		;;
-	"mips64")
-		BUNDLEARCH="mips64"
-		;;
-	"mips64le")
-		BUNDLEARCH="mips64le"
 		;;
 esac
