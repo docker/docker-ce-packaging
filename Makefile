@@ -23,7 +23,7 @@ src/github.com/docker/cli:
 	cp -r "$(CLI_DIR)" $@
 else
 src/github.com/docker/cli:
-	git init $@
+	git init --initial-branch=master $@
 	git -C $@ remote add origin "$(DOCKER_CLI_REPO)"
 endif
 
@@ -33,20 +33,20 @@ src/github.com/docker/docker:
 	cp -r "$(ENGINE_DIR)" $@
 else
 src/github.com/docker/docker:
-	git init $@
+	git init --initial-branch=master $@
 	git -C $@ remote add origin "$(DOCKER_ENGINE_REPO)"
 endif
 
 src/github.com/docker/buildx:
-	git init $@
+	git init --initial-branch=master $@
 	git -C $@ remote add origin "$(DOCKER_BUILDX_REPO)"
 
 src/github.com/docker/compose:
-	git init $@
+	git init --initial-branch=master $@
 	git -C $@ remote add origin "$(DOCKER_COMPOSE_REPO)"
 
 src/github.com/docker/scan-cli-plugin:
-	git init $@
+	git init --initial-branch=master $@
 	git -C $@ remote add origin "$(DOCKER_SCAN_REPO)"
 
 
