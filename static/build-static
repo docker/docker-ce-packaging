@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+for varName in CONTAINERD_VERSION DEFAULT_PRODUCT_LICENSE PACKAGER_NAME PLATFORM PRODUCT RUNC_VERSION; do
+	# Prevent empty environment variables from overriding build-arg defaults.
+	# Jenkins may set the variable, but as an empty string.
+	if [ -z "${!varName}" ]; then
+		unset "$varName"
+	fi
+done
+
 source "../scripts/target-platform"
 
 CURDIR="$1"
