@@ -88,10 +88,12 @@ def genStaticStep(LinkedHashMap pkg, String arch) {
                 sh 'env|sort'
             }
             stage("build") {
-                try {
-                    checkout scm
-                    sh "make REF=$branch TARGETPLATFORM=${pkg.os}/${config.targetarch} static"
-                } finally {
+                checkout scm
+                sh "make REF=$branch TARGETPLATFORM=${pkg.os}/${config.targetarch} static"
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'static/build/bundles-*.tar.gz', onlyIfSuccessful: true, fingerprint: true
                     sh "make clean"
                 }
             }
