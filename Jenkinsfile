@@ -72,6 +72,7 @@ def build_package_steps = [
                     checkout scm
                     sh "make REF=$branch DOCKER_BUILD_PKGS='static-linux' static"
                 } finally {
+                    sh "ls -lR static/build"
                     sh "make clean"
                 }
             }
@@ -93,6 +94,7 @@ def build_package_steps = [
                     checkout scm
                     sh "make REF=$branch DOCKER_BUILD_PKGS='cross-mac' static"
                 } finally {
+                    sh "ls -lR static/build"
                     sh "make clean"
                 }
             }
@@ -114,6 +116,7 @@ def build_package_steps = [
                     checkout scm
                     sh "make REF=$branch DOCKER_BUILD_PKGS='cross-win' static"
                 } finally {
+                    sh "ls -lR static/build"
                     sh "make clean"
                 }
             }
