@@ -130,6 +130,6 @@ def genPackageSteps(opts) {
     }
 }
 
-build_package_steps << pkgs.collectEntries { genPackageSteps(it) }
+// build_package_steps << pkgs.collectEntries { genPackageSteps(it) }
 
 parallel(build_package_steps)
