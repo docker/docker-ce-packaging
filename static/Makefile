@@ -1,8 +1,8 @@
 include ../common.mk
 
-CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
-ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
-BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
+CLI_DIR     = $(realpath $(CURDIR)/../src/github.com/docker/cli)
+ENGINE_DIR  = $(realpath $(CURDIR)/../src/github.com/docker/docker)
+BUILDX_DIR  = $(realpath $(CURDIR)/../src/github.com/docker/buildx)
 
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
@@ -40,12 +40,16 @@ static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
 static-linux: static-cli static-engine static-buildx-plugin ## create tgz
+	# docker cli binaries
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
+
+	# docker engine binaries
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
 		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker/$$f; \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
+	$(RM) -r build/linux/docker
 
 	# extra binaries for running rootless
 	mkdir -p build/linux/docker-rootless-extras
@@ -55,8 +59,9 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 		fi \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
+	$(RM) -r build/linux/docker-rootless-extras
 
-	# buildx
+	# docker buildx
 	tar -C $(BUILDX_DIR)/bin -c -z -f build/linux/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
 
 .PHONY: hash_files
@@ -70,32 +75,42 @@ buildx:
 
 .PHONY: cross-mac
 cross-mac: buildx
+	# docker cli binaries
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=darwin/amd64,darwin/arm64 binary
 	dest=$$PWD/build/mac; cd $(CLI_DIR)/build && for platform in *; do \
 		arch=$$(echo $$platform | cut -d_ -f2); \
 		mkdir -p $$dest/$$arch/docker; \
 		cp $$platform/docker-darwin-* $$dest/$$arch/docker/docker && \
 		tar -C $$dest/$$arch -c -z -f $$dest/$$arch/docker-$(GEN_STATIC_VER).tgz docker; \
+		$(RM) -r $$dest/$$arch/docker
 	done
 
 .PHONY: cross-win
 cross-win: cross-win-engine
-	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
+	# docker cli binaries
 	mkdir -p build/win/amd64/docker
+	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
+
+	# docker engine binaries
 	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/dockerd.exe build/win/amd64/docker/dockerd.exe
 	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/docker-proxy.exe build/win/amd64/docker/docker-proxy.exe
 	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
+
+	# clean up temporary directories
+	$(RM) -r build/win/amd64/docker
 
 .PHONY: cross-arm
 cross-arm: cross-all-cli ## create tgz with linux armhf client only
 	mkdir -p build/arm/docker
 	cp $(CLI_DIR)/build/docker-linux-arm build/arm/docker/docker
 	tar -C build/arm -c -z -f build/arm/docker-$(GEN_STATIC_VER).tgz docker
+	$(RM) -r build/arm/docker
 
 .PHONY: static-cli
 static-cli:
+	# TODO(thaJeztah) check if CGO_ENABLED variable is correct here
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=$(TARGETPLATFORM) --set binary.args.CGO_ENABLED=$(CGO_ENABLED) binary
 
 .PHONY: static-engine
