@@ -39,30 +39,31 @@ clean: ## remove build artifacts
 static: static-linux cross-mac cross-win cross-arm ## create all static packages
 
 .PHONY: static-linux
+static-linux: BUILD_DIR=build/linux
 static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	# docker cli binaries
-	mkdir -p build/linux/docker
-	cp $(CLI_DIR)/build/docker build/linux/docker/
+	mkdir -p $(BUILD_DIR)/docker
+	cp $(CLI_DIR)/build/docker $(BUILD_DIR)/docker/
 
 	# docker engine binaries
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
-		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker/$$f; \
+		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f $(BUILD_DIR)/docker/$$f; \
 	done
-	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
-	$(RM) -r build/linux/docker
+	tar -C $(BUILD_DIR) -c -z -f $(BUILD_DIR)/docker-$(GEN_STATIC_VER).tgz docker
+	$(RM) -r $(BUILD_DIR)/docker
 
 	# extra binaries for running rootless
-	mkdir -p build/linux/docker-rootless-extras
+	mkdir -p $(BUILD_DIR)/docker-rootless-extras
 	for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do \
 		if [ -f $(ENGINE_DIR)/bundles/binary-daemon/$$f ]; then \
-			cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker-rootless-extras/$$f; \
+			cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f $(BUILD_DIR)/docker-rootless-extras/$$f; \
 		fi \
 	done
-	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
-	$(RM) -r build/linux/docker-rootless-extras
+	tar -C $(BUILD_DIR) -c -z -f $(BUILD_DIR)/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
+	$(RM) -r $(BUILD_DIR)/docker-rootless-extras
 
 	# docker buildx
-	tar -C $(BUILDX_DIR)/bin -c -z -f build/linux/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
+	tar -C $(BUILDX_DIR)/bin -c -z -f $(BUILD_DIR)/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
 
 .PHONY: hash_files
 hash_files:
@@ -86,27 +87,29 @@ cross-mac: buildx
 	done
 
 .PHONY: cross-win
+cross-win: BUILD_DIR=build/win/amd64
 cross-win: cross-win-engine
 	# docker cli binaries
-	mkdir -p build/win/amd64/docker
+	mkdir -p $(BUILD_DIR)/docker
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
-	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
+	cp $(CLI_DIR)/build/docker-windows-amd64.exe $(BUILD_DIR)/docker/docker.exe
 
 	# docker engine binaries
-	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/dockerd.exe build/win/amd64/docker/dockerd.exe
-	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/docker-proxy.exe build/win/amd64/docker/docker-proxy.exe
-	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
+	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/dockerd.exe $(BUILD_DIR)/docker/dockerd.exe
+	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/docker-proxy.exe $(BUILD_DIR)/docker/docker-proxy.exe
+	docker run --rm -v $(CURDIR)/$(BUILD_DIR):/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 
 	# clean up temporary directories
-	$(RM) -r build/win/amd64/docker
+	$(RM) -r $(BUILD_DIR)/docker
 
 .PHONY: cross-arm
+cross-arm: BUILD_DIR=build/arm
 cross-arm: cross-all-cli ## create tgz with linux armhf client only
-	mkdir -p build/arm/docker
-	cp $(CLI_DIR)/build/docker-linux-arm build/arm/docker/docker
-	tar -C build/arm -c -z -f build/arm/docker-$(GEN_STATIC_VER).tgz docker
-	$(RM) -r build/arm/docker
+	mkdir -p $(BUILD_DIR)/docker
+	cp $(CLI_DIR)/build/docker-linux-arm $(BUILD_DIR)/docker/docker
+	tar -C $(BUILD_DIR) -c -z -f $(BUILD_DIR)/docker-$(GEN_STATIC_VER).tgz docker
+	$(RM) -r $(BUILD_DIR)/docker
 
 .PHONY: static-cli
 static-cli:
