@@ -25,7 +25,8 @@ VERSION?=0.0.1-dev
 # DOCKER_CLI_REPO and DOCKER_ENGINE_REPO define the source repositories to clone
 # the source from. These can be overridden to build from a fork.
 DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
-DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
+#DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
+DOCKER_ENGINE_REPO  ?= https://github.com/crazy-max/moby.git
 DOCKER_SCAN_REPO    ?= https://github.com/docker/scan-cli-plugin.git
 DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
 DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
@@ -38,7 +39,8 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 # For other situations, specify DOCKER_CLI_REF and/or DOCKER_ENGINE_REF separately.
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
-DOCKER_ENGINE_REF  ?= $(REF)
+#DOCKER_ENGINE_REF  ?= $(REF)
+DOCKER_ENGINE_REF  ?= cross
 DOCKER_SCAN_REF    ?= v0.17.0
 DOCKER_COMPOSE_REF ?= v2.6.1
 DOCKER_BUILDX_REF  ?= v0.8.2
