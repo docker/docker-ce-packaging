@@ -45,7 +45,8 @@ DOCKER_BUILDX_REF  ?= v0.8.2
 
 # XX is used as cross-compilation helper for static bundles
 XX_REPO ?= https://github.com/tonistiigi/xx.git
-XX_REF  ?= v1.1.1
+# TODO update to 1.1.2 once https://github.com/tonistiigi/xx/pull/72 is in a release
+XX_REF  ?= 9ef71c72368cf4dfcfaa904f9f59c538cf43abed
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
