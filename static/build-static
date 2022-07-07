@@ -249,7 +249,10 @@ case ${TARGETOS} in
 		(
 			set -x
 			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-engine-${ENGINE_VERSION}.tgz" docker-engine
-			tar -C "${buildDir}" -c -z -f "${buildDir}/containerd-${CONTAINERD_PKG_VER#v}.tgz" containerd
+			if [ "$(ls -A "${containerdBuildDir}")" ]; then
+				# FIXME(thaJeztah) moby cross-compile currently doesn't include containerd binaries
+				tar -C "${buildDir}" -c -z -f "${buildDir}/containerd-${CONTAINERD_PKG_VER#v}.tgz" containerd
+			fi
 		)
 		;;
 	windows)
