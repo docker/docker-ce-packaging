@@ -44,6 +44,9 @@ Recommends: docker-scan-plugin(x86-64)
 BuildRequires: make
 BuildRequires: libtool-ltdl-devel
 BuildRequires: git
+%if 0%{?fedora} > 35 || 0%{?rhel} > 7
+BuildRequires: golang
+%endif
 
 # conflicting packages
 Conflicts: docker
@@ -67,10 +70,15 @@ depending on a particular stack or provider.
 %setup -q -c -n src -a 0
 
 %build
-mkdir -p /go/src/github.com/docker
-rm -f /go/src/github.com/docker/cli
-ln -snf ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
-pushd /go/src/github.com/docker/cli
+go env -w GO111MODULE=off
+export PREFIX=${RPM_BUILD_DIR}
+export TMP_GOPATH="${RPM_BUILD_DIR}/go"
+export GOPATH="${RPM_BUILD_DIR}/go"
+
+mkdir -p ${RPM_BUILD_DIR}/go/src/github.com/docker
+rm -f ${RPM_BUILD_DIR}/go/src/github.com/docker/cli
+ln -snf ${RPM_BUILD_DIR}/src/cli ${RPM_BUILD_DIR}/go/src/github.com/docker/cli
+pushd ${RPM_BUILD_DIR}/go/src/github.com/docker/cli
 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} GO_LINKMODE=dynamic ./scripts/build/binary && DISABLE_WARN_OUTSIDE_CONTAINER=1 make manpages # cli
 popd
 

@@ -20,6 +20,9 @@ Requires: slirp4netns >= 0.4
 Requires: fuse-overlayfs >= 0.7
 
 BuildRequires: bash
+%if 0%{?fedora} > 35 || 0%{?rhel} > 7
+BuildRequires: golang
+%endif
 
 # conflicting packages
 Conflicts: rootlesskit
@@ -35,20 +38,22 @@ Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
 %setup -q -c -n src -a 0
 
 %build
+export TMP_GOPATH="${RPM_BUILD_DIR}/go"
+export PREFIX="${RPM_BUILD_DIR}/go"
 
 export DOCKER_GITCOMMIT=%{_gitcommit_engine}
-mkdir -p /go/src/github.com/docker
-ln -snf ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
-TMP_GOPATH="/go" ${RPM_BUILD_DIR}/src/engine/hack/dockerfile/install/install.sh rootlesskit dynamic
+mkdir -p ${RPM_BUILD_DIR}/go/src/github.com/docker
+ln -snf ${RPM_BUILD_DIR}/src/engine ${RPM_BUILD_DIR}/go/src/github.com/docker/docker
+TMP_GOPATH="${RPM_BUILD_DIR}/go" ${RPM_BUILD_DIR}/src/engine/hack/dockerfile/install/install.sh rootlesskit dynamic
 
 %check
-/usr/local/bin/rootlesskit -v
+${RPM_BUILD_ROOT}%{_bindir}/rootlesskit -v
 
 %install
 install -D -p -m 0755 engine/contrib/dockerd-rootless.sh ${RPM_BUILD_ROOT}%{_bindir}/dockerd-rootless.sh
 install -D -p -m 0755 engine/contrib/dockerd-rootless-setuptool.sh ${RPM_BUILD_ROOT}%{_bindir}/dockerd-rootless-setuptool.sh
-install -D -p -m 0755 /usr/local/bin/rootlesskit ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit
-install -D -p -m 0755 /usr/local/bin/rootlesskit-docker-proxy ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit-docker-proxy
+install -D -p -m 0755 ${RPM_BUILD_DIR}/go/rootlesskit ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit
+install -D -p -m 0755 ${RPM_BUILD_DIR}/go/rootlesskit-docker-proxy ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit-docker-proxy
 
 %files
 %{_bindir}/dockerd-rootless.sh
