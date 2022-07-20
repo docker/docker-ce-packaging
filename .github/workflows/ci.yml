@@ -18,6 +18,9 @@ jobs:
       matrix:
         target:
           - debian-bullseye
+          - ubuntu-jammy
+          - centos-7
+          - fedora-36
     steps:
       -
         name: Checkout
