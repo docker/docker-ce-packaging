@@ -10,7 +10,7 @@ override_dh_builddeb:
 
 override_dh_auto_build:
 	# Build the daemon and dependencies
-	cd /go/src/github.com/docker/docker && DOCKER_GITCOMMIT=$(ENGINE_GITCOMMIT) PRODUCT=docker ./hack/make.sh dynbinary
+	cd /go/src/github.com/docker/docker && GITCOMMIT=$(ENGINE_GITCOMMIT) PRODUCT=docker ./hack/make.sh dynbinary
 	cd /go/src/github.com/docker/docker && TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
 	cd /go/src/github.com/docker/docker && TMP_GOPATH="/go" hack/dockerfile/install/install.sh rootlesskit dynamic
 	# Build the CLI

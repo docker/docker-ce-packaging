@@ -73,9 +73,9 @@ rpmRelease=1
 tilde='~'
 rpmVersion="${rpmVersion//-/$tilde}"
 
-DOCKER_GITCOMMIT=$($GIT_COMMAND rev-parse --short HEAD)
+GITCOMMIT=$($GIT_COMMAND rev-parse --short HEAD)
 if [ -n "$($GIT_COMMAND status --porcelain --untracked-files=no)" ]; then
-	DOCKER_GITCOMMIT="$DOCKER_GITCOMMIT-unsupported"
+	GITCOMMIT="$GITCOMMIT-unsupported"
 fi
 
 # if we have a "-dev" suffix or have change in Git, this is a nightly build, and
@@ -112,4 +112,4 @@ fi
 
 # Replace any remaining dashes with periods
 rpmVersion="${rpmVersion//-/.}"
-echo "$rpmVersion $rpmRelease $DOCKER_GITCOMMIT $origVersion"
+echo "$rpmVersion $rpmRelease $GITCOMMIT $origVersion"

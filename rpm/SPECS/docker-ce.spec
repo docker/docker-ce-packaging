@@ -80,7 +80,7 @@ depending on a particular stack or provider.
 
 %build
 
-export DOCKER_GITCOMMIT=%{_gitcommit_engine}
+export GITCOMMIT=%{_gitcommit_engine}
 mkdir -p /go/src/github.com/docker
 ln -snf ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
 
