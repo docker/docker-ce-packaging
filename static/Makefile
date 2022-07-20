@@ -23,7 +23,7 @@ export STATIC_VERSION
 # Select the default version of containerd based on the docker engine source
 # we need this variable here for naming the produced .tgz file.
 # TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
-CONTAINERD_VERSION?=v$(shell grep "ARG CONTAINERD_VERSION" "$(ENGINE_DIR)/Dockerfile.windows" | awk -F'=' '{print $$2}')
+CONTAINERD_VERSION?=$(shell grep "ARG CONTAINERD_VERSION" "$(ENGINE_DIR)/Dockerfile.windows" | awk -F'=' '{print $$2}')
 
 export CONTAINERD_VERSION
 export RUNC_VERSION
