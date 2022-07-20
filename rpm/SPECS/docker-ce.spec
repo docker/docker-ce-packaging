@@ -84,18 +84,18 @@ export DOCKER_GITCOMMIT=%{_gitcommit_engine}
 mkdir -p /go/src/github.com/docker
 ln -snf ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
 
-pushd ${RPM_BUILD_DIR}/src/engine
+pushd /go/src/github.com/docker/docker
 TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
 VERSION=%{_origversion} PRODUCT=docker hack/make.sh dynbinary
 popd
 
 %check
-ver="$(engine/bundles/dynbinary-daemon/dockerd --version)"; \
+ver="$(engine/bundles/dynbinary/dockerd --version)"; \
     test "$ver" = "Docker version %{_origversion}, build %{_gitcommit_engine}" && echo "PASS: daemon version OK" || (echo "FAIL: daemon version ($ver) did not match" && exit 1)
 
 %install
-install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary-daemon/dockerd) ${RPM_BUILD_ROOT}%{_bindir}/dockerd
-install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary-daemon/docker-proxy) ${RPM_BUILD_ROOT}%{_bindir}/docker-proxy
+install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary/dockerd) ${RPM_BUILD_ROOT}%{_bindir}/dockerd
+install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary/docker-proxy) ${RPM_BUILD_ROOT}%{_bindir}/docker-proxy
 install -D -p -m 0755 /usr/local/bin/docker-init ${RPM_BUILD_ROOT}%{_bindir}/docker-init
 
 # install systemd scripts
