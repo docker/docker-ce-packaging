@@ -16,7 +16,7 @@ BUILDTIME=$(shell date -u -d "@$${SOURCE_DATE_EPOCH:-$$(date +%s)}" --rfc-3339 n
 CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
 DEFAULT_PRODUCT_LICENSE:=Community Engine
 PACKAGER_NAME?=
-DOCKER_GITCOMMIT:=abcdefg
+GITCOMMIT:=abcdefg
 GO_VERSION:=1.18.4
 PLATFORM=Docker Engine - Community
 SHELL:=/bin/bash
@@ -25,7 +25,8 @@ VERSION?=0.0.1-dev
 # DOCKER_CLI_REPO and DOCKER_ENGINE_REPO define the source repositories to clone
 # the source from. These can be overridden to build from a fork.
 DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
-DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
+#DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
+DOCKER_ENGINE_REPO  ?= https://github.com/crazy-max/moby.git
 DOCKER_SCAN_REPO    ?= https://github.com/docker/scan-cli-plugin.git
 DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
 DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
@@ -38,10 +39,15 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 # For other situations, specify DOCKER_CLI_REF and/or DOCKER_ENGINE_REF separately.
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
-DOCKER_ENGINE_REF  ?= $(REF)
+#DOCKER_ENGINE_REF  ?= $(REF)
+DOCKER_ENGINE_REF  ?= cross
 DOCKER_SCAN_REF    ?= v0.17.0
 DOCKER_COMPOSE_REF ?= v2.6.1
 DOCKER_BUILDX_REF  ?= v0.8.2
+
+# XX is used as cross-compilation helper for static bundles
+XX_REPO ?= https://github.com/tonistiigi/xx.git
+XX_REF  ?= v1.1.1
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
@@ -50,7 +56,40 @@ VERIFY_PACKAGE_REPO ?= staging
 # Optional flags like --platform=linux/armhf
 VERIFY_PLATFORM ?=
 
+# Export vars as envs
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
 export PACKAGER_NAME
 export PLATFORM
+export VERSION
+export GO_VERSION
+
+export DOCKER_CLI_REPO
+export DOCKER_ENGINE_REPO
+export DOCKER_SCAN_REPO
+export DOCKER_COMPOSE_REPO
+export DOCKER_BUILDX_REPO
+
+export REF
+export DOCKER_CLI_REF
+export DOCKER_ENGINE_REF
+export DOCKER_SCAN_REF
+export DOCKER_COMPOSE_REF
+export DOCKER_BUILDX_REF
+
+# utilities
+BOLD := $(shell tput -T linux bold)
+RED := $(shell tput -T linux setaf 1)
+GREEN := $(shell tput -T linux setaf 2)
+YELLOW := $(shell tput -T linux setaf 3)
+BLUE := $(shell tput -T linux setaf 4)
+PURPLE := $(shell tput -T linux setaf 5)
+CYAN := $(shell tput -T linux setaf 6)
+
+RESET := $(shell tput -T linux sgr0)
+TITLE := $(BOLD)$(YELLOW)
+SUCCESS := $(BOLD)$(GREEN)
+
+define title
+    @printf '$(TITLE)$(1)$(RESET)\n'
+endef

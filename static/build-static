@@ -1,0 +1,362 @@
+#!/usr/bin/env bash
+set -e
+
+function xx-info() {
+	"$XX_DIR"/base/xx-info "$1"
+}
+
+CURDIR="$1"
+if [ -z "$CURDIR" ]; then
+	# shellcheck disable=SC2016
+	echo 'CURDIR is required. See README.md for usage.'
+	exit 1
+fi
+
+TARGETPLATFORM="$2"
+if [ -z "$TARGETPLATFORM" ]; then
+	TARGETPLATFORM="$(xx-info os)/$(xx-info arch)"
+	if [ -n "$(xx-info variant)" ]; then
+		TARGETPLATFORM="$TARGETPLATFORM/$(xx-info variant)"
+	fi
+fi
+# TARGETPLATFORM is also used by xx-info
+export TARGETPLATFORM
+
+build_cli() {
+	(
+		cd "${CLI_DIR}"
+		set -x
+		docker buildx build \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--build-arg GO_LINKMODE=static \
+			--build-arg DEFAULT_PRODUCT_LICENSE \
+			--build-arg PACKAGER_NAME \
+			--build-arg PLATFORM \
+			--build-arg PRODUCT \
+			--build-arg VERSION="${STATIC_VERSION}" \
+			--output ./build \
+			--platform "${TARGETPLATFORM}" \
+			--target binary .
+	)
+}
+
+build_engine() {
+	(
+		cd "${ENGINE_DIR}"
+		set -x
+		docker buildx build \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--build-arg DOCKER_LINKMODE=static \
+			--build-arg CONTAINERD_VERSION \
+			--build-arg DEFAULT_PRODUCT_LICENSE \
+			--build-arg PACKAGER_NAME \
+			--build-arg PLATFORM \
+			--build-arg PRODUCT \
+			--build-arg VERSION="${STATIC_VERSION}" \
+			--output ./build \
+			--platform "${TARGETPLATFORM}" \
+			--target all .
+	)
+}
+
+build_buildx() {
+	(
+		cd "${BUILDX_DIR}"
+		set -x
+		docker buildx build \
+			--platform "${TARGETPLATFORM}" \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--output "./bin" \
+			--target binaries .
+	)
+}
+
+build_compose() {
+	(
+		cd "${COMPOSE_DIR}"
+		set -x
+		# TODO: Add TARGETPLATFORM support on compose repo to build efficiently with buildx
+		make GIT_TAG="${DOCKER_COMPOSE_REF}" cross
+	)
+}
+
+build_scan() {
+	(
+		cd "${SCAN_DIR}"
+		set -x
+		# TODO: Add TARGETPLATFORM support on scan-cli-plugin repo to build efficiently with --platform
+		make GIT_TAG_NAME="${DOCKER_SCAN_REF}" cross
+	)
+}
+
+xx-info env
+echo "TARGETPLATFORM=${TARGETPLATFORM}"
+echo "CONTAINERD_VERSION=${CONTAINERD_VERSION}"
+
+targetPair="$(xx-info os)_$(xx-info arch)"
+if [ -n "$(xx-info variant)" ]; then
+	targetPair="${targetPair}_$(xx-info variant)"
+fi
+
+buildDir="${CURDIR}/build/${TARGETPLATFORM}"
+
+dockerCLIBuildDir="${buildDir}/docker-cli"
+dockerBuildDir="${buildDir}/docker-engine"
+containerdBuildDir="${buildDir}/containerd"
+rootlessExtrasBuildDir="${buildDir}/docker-rootless-extras"
+buildxBuildDir="${buildDir}/docker-buildx"
+composeBuildDir="${buildDir}/docker-compose"
+scanBuildDir="${buildDir}/docker-scan"
+
+# clean up previous build output dirs
+[ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
+[ -d "${ENGINE_DIR:?}/build" ] && rm -r "${ENGINE_DIR:?}/build"
+[ -d "${BUILDX_DIR:?}/bin" ] && rm -r "${BUILDX_DIR:?}/bin"
+[ -d "${COMPOSE_DIR:?}/bin" ] && rm -r "${COMPOSE_DIR:?}/bin"
+[ -d "${SCAN_DIR:?}/dist" ] && rm -r "${SCAN_DIR:?}/dist"
+
+# create docker-container builder
+docker buildx inspect | grep -q 'Driver: docker-container' || docker buildx create --use
+
+case $(xx-info os) in
+	linux)
+		build_cli
+		build_engine
+		build_buildx
+		build_compose
+		# TODO change once we support scan-plugin on other architectures
+		if [ "$(xx-info arch)" = "amd64" ]; then
+			build_scan
+		fi
+		;;
+	darwin)
+		build_cli
+		build_buildx
+		build_compose
+		build_scan
+		;;
+	windows)
+		build_cli
+		build_engine
+		build_buildx
+		build_compose
+		# TODO change once we support scan-plugin on other architectures
+		if [ "$(xx-info arch)" = "amd64" ]; then
+			build_scan
+		fi
+		;;
+esac
+
+# cleanup
+[ -d "${buildDir}" ] && rm -r "${buildDir}"
+
+# docker CLI
+mkdir -p "${dockerCLIBuildDir}"
+case $(xx-info os) in
+	linux | darwin)
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"$(xx-info os)"-* "${dockerCLIBuildDir}/docker"
+		;;
+	windows)
+		cp "${CLI_DIR}"/build/"${targetPair}"/docker-"$(xx-info os)"-*.exe "${dockerCLIBuildDir}/docker.exe"
+		;;
+esac
+# package docker CLI
+case $(xx-info os) in
+	linux | darwin)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-cli-${STATIC_VERSION}.tgz" docker-cli
+		)
+		;;
+	windows)
+		(
+			cd "${buildDir}"
+			set -x
+			zip -r "docker-cli-${STATIC_VERSION}.zip" docker-cli
+		)
+		;;
+esac
+
+# docker, containerd, and runc
+mkdir -p "${dockerBuildDir}"
+case $(xx-info os) in
+	linux)
+		for f in dockerd docker-init docker-proxy; do
+			if [ -f "${ENGINE_DIR}/build/${targetPair}/$f" ]; then
+				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerBuildDir}/$f"
+			fi
+		done
+		# TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
+		mkdir -p "${containerdBuildDir}"
+		for f in containerd ctr containerd-shim containerd-shim-runc-v2 runc; do
+			if [ -f "${ENGINE_DIR}/build/${targetPair}/$f" ]; then
+				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${containerdBuildDir}/$f"
+			fi
+		done
+		;;
+	windows)
+		for f in dockerd.exe docker-proxy.exe; do
+			if [ -f "${ENGINE_DIR}/build/${targetPair}/$f" ]; then
+				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerBuildDir}/$f"
+			fi
+		done
+		;;
+esac
+# package docker, containerd, and runc
+case $(xx-info os) in
+	darwin)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-engine-${STATIC_VERSION}.tgz" docker-engine
+		)
+		;;
+	linux)
+		(
+			set -x
+			tar -C "${buildDir}" -c -z -f "${buildDir}/docker-engine-${STATIC_VERSION}.tgz" docker-engine
+			tar -C "${buildDir}" -c -z -f "${buildDir}/containerd-${CONTAINERD_VERSION#v}.tgz" containerd
+		)
+		;;
+	windows)
+		(
+			cd "${buildDir}"
+			set -x
+			zip -r "docker-engine-${STATIC_VERSION}.zip" docker-engine
+		)
+		;;
+esac
+
+# rootless extras
+case $(xx-info os) in
+	linux)
+		for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do
+			if [ -f "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" ]; then
+				mkdir -p "${rootlessExtrasBuildDir}"
+				cp -L "${ENGINE_DIR}/bundles/${TARGETPLATFORM}/$f" "${rootlessExtrasBuildDir}/$f"
+			fi
+		done
+		;;
+esac
+# package rootless extras
+if [ -d "${rootlessExtrasBuildDir}" ]; then
+	case $(xx-info os) in
+		linux)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-rootless-extras-${STATIC_VERSION}.tgz" docker-rootless-extras
+			)
+			;;
+	esac
+fi
+
+# buildx
+if [ -d "${BUILDX_DIR}/bin" ]; then
+	mkdir -p "${buildxBuildDir}"
+	case $(xx-info os) in
+		linux | darwin)
+			cp "${BUILDX_DIR}/bin/${targetPair}/buildx" "${buildxBuildDir}/docker-buildx"
+			;;
+		windows)
+			cp "${BUILDX_DIR}/bin/${targetPair}/buildx.exe" "${buildxBuildDir}/docker-buildx.exe"
+			;;
+	esac
+	# package buildx
+	case $(xx-info os) in
+		linux | darwin)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-buildx-plugin-${DOCKER_BUILDX_REF#v}.tgz" docker-buildx
+			)
+			;;
+		windows)
+			(
+				cd "${buildDir}"
+				set -x
+				zip -r "docker-buildx-plugin-${DOCKER_BUILDX_REF#v}.zip" docker-buildx
+			)
+			;;
+	esac
+fi
+
+# compose
+if [ -d "${COMPOSE_DIR}/bin" ]; then
+	mkdir -p "${composeBuildDir}"
+	composeTargetPair="$(xx-info os)"
+	case $(xx-info arch) in
+		amd64)
+			composeTargetPair="${composeTargetPair}-x86_64"
+			;;
+		arm64)
+			composeTargetPair="${composeTargetPair}-aarch64"
+			;;
+		*)
+			composeTargetPair="${composeTargetPair}-$(xx-info arch)"
+			;;
+	esac
+	if [ -n "$(xx-info variant)" ]; then
+		composeTargetPair="${composeTargetPair}$(xx-info variant)"
+	fi
+	case $(xx-info os) in
+		linux | darwin)
+			cp "${COMPOSE_DIR}/bin/docker-compose-${composeTargetPair}" "${composeBuildDir}/docker-compose"
+			;;
+		windows)
+			cp "${COMPOSE_DIR}/bin/docker-compose-${composeTargetPair}.exe" "${composeBuildDir}/docker-compose.exe"
+			;;
+	esac
+	# package compose
+	case $(xx-info os) in
+		linux | darwin)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-compose-plugin-${DOCKER_COMPOSE_REF#v}.tgz" docker-compose
+			)
+			;;
+		windows)
+			(
+				cd "${buildDir}"
+				set -x
+				zip -r "docker-compose-plugin-${DOCKER_COMPOSE_REF#v}.zip" docker-compose
+			)
+			;;
+	esac
+fi
+
+# scan
+if [ -d "${SCAN_DIR}/dist" ]; then
+	mkdir -p "${scanBuildDir}"
+	case $(xx-info os) in
+		linux | darwin)
+			cp "${SCAN_DIR}/dist/docker-scan_$(xx-info os)_$(xx-info arch)" "${scanBuildDir}/docker-scan"
+			;;
+		windows)
+			cp "${SCAN_DIR}/dist/docker-scan_$(xx-info os)_$(xx-info arch).exe" "${scanBuildDir}/docker-scan.exe"
+			;;
+	esac
+	# package compose
+	case $(xx-info os) in
+		linux | darwin)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-scan-plugin-${DOCKER_SCAN_REF#v}.tgz" docker-scan
+			)
+			;;
+		windows)
+			(
+				cd "${buildDir}"
+				set -x
+				zip -r "docker-scan-plugin-${DOCKER_SCAN_REF#v}.zip" docker-scan
+			)
+			;;
+	esac
+fi
+
+# create bundle
+(
+	# bundle is expected to have a tar.gz extension, unlike the other archives, which use .tgz
+	bundlesFilename="bundles-ce-static-$(xx-info os)-$(xx-info arch)$(xx-info variant).tar.gz"
+	set -x
+	cd "${buildDir}"
+	rm -r */
+	tar -zvcf "${CURDIR}/build/${bundlesFilename}" .
+)
