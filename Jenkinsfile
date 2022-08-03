@@ -8,7 +8,6 @@ def pkgs = [
     [target: "centos-9",                 image: "quay.io/centos/centos:stream9",          arches: ["amd64", "aarch64"]],
     [target: "debian-buster",            image: "debian:buster",                          arches: ["amd64", "aarch64", "armhf"]], // Debian 10 (EOL: 2024)
     [target: "debian-bullseye",          image: "debian:bullseye",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 11 (Next stable)
-    [target: "fedora-34",                image: "fedora:34",                              arches: ["amd64", "aarch64"]],          // EOL: May 17, 2022
     [target: "fedora-35",                image: "fedora:35",                              arches: ["amd64", "aarch64"]],          // EOL: November 30, 2022
     [target: "fedora-36",                image: "fedora:36",                              arches: ["amd64", "aarch64"]],          // EOL: May 24, 2023
     [target: "raspbian-buster",          image: "balenalib/rpi-raspbian:buster",          arches: ["armhf"]],                     // Debian/Raspbian 10 (EOL: 2024)
