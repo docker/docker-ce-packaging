@@ -125,6 +125,13 @@ function verify_rpm() {
 	# install all non-source packages
 	(
 		set -x
+		product_version=$(source /etc/os-release; echo "${REDHAT_SUPPORT_PRODUCT_VERSION:-}")
+		if [ "$product_version" = 'rawhide' ]; then
+				# force $releasever to account for Fedora pre-release images, as they
+				# may still be using "rawhide", which is not present on our package
+				# repositories on download.docker.com.
+				export DNF_VAR_releasever="$DIST_VERSION"
+		fi
 		${pkg_manager} install -y ${packages}
 	)
 
