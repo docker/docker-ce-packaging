@@ -102,7 +102,7 @@ function verify_rpm() {
 	if dnf --version; then
 		pkg_manager="dnf"
 		pkg_config_manager="dnf config-manager"
-		dnf clean all && dnf upgrade -y
+		dnf clean all
 		${pkg_manager} install -y 'dnf-command(config-manager)'
 	fi
 
