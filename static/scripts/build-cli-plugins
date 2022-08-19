@@ -7,6 +7,11 @@ shopt -s globstar
 # /plugins should be volume mounted from root plugins dir
 # /out should also be volume mounted from static/out/
 for installer in /plugins/*.installer; do
+	if [ "${installer##*/}" = "app.installer" ] && [ "$GOOS" = "darwin" ]; then
+		# skip building docker-app on macOS, because it's deprecated, and the
+		# vendored version of golang.org/x/sys is incompatible with go1.18 and up.
+		continue
+	fi
 	bash "${installer}" build
 	DESTDIR='/out' PREFIX="/" bash "${installer}" install_plugin
 done
