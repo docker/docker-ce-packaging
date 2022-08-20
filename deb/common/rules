@@ -19,12 +19,10 @@ override_dh_auto_build:
 		LDFLAGS='' DISABLE_WARN_OUTSIDE_CONTAINER=1 make VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) dynbinary manpages
 
 	# Build the compose plugin
-	# FIXME: using GOPROXY, to work around:
-	# go: github.com/Azure/azure-sdk-for-go@v48.2.0+incompatible: reading github.com/Azure/azure-sdk-for-go/go.mod at revision v48.2.0: unknown revision v48.2.0
 	cd /go/src/github.com/docker/compose \
-	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on go mod download \
+	&& GO111MODULE=on go mod download \
 	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
-	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on \
+	&& GO111MODULE=on \
 		CGO_ENABLED=0 \
 			go build \
 				-trimpath \
