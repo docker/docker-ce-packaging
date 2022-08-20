@@ -7,11 +7,7 @@ FROM ${GO_IMAGE} AS golang
 
 FROM ${BUILD_IMAGE}
 
-# Using goproxy instead of "direct" to work around an issue in go mod
-# not working with older git versions (default version on CentOS 7 is
-# git 1.8), see https://github.com/golang/go/issues/38373, and
-# https://github.com/docker/docker-ce-packaging/pull/631#issuecomment-1059363763
-ENV GOPROXY=https://proxy.golang.org
+ENV GOPROXY=https://proxy.golang.org|direct
 ENV GO111MODULE=off
 ENV GOPATH=/go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
