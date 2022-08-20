@@ -16,7 +16,7 @@ RUN if  [ "$(dpkg-divert --truename /usr/bin/man)" = "/usr/bin/man.REAL" ]; then
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y curl devscripts equivs git
 
-ENV GOPROXY=direct
+ENV GOPROXY=https://proxy.golang.org|direct
 ENV GO111MODULE=off
 ENV GOPATH /go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
