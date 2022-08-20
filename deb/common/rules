@@ -24,8 +24,13 @@ override_dh_auto_build:
 	cd /go/src/github.com/docker/compose \
 	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on go mod download \
 	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
-	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on GIT_TAG=$(COMPOSE_VERSION) \
-		make COMPOSE_BINARY=/usr/libexec/docker/cli-plugins/docker-compose -f builder.Makefile compose-plugin
+	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on \
+		CGO_ENABLED=0 \
+			go build \
+				-trimpath \
+				-ldflags="-s -w -X github.com/docker/compose/v2/internal.Version=$(COMPOSE_VERSION)" \
+				-o "/usr/libexec/docker/cli-plugins/docker-compose" \
+				./cmd
 
 	# Build the scan-plugin
 	# TODO change once we support scan-plugin on other architectures
