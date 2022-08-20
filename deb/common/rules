@@ -22,12 +22,10 @@ override_dh_auto_build:
 	&& CGO_ENABLED=0 GO111MODULE=on go build -mod=vendor -o /usr/libexec/docker/cli-plugins/docker-buildx -ldflags "-X github.com/docker/buildx/version.Version=$(BUILDX_VERSION) -X github.com/docker/buildx/version.Revision=$(git rev-parse HEAD) -X github.com/docker/buildx/version.Package=github.com/docker/buildx" ./cmd/buildx
 
 	# Build the compose plugin
-	# FIXME: using GOPROXY, to work around:
-	# go: github.com/Azure/azure-sdk-for-go@v48.2.0+incompatible: reading github.com/Azure/azure-sdk-for-go/go.mod at revision v48.2.0: unknown revision v48.2.0
 	cd /go/src/github.com/docker/compose \
-	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on go mod download \
+	&& GO111MODULE=on go mod download \
 	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
-	&& GOPROXY="https://proxy.golang.org" GO111MODULE=on \
+	&& GO111MODULE=on \
 		CGO_ENABLED=0 \
 			go build \
 				-trimpath \

@@ -35,10 +35,8 @@ Docker Compose V1 ('docker-compose').
 
 %build
 pushd ${RPM_BUILD_DIR}/src/compose
-    # FIXME: using GOPROXY, to work around:
-    # go: github.com/Azure/azure-sdk-for-go@v48.2.0+incompatible: reading github.com/Azure/azure-sdk-for-go/go.mod at revision v48.2.0: unknown revision v48.2.0
-    GOPROXY="https://proxy.golang.org" GO111MODULE=on go mod download
-    GOPROXY="https://proxy.golang.org" GO111MODULE=on \
+    GO111MODULE=on go mod download
+    GO111MODULE=on \
     CGO_ENABLED=0 \
         go build \
             -trimpath \
