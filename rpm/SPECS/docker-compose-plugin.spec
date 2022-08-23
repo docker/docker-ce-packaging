@@ -27,14 +27,7 @@ Docker Compose V1 ('docker-compose').
 
 %build
 pushd ${RPM_BUILD_DIR}/src/compose
-    GO111MODULE=on go mod download
-    GO111MODULE=on \
-    CGO_ENABLED=0 \
-        go build \
-            -trimpath \
-            -ldflags="-s -w -X github.com/docker/compose/v2/internal.Version=%{_compose_version}" \
-            -o "bin/docker-compose" \
-            ./cmd
+    make VERSION=%{_compose_version} DESTDIR=./bin build
 popd
 
 %check
