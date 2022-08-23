@@ -25,6 +25,20 @@ function verify() {
 	fi
 }
 
+function verify_binaries() {
+	docker --version
+	if [ "$(uname -m)" = "x86_64" ]; then
+		# FIXME this tries to connect to the docker daemon, which isn't started
+		# docker scan --accept-license --version;
+		docker scan --help
+	fi
+	docker buildx version
+	docker compose version
+	dockerd --version
+	containerd --version
+	runc --version
+}
+
 function verify_deb() {
 	# First install prerequisites for our script and dpkg and apt to run correctly.
 	# This list SHOULD NOT include dependencies of docker itself, otherwise we would
@@ -83,14 +97,8 @@ function verify_deb() {
 		# shellcheck disable=SC2086
 		apt-get -y install --no-install-recommends --no-upgrade --fix-broken ${packages}
 	)
-	docker --version
-	# FIXME this tries to connect to the docker daemon, which isn't started
-	#if [ "$(uname -m)" = "x86_64" ]; then
-	#	docker scan --accept-license --version;
-	#fi
-	dockerd --version
-	containerd --version
-	runc --version
+
+	verify_binaries
 }
 
 function verify_rpm() {
@@ -135,15 +143,7 @@ function verify_rpm() {
 		${pkg_manager} install -y ${packages}
 	)
 
-	docker --version
-	# FIXME this tries to connect to the docker daemon, which isn't started
-	#if [ "$(uname -m)" = "x86_64" ]; then
-	#	docker scan --accept-license --version;
-	#fi
-	dockerd --version
-	containerd --version
-	runc --version
-
+	verify_binaries
 }
 
 verify
