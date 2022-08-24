@@ -10,6 +10,7 @@ GEN_SCAN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/do
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
 SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
+BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
@@ -38,6 +39,7 @@ RPMBUILD_FLAGS?=-ba\
 	--define '_origversion $(word 4, $(GEN_RPM_VER))' \
 	--define '_buildx_rpm_version $(word 1,$(GEN_BUILDX_RPM_VER))' \
 	--define '_buildx_version $(word 4,$(GEN_BUILDX_RPM_VER))' \
+	--define '_buildx_gitcommit $(BUILDX_GITCOMMIT)' \
 	--define '_compose_rpm_version $(word 1,$(GEN_COMPOSE_RPM_VER))' \
 	--define '_compose_version $(word 4,$(GEN_COMPOSE_RPM_VER))' \
 	--define '_scan_rpm_version $(word 1,$(GEN_SCAN_RPM_VER))' \
