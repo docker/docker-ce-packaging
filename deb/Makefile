@@ -9,6 +9,7 @@ GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 GEN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
 EPOCH?=5
 SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
+BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
@@ -34,6 +35,7 @@ RUN?=docker run --rm \
 	-e CLI_GITCOMMIT=$(CLI_GITCOMMIT) \
 	-e ENGINE_GITCOMMIT=$(ENGINE_GITCOMMIT) \
 	-e BUILDX_VERSION=$(DOCKER_BUILDX_REF) \
+	-e BUILDX_GITCOMMIT=$(BUILDX_GITCOMMIT) \
 	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
 	-e SCAN_VERSION=$(DOCKER_SCAN_REF) \
 	-e SCAN_GITCOMMIT=$(SCAN_GITCOMMIT) \
