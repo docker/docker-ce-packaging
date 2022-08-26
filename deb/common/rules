@@ -19,7 +19,14 @@ override_dh_auto_build:
 	# Build buildx plugin
 	cd /go/src/github.com/docker/buildx \
 	&& mkdir -p /usr/libexec/docker/cli-plugins/ \
-	&& CGO_ENABLED=0 GO111MODULE=on go build -mod=vendor -o /usr/libexec/docker/cli-plugins/docker-buildx -ldflags "-X github.com/docker/buildx/version.Version=$(BUILDX_VERSION) -X github.com/docker/buildx/version.Revision=$(git rev-parse HEAD) -X github.com/docker/buildx/version.Package=github.com/docker/buildx" ./cmd/buildx
+	&& GO111MODULE=on \
+		CGO_ENABLED=0 \
+			go build \
+				-mod=vendor \
+				-trimpath \
+				-ldflags "-X github.com/docker/buildx/version.Version=$(BUILDX_VERSION) -X github.com/docker/buildx/version.Revision=$(BUILDX_GITCOMMIT) -X github.com/docker/buildx/version.Package=github.com/docker/buildx" \
+				-o "/usr/libexec/docker/cli-plugins/docker-buildx" \
+				./cmd/buildx
 
 	# Build the compose plugin
 	cd /go/src/github.com/docker/compose \

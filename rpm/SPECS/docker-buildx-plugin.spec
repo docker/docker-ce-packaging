@@ -22,7 +22,14 @@ Docker Buildx plugin for the Docker CLI.
 
 %build
 pushd ${RPM_BUILD_DIR}/src/buildx
-bash -c 'CGO_ENABLED=0 GO111MODULE=on go build -mod=vendor -o bin/docker-buildx -ldflags "-X github.com/docker/buildx/version.Version=%{_buildx_version} -X github.com/docker/buildx/version.Revision=%{_buildx_gitcommit} -X github.com/docker/buildx/version.Package=github.com/docker/buildx" ./cmd/buildx'
+	GO111MODULE=on \
+	CGO_ENABLED=0 \
+		go build \
+			-mod=vendor \
+			-trimpath \
+			-ldflags="-X github.com/docker/buildx/version.Version=%{_buildx_version} -X github.com/docker/buildx/version.Revision=%{_buildx_gitcommit} -X github.com/docker/buildx/version.Package=github.com/docker/buildx" \
+			-o "bin/docker-buildx" \
+			./cmd/buildx
 popd
 
 %check
