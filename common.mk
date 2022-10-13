@@ -39,7 +39,7 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
-DOCKER_SCAN_REF    ?= v0.17.0
+DOCKER_SCAN_REF    ?= v0.21.0
 DOCKER_COMPOSE_REF ?= v2.11.2
 DOCKER_BUILDX_REF  ?= v0.9.1
 
