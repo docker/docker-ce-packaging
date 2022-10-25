@@ -16,6 +16,7 @@ def pkgs = [
     [target: "ubuntu-bionic",            image: "ubuntu:bionic",                          arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 18.04 LTS (End of support: April, 2023. EOL: April, 2028)
     [target: "ubuntu-focal",             image: "ubuntu:focal",                           arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 20.04 LTS (End of support: April, 2025. EOL: April, 2030)
     [target: "ubuntu-jammy",             image: "ubuntu:jammy",                           arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 22.04 LTS (End of support: April, 2027. EOL: April, 2032)
+    [target: "ubuntu-kinetic",           image: "ubuntu:kinetic",                         arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 22.10 (EOL: July, 2023)
 ]
 
 def genBuildStep(LinkedHashMap pkg, String arch) {
