@@ -43,6 +43,11 @@ DOCKER_SCAN_REF    ?= v0.22.0
 DOCKER_COMPOSE_REF ?= v2.13.0
 DOCKER_BUILDX_REF  ?= v0.9.1
 
+# XX is used as cross-compilation helper for static bundles
+XX_REPO ?= https://github.com/tonistiigi/xx.git
+# TODO update to 1.1.2 once https://github.com/tonistiigi/xx/pull/72 is in a release
+XX_REF  ?= 9ef71c72368cf4dfcfaa904f9f59c538cf43abed
+
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
 VERIFY_PACKAGE_REPO ?= staging
@@ -50,7 +55,40 @@ VERIFY_PACKAGE_REPO ?= staging
 # Optional flags like --platform=linux/armhf
 VERIFY_PLATFORM ?=
 
+# Export vars as envs
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
 export PACKAGER_NAME
 export PLATFORM
+export VERSION
+export GO_VERSION
+
+export DOCKER_CLI_REPO
+export DOCKER_ENGINE_REPO
+export DOCKER_SCAN_REPO
+export DOCKER_COMPOSE_REPO
+export DOCKER_BUILDX_REPO
+
+export REF
+export DOCKER_CLI_REF
+export DOCKER_ENGINE_REF
+export DOCKER_SCAN_REF
+export DOCKER_COMPOSE_REF
+export DOCKER_BUILDX_REF
+
+# utilities
+BOLD := $(shell tput -T linux bold)
+RED := $(shell tput -T linux setaf 1)
+GREEN := $(shell tput -T linux setaf 2)
+YELLOW := $(shell tput -T linux setaf 3)
+BLUE := $(shell tput -T linux setaf 4)
+PURPLE := $(shell tput -T linux setaf 5)
+CYAN := $(shell tput -T linux setaf 6)
+
+RESET := $(shell tput -T linux sgr0)
+TITLE := $(BOLD)$(YELLOW)
+SUCCESS := $(BOLD)$(GREEN)
+
+define title
+    @printf '$(TITLE)$(1)$(RESET)\n'
+endef
