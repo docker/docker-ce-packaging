@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+: "${TARGETPLATFORM=}"
+: "${TARGETOS=}"
+: "${TARGETARCH=}"
+: "${TARGETVARIANT=}"
+
+# get TARGETOS/TARGETARCH/TARGETVARIANT from TARGETPLATFORM
+if [ -n "$TARGETPLATFORM" ]; then
+	os="$(cut -d"/" -f1 <<<"$TARGETPLATFORM")"
+	arch="$(cut -d"/" -f2 <<<"$TARGETPLATFORM")"
+	if [ -n "$os" ] && [ -n "$arch" ]; then
+		TARGETOS="$os"
+		TARGETARCH="$arch"
+		case "$arch" in
+			"arm")
+				TARGETVARIANT="$(cut -d"/" -f3 <<<"$TARGETPLATFORM")"
+				: "${TARGETVARIANT:=v7}"
+				;;
+		esac
+	fi
+fi
+
+# current arch/variant
+CUROS="linux"
+case "$(uname -m)" in
+	"x86_64" | "amd64")
+		CURARCH="amd64"
+		;;
+	"i386")
+		CURARCH="386"
+		;;
+	"aarch64" | "arm64")
+		CURARCH="arm64"
+		;;
+	"armv8l")
+		CURARCH="arm"
+		CURVARIANT="v8"
+		;;
+	"armv7l")
+		CURARCH="arm"
+		CURVARIANT="v7"
+		;;
+	"armv6l")
+		CURARCH="arm"
+		CURVARIANT="v6"
+		;;
+	"armv5l")
+		CURARCH="arm"
+		CURVARIANT="v5"
+		;;
+	"riscv64")
+		CURARCH="riscv64"
+		;;
+	"ppc64le")
+		CURARCH="ppc64le"
+		;;
+	"s390x")
+		CURARCH="s390x"
+		;;
+esac
+CURPLATFORM="$CUROS/$CURARCH"
+if [ -n "$CURVARIANT" ]; then
+	CURPLATFORM="$CURPLATFORM/$CURVARIANT"
+fi
+
+# use current arch if empty
+if [ -z "$TARGETARCH" ]; then
+	TARGETOS="linux"
+	TARGETARCH="$CURARCH"
+	TARGETPLATFORM="$TARGETOS/$TARGETARCH"
+	if [ -n "$CURVARIANT" ]; then
+		TARGETVARIANT="$CURVARIANT"
+		TARGETPLATFORM="$TARGETPLATFORM/$TARGETVARIANT"
+	fi
+fi
+
+# bundle arch
+case "$TARGETARCH$TARGETVARIANT" in
+	"amd64")
+		BUNDLEARCH="x86_64"
+		;;
+	"386")
+		BUNDLEARCH="i386"
+		;;
+	"arm64")
+		BUNDLEARCH="aarch64"
+		;;
+	"armv7")
+		BUNDLEARCH="armhf"
+		;;
+	"armv6")
+		BUNDLEARCH="armel"
+		;;
+	"riscv64")
+		BUNDLEARCH="riscv64"
+		;;
+	"ppc64le")
+		BUNDLEARCH="ppc64le"
+		;;
+	"s390x")
+		BUNDLEARCH="s390x"
+		;;
+esac

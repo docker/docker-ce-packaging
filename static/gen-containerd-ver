@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+engine_dir="$1"
+# containerd_pkg_version is used to name the containerd-<version>.tgz file.
+containerd_pkg_version="$2"
+
+if [ -z "${containerd_pkg_version}" ]; then
+	# If no custom version is set for containerd, we select the default version of
+	# containerd based on the docker engine source.
+	# which is needed for naming the produced .tgz file.
+	# TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
+	awk -F'=' '$1 == "ARG CONTAINERD_VERSION" {{sub("v","")}; print $2 }' "${engine_dir}/Dockerfile.windows"
+else
+	echo "${containerd_pkg_version#v}"
+fi
