@@ -32,22 +32,32 @@ Docker Scan plugin for the Docker CLI.
 
 %build
 pushd ${RPM_BUILD_DIR}/src/scan-cli-plugin
-bash -c 'TAG_NAME="%{_scan_version}" COMMIT="%{_scan_gitcommit}" PLATFORM_BINARY=docker-scan make native-build'
+    bash -c 'TAG_NAME="%{_scan_version}" COMMIT="%{_scan_gitcommit}" PLATFORM_BINARY=docker-scan make native-build'
 popd
 
+for f in LICENSE MAINTAINERS NOTICE README.md; do
+    install -D -p -m 0644 "${RPM_BUILD_DIR}/src/scan-cli-plugin/$f" "scan-cli-plugin-docs/$f"
+done
 
 %check
 # FIXME: --version currently doesn't work as it makes a connection to the daemon, so using the plugin metadata instead
 #${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-scan scan --accept-license --version
 ver="$(${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-scan docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $1 == "Version" { print $2 }')"; \
-	test "$ver" = "%{_scan_version}" && echo "PASS: docker-scan version OK" || (echo "FAIL: docker-scan version ($ver) did not match" && exit 1)
+    test "$ver" = "%{_scan_version}" && echo "PASS: docker-scan version OK" || (echo "FAIL: docker-scan version ($ver) did not match" && exit 1)
 
 %install
 pushd ${RPM_BUILD_DIR}/src/scan-cli-plugin
-install -D -p -m 0755 bin/docker-scan ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-scan
+    install -D -p -m 0755 bin/docker-scan ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-scan
 popd
 
+for f in AUTHORS LICENSE MAINTAINERS NOTICE README.md SECURITY.md; do
+    install -D -p -m 0644 "${RPM_BUILD_DIR}/src/scan-cli-plugin/$f" "scan-cli-plugin-docs/$f"
+done
+
 %files
+%doc scan-cli-plugin-docs/*
+%license scan-cli-plugin-docs/LICENSE
+%license scan-cli-plugin-docs/NOTICE
 %{_libexecdir}/docker/cli-plugins/docker-scan
 
 %post
