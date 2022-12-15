@@ -104,7 +104,7 @@ static-engine:
 
 .PHONY: static-buildx-plugin
 static-buildx-plugin:
-	cd $(BUILDX_DIR) && docker buildx bake --set binaries.platform=$(TARGETPLATFORM) binaries && mv ./bin/buildx ./bin/docker-buildx
+	cd $(BUILDX_DIR) && docker buildx bake --set binaries.platform=$(TARGETPLATFORM) binaries && mv ./bin/build/buildx ./bin/docker-buildx
 
 .PHONY: cross-all-cli
 cross-all-cli:
