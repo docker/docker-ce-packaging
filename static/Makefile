@@ -9,20 +9,17 @@ HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
 DIR_TO_HASH:=build/linux
 DOCKER_CLI_GOLANG_IMG=golang:$(GO_VERSION)
 
-DOCKER_BUILD_OPTS=
+BAKE_SET_FLAGS=
 
 ifneq ($(strip $(CONTAINERD_VERSION)),)
 # Set custom build-args to override the containerd version to build for static
-# packages. The Dockerfile for 20.10 and earlier used CONTAINERD_COMMIT, later
-# versions use CONTAINERD_VERSION. We can remove CONTAINERD_VERSION once 20.10.x
-# reaches EOL.
-DOCKER_BUILD_OPTS +=--build-arg=CONTAINERD_VERSION=$(CONTAINERD_VERSION)
-DOCKER_BUILD_OPTS +=--build-arg=CONTAINERD_COMMIT=$(CONTAINERD_VERSION)
+# packages.
+BAKE_SET_FLAGS +=--set *.args.CONTAINERD_VERSION=$(CONTAINERD_VERSION)
 endif
 
 ifneq ($(strip $(RUNC_VERSION)),)
 # Set custom build-args to override the runc version to build for static packages.
-DOCKER_BUILD_OPTS +=--build-arg=RUNC_VERSION=$(RUNC_VERSION)
+BAKE_SET_FLAGS +=--set *.args.RUNC_VERSION=$(RUNC_VERSION)
 endif
 
 .PHONY: help
@@ -43,15 +40,15 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	mkdir -p build/linux/docker
 	cp $(CLI_DIR)/build/docker build/linux/docker/
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
-		cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker/$$f; \
+		cp -L $(ENGINE_DIR)/bundles/binary/$$f build/linux/docker/$$f; \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
 
 	# extra binaries for running rootless
 	mkdir -p build/linux/docker-rootless-extras
 	for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do \
-		if [ -f $(ENGINE_DIR)/bundles/binary-daemon/$$f ]; then \
-			cp -L $(ENGINE_DIR)/bundles/binary-daemon/$$f build/linux/docker-rootless-extras/$$f; \
+		if [ -f $(ENGINE_DIR)/bundles/binary/$$f ]; then \
+			cp -L $(ENGINE_DIR)/bundles/binary/$$f build/linux/docker-rootless-extras/$$f; \
 		fi \
 	done
 	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
@@ -83,8 +80,8 @@ cross-win: cross-win-engine
 	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/amd64 binary
 	mkdir -p build/win/amd64/docker
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
-	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/dockerd.exe build/win/amd64/docker/dockerd.exe
-	cp $(ENGINE_DIR)/bundles/cross/windows/amd64-daemon/docker-proxy.exe build/win/amd64/docker/docker-proxy.exe
+	cp $(ENGINE_DIR)/bundles/binary/dockerd.exe build/win/amd64/docker/dockerd.exe
+	cp $(ENGINE_DIR)/bundles/binary/docker-proxy.exe build/win/amd64/docker/docker-proxy.exe
 	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 
@@ -100,7 +97,7 @@ static-cli:
 
 .PHONY: static-engine
 static-engine:
-	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" binary
+	cd $(ENGINE_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake all $(BAKE_SET_FLAGS)
 
 .PHONY: static-buildx-plugin
 static-buildx-plugin:
@@ -112,4 +109,4 @@ cross-all-cli:
 
 .PHONY: cross-win-engine
 cross-win-engine:
-	$(MAKE) -C $(ENGINE_DIR) VERSION=$(GEN_STATIC_VER) DOCKER_CROSSPLATFORMS=windows/amd64 DOCKER_BUILD_OPTS="$(DOCKER_BUILD_OPTS)" cross
+	cd $(ENGINE_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake binary --set binary.platform=windows/amd64 $(BAKE_SET_FLAGS)
