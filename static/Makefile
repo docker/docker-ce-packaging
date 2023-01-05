@@ -13,11 +13,8 @@ DOCKER_BUILD_OPTS=
 
 ifneq ($(strip $(CONTAINERD_VERSION)),)
 # Set custom build-args to override the containerd version to build for static
-# packages. The Dockerfile for 20.10 and earlier used CONTAINERD_COMMIT, later
-# versions use CONTAINERD_VERSION. We can remove CONTAINERD_VERSION once 20.10.x
-# reaches EOL.
+# packages.
 DOCKER_BUILD_OPTS +=--build-arg=CONTAINERD_VERSION=$(CONTAINERD_VERSION)
-DOCKER_BUILD_OPTS +=--build-arg=CONTAINERD_COMMIT=$(CONTAINERD_VERSION)
 endif
 
 ifneq ($(strip $(RUNC_VERSION)),)
