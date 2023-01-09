@@ -23,10 +23,14 @@ RUN if [ -f /etc/yum.repos.d/CentOS-Sources.repo ]; then sed -i 's/altarch/cento
 RUN yum install -y rpm-build rpmlint
 
 # Install Linux kernel headers for btrfs support.
-# See https://github.com/moby/moby/pull/44761 and https://github.com/moby/moby/pull/44762
-RUN rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org \
- && yum install -y https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm \
- && yum --enablerepo=elrepo-kernel install -y kernel-lt-headers
+# See https://github.com/moby/moby/pull/44761 and https://github.com/moby/moby/pull/44762,
+# See https://www.kernel.org/doc/Documentation/kbuild/headers_install.txt
+RUN yum install -y make gcc \
+ && curl -fsSL -O https://github.com/torvalds/linux/archive/refs/tags/v4.12.tar.gz \
+ && tar -xvzf ./v4.12.tar.gz \
+ && rm v4.12.tar.gz \
+ && cd linux-4.12/ \
+ && make headers_install ARCH=arm64 INSTALL_HDR_PATH=/usr
 
 COPY SPECS /root/rpmbuild/SPECS
 
