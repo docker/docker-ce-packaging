@@ -21,6 +21,13 @@ ENV SUITE=${SUITE}
 # failing, so replace the URL.
 RUN if [ -f /etc/yum.repos.d/CentOS-Sources.repo ]; then sed -i 's/altarch/centos/g' /etc/yum.repos.d/CentOS-Sources.repo; fi
 RUN yum install -y rpm-build rpmlint
+
+# Install Linux kernel headers for btrfs support.
+# See https://github.com/moby/moby/pull/44761 and https://github.com/moby/moby/pull/44762
+RUN rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org \
+ && yum install -y https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm \
+ && yum --enablerepo=elrepo-kernel install -y kernel-lt-headers
+
 COPY SPECS /root/rpmbuild/SPECS
 
 # TODO change once we support scan-plugin on other architectures
