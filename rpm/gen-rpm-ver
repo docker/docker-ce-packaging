@@ -37,11 +37,11 @@ rpmVersion="${VERSION#v}"
 # Assuming all tagged version of rpmRelease correspond with an upstream release,
 # this means that versioning is as follows:
 #
-# Docker 22.06.0:         version=22.06.0, release=1
-# Docker 22.06.0-alpha.1: version=22.06.0, release=1
-# Docker 22.06.0-beta.1:  version=22.06.0, release=1
-# Docker 22.06.0-rc.1:    version=22.06.0, release=1
-# Docker 22.06.0-dev:     version=0.0.0~YYYYMMDDHHMMSS.gitHASH, release=0
+# Docker 23.0.0:         version=23.0.0, release=1
+# Docker 23.0.0-alpha.1: version=23.0.0, release=1
+# Docker 23.0.0-beta.1:  version=23.0.0, release=1
+# Docker 23.0.0-rc.1:    version=23.0.0, release=1
+# Docker 23.0.0-dev:     version=0.0.0~YYYYMMDDHHMMSS.gitHASH, release=0
 rpmRelease=1
 
 # rpm packages require a tilde (~) instead of a hyphen (-) as separator between
