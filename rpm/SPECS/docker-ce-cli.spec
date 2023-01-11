@@ -65,9 +65,7 @@ popd
 # Build all associated plugins
 pushd ${RPM_BUILD_DIR}/src/plugins
 for installer in *.installer; do
-    if [ "${installer}" != "scan.installer" ]; then
-        bash ${installer} build
-    fi
+    bash ${installer} build
 done
 popd
 
@@ -84,11 +82,9 @@ install -p -m 755 cli/build/docker ${RPM_BUILD_ROOT}%{_bindir}/docker
 # install plugins
 pushd ${RPM_BUILD_DIR}/src/plugins
 for installer in *.installer; do
-    if [ "${installer}" != "scan.installer" ]; then
-        DESTDIR=${RPM_BUILD_ROOT} \
-        PREFIX=%{_libexecdir}/docker/cli-plugins \
-        bash ${installer} install_plugin
-    fi
+    DESTDIR=${RPM_BUILD_ROOT} \
+    PREFIX=%{_libexecdir}/docker/cli-plugins \
+    bash ${installer} install_plugin
 done
 popd
 
