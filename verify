@@ -35,7 +35,14 @@ function verify_binaries() {
 	docker buildx version
 	docker compose version
 	dockerd --version
+	docker-proxy --version
 	containerd --version
+	ctr --version
+	# containerd-shim v1.6.x does not have a -v flag.
+	# TODO(thaJeztah): use -v once we switch to containerd 1.7 (see https://github.com/containerd/containerd/pull/6495)
+	containerd-shim --help
+	containerd-shim-runc-v1 -v
+	containerd-shim-runc-v2 -v
 	runc --version
 }
 
