@@ -43,8 +43,6 @@ debSource="$(awk -F ': ' '$1 == "Source" { print $2; exit }' debian/control)"
 debMaintainer="$(awk -F ': ' '$1 == "Maintainer" { print $2; exit }' debian/control)"
 debDate="$(date --rfc-2822)"
 
-versionID="$(. /etc/os-release && echo "$VERSION_ID")"
-
 # Include an extra `.0` in the version, in case we ever would have to re-build an
 # already published release with a packaging-only change.
 pkgRevision=0
@@ -76,7 +74,7 @@ pkgRevision=0
 # docker-ce_22.10.6~beta.0-0~debian.11.0~bullseye_amd64.deb
 # docker-ce_22.10.6~beta.0-0~ubuntu.22.04.0~jammy_amd64.deb
 cat > "debian/changelog" <<-EOF
-$debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}-0~${DISTRO}.${versionID}.${pkgRevision}~${SUITE}) $SUITE; urgency=low
+$debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}-0~${DISTRO}.${VERSION_ID}.${pkgRevision}~${SUITE}) $SUITE; urgency=low
   * Version: $VERSION
  -- $debMaintainer  $debDate
 EOF
