@@ -2,6 +2,9 @@
 
 VERSION ?= $(shell cat engine/VERSION)
 TARGET_ARCH = $(shell dpkg-architecture -qDEB_TARGET_ARCH)
+# TODO(thaJeztah): allow passing this version when building.
+PKG_REVISION ?= 1
+export PKG_REVISION
 
 # force packages to be built with xz compression, as Ubuntu 21.10 and up use
 # zstd compression, which is non-standard, and breaks 'dpkg-sig --verify'
