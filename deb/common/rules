@@ -112,7 +112,7 @@ override_dh_install:
 override_dh_gencontrol:
 	# Use separate version for the compose-plugin package, then generate the other control files as usual
 	# TODO override "Source" field in control as well (to point to compose, as it doesn't match the package name)
-	dh_gencontrol -pdocker-compose-plugin -- -v$${COMPOSE_DEB_VERSION#v}~$${DISTRO}-$${SUITE}
+	dh_gencontrol -pdocker-compose-plugin -- -v$${COMPOSE_DEB_VERSION#v}-$${PKG_REVISION}~$${DISTRO}.$${VERSION_ID}-$${SUITE}
 
 	# Use separate version for the scan-plugin package, then generate the other control files as usual
 	# TODO override "Source" field in control as well (to point to scan-cli-plugin, as it doesn't match the package name)
