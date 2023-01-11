@@ -5,6 +5,8 @@ GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 EPOCH?=5
 GEN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
+GEN_COMPOSE_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/compose) "$(DOCKER_COMPOSE_REF)")
+GEN_SCAN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) "$(DOCKER_SCAN_REF)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
 SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
@@ -33,7 +35,9 @@ RUN?=docker run --rm \
 	-e CLI_GITCOMMIT=$(CLI_GITCOMMIT) \
 	-e ENGINE_GITCOMMIT=$(ENGINE_GITCOMMIT) \
 	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
+	-e COMPOSE_DEB_VERSION=$(word 1, $(GEN_COMPOSE_DEB_VER)) \
 	-e SCAN_VERSION=$(DOCKER_SCAN_REF) \
+	-e SCAN_DEB_VERSION=$(word 1, $(GEN_SCAN_DEB_VER)) \
 	-e SCAN_GITCOMMIT=$(SCAN_GITCOMMIT) \
 	-v $(CURDIR)/debbuild/$@:/build \
 	$(RUN_FLAGS) \
