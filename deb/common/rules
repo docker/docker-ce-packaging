@@ -124,7 +124,7 @@ override_dh_gencontrol:
 	# TODO override "Source" field in control as well (to point to scan-cli-plugin, as it doesn't match the package name)
 	# TODO change once we support scan-plugin on other architectures (see dpkg-architecture -L)
 	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
-		dh_gencontrol -pdocker-scan-plugin -- -v$${SCAN_DEB_VERSION#v}~$${DISTRO}-$${SUITE}; \
+		dh_gencontrol -pdocker-scan-plugin -- -v$${SCAN_DEB_VERSION#v}-$${PKG_REVISION}~$${DISTRO}.$${VERSION_ID}~$${SUITE}; \
 	fi
 	dh_gencontrol --remaining-packages
 
