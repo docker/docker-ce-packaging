@@ -52,7 +52,7 @@ pkgRevision=0
 # Resulting packages are formatted as;
 #
 # - name of the package (e.g., "docker-ce")
-# - version (e.g., "22.10.6~beta.0")
+# - version (e.g., "23.0.0~beta.0")
 # - "-0" (mostly "best practice", and allows updating for specific situations)
 # - distro (e.g., "ubuntu")
 # - VERSION_ID (e.g. "22.04" or "11") this must be "sortable" to make sure that
@@ -71,8 +71,8 @@ pkgRevision=0
 #
 # Examples:
 #
-# docker-ce_22.10.6~beta.0-0~debian.11.0~bullseye_amd64.deb
-# docker-ce_22.10.6~beta.0-0~ubuntu.22.04.0~jammy_amd64.deb
+# docker-ce_23.0.0~beta.0-0~debian.11.0~bullseye_amd64.deb
+# docker-ce_23.0.0~beta.0-0~ubuntu.22.04.0~jammy_amd64.deb
 cat > "debian/changelog" <<-EOF
 $debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}-0~${DISTRO}.${VERSION_ID}.${pkgRevision}~${SUITE}) $SUITE; urgency=low
   * Version: $VERSION
