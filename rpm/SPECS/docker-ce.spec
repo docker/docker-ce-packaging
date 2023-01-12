@@ -1,10 +1,5 @@
 %global debug_package %{nil}
 
-# BTRFS is enabled by default, but can be disabled by defining _without_btrfs
-%if %{undefined _with_btrfs} && %{undefined _without_btrfs}
-%define _with_btrfs 1
-%endif
-
 Name: docker-ce
 Version: %{_version}
 Release: %{_release}%{?dist}
@@ -33,7 +28,6 @@ Requires: tar
 Requires: xz
 
 BuildRequires: bash
-%{?_with_btrfs:BuildRequires: btrfs-progs-devel}
 BuildRequires: ca-certificates
 BuildRequires: cmake
 BuildRequires: device-mapper-devel

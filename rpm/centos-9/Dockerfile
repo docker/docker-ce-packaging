@@ -30,10 +30,10 @@ COPY SPECS /root/rpmbuild/SPECS
 # TODO change once we support scan-plugin on other architectures
 RUN \
   if [ "$(uname -m)" = "x86_64" ]; then \
-    dnf builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/*.spec; \
+    dnf builddep -y /root/rpmbuild/SPECS/*.spec; \
   else \
-    dnf builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/docker-c*.spec; \
-    dnf builddep --define '_without_btrfs 1' -y /root/rpmbuild/SPECS/docker-b*.spec; \
+    dnf builddep -y /root/rpmbuild/SPECS/docker-c*.spec; \
+    dnf builddep -y /root/rpmbuild/SPECS/docker-b*.spec; \
   fi
 
 COPY --from=golang /usr/local/go /usr/local/go

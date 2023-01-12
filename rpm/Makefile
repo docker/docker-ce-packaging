@@ -85,9 +85,6 @@ rpm: fedora centos ## build all rpm packages
 .PHONY: fedora
 fedora: $(FEDORA_RELEASES) ## build all fedora rpm packages
 
-.PHONY: centos-8 centos-9
-centos-8 centos-9: RPMBUILD_EXTRA_FLAGS=--define '_without_btrfs 1'
-
 .PHONY: centos
 centos: $(CENTOS_RELEASES) ## build all centos rpm packages
 
