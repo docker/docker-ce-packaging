@@ -1,6 +1,7 @@
 ARG GO_IMAGE
 ARG DISTRO=debian
 ARG SUITE=bullseye
+ARG VERSION_ID=11
 ARG BUILD_IMAGE=${DISTRO}:${SUITE}
 
 FROM ${GO_IMAGE} AS golang
@@ -25,8 +26,10 @@ RUN apt-get update \
 COPY sources/ /sources
 ARG DISTRO
 ARG SUITE
+ARG VERSION_ID
 ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
+ENV VERSION_ID=${VERSION_ID}
 
 COPY --from=golang /usr/local/go /usr/local/go
 
