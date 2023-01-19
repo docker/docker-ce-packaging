@@ -42,7 +42,12 @@ rpmVersion="${VERSION#v}"
 # Docker 22.06.0-beta.1:  version=22.06.0, release=1
 # Docker 22.06.0-rc.1:    version=22.06.0, release=1
 # Docker 22.06.0-dev:     version=0.0.0~YYYYMMDDHHMMSS.gitHASH, release=0
-rpmRelease=1
+# rpmRelease=1
+
+# Note: on the 20.10 branch, continue using "3" as default, which was removed in
+#       commit 8a720b28a5d0db8fc93423cca79ca21b9b69f1f1. 23.0.0 and up use "1"
+#       as default.
+rpmRelease=3
 
 # rpm packages require a tilde (~) instead of a hyphen (-) as separator between
 # the version # and pre-release suffixes, otherwise pre-releases are sorted AFTER

@@ -40,8 +40,11 @@ debSource="$(awk -F ': ' '$1 == "Source" { print $2; exit }' debian/control)"
 debMaintainer="$(awk -F ': ' '$1 == "Maintainer" { print $2; exit }' debian/control)"
 debDate="$(date --rfc-2822)"
 
+# Note: on the 20.10 branch, we preserve the "~3" suffix that was removed in
+#       commit 8a720b28a5d0db8fc93423cca79ca21b9b69f1f1, and continue using the
+#       old version scheme for docker-ce, docker-ce-cli, and docker-rootless-extras.
 cat > "debian/changelog" <<-EOF
-$debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}-0~${DISTRO}-${SUITE}) $SUITE; urgency=low
+$debSource (${EPOCH}${EPOCH_SEP}${DEB_VERSION}~3-0~${DISTRO}-${SUITE}) $SUITE; urgency=low
   * Version: $VERSION
  -- $debMaintainer  $debDate
 EOF
