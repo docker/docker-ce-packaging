@@ -137,7 +137,8 @@ fi
 buildDir="${CURDIR}/build/${TARGETPLATFORM}"
 
 dockerCLIBuildDir="${buildDir}/docker-cli"
-dockerBuildDir="${buildDir}/docker-engine"
+dockerEngineBuildDir="${buildDir}/docker-engine"
+dockerBuildDir="${buildDir}/docker"
 containerdBuildDir="${buildDir}/containerd"
 rootlessExtrasBuildDir="${buildDir}/docker-rootless-extras"
 buildxBuildDir="${buildDir}/docker-buildx"
@@ -195,12 +196,12 @@ case ${TARGETOS} in
 esac
 
 # docker, containerd, and runc
-mkdir -p "${dockerBuildDir}"
+mkdir -p "${dockerEngineBuildDir}"
 case ${TARGETOS} in
 	linux)
 		for f in dockerd docker-init docker-proxy; do
 			if [ -f "${ENGINE_DIR}/build/${targetPair}/$f" ]; then
-				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerBuildDir}/$f"
+				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerEngineBuildDir}/$f"
 			fi
 		done
 		# TODO containerd binaries should be built as part of containerd-packaging, not as part of docker/docker-ce-packaging
@@ -214,7 +215,7 @@ case ${TARGETOS} in
 	windows)
 		for f in dockerd.exe docker-proxy.exe; do
 			if [ -f "${ENGINE_DIR}/build/${targetPair}/$f" ]; then
-				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerBuildDir}/$f"
+				cp -L "${ENGINE_DIR}/build/${targetPair}/$f" "${dockerEngineBuildDir}/$f"
 			fi
 		done
 		;;
@@ -242,6 +243,34 @@ case ${TARGETOS} in
 		)
 		;;
 esac
+
+# docker CLI + docker engine
+# TODO: for backward compat keep a copy of the old docker.tgz for now
+mkdir -p "${dockerBuildDir}"
+if [ "$(ls -A "${dockerCLIBuildDir}")" ]; then
+	cp "${dockerCLIBuildDir}"/* "${dockerBuildDir}/"
+fi
+if [ "$(ls -A "${dockerEngineBuildDir}")" ]; then
+	cp "${dockerEngineBuildDir}"/* "${dockerBuildDir}/"
+fi
+# package docker
+if [ "$(ls -A "${dockerBuildDir}")" ]; then
+	case ${TARGETOS} in
+		linux | darwin)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-${GEN_STATIC_VER}.tgz" docker
+			)
+			;;
+		windows)
+			(
+				cd "${buildDir}"
+				set -x
+				zip -r "docker-${GEN_STATIC_VER}.zip" docker
+			)
+			;;
+	esac
+fi
 
 # rootless extras
 case ${TARGETOS} in
