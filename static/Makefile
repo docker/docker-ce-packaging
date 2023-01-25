@@ -45,7 +45,7 @@ create_builder: # create docker-container builder
 
 .PHONY: build
 build: create_builder ## build static package
-	CURDIR=$(CURDIR) TARGETPLATFORM=$(TARGETPLATFORM) ./build-static
+	CURDIR=$(CURDIR) STATICOS=$(STATICOS) STATICARCH=$(STATICARCH) ./build-static
 
 .PHONY: hash_files
 hash_files: ## hash files

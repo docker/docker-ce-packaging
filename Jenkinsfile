@@ -19,9 +19,9 @@ def pkgs = [
 ]
 
 def statics = [
-    [os: "linux",   arches: ["amd64", "armv6", "armv7", "aarch64"]],
-    [os: "darwin",  arches: ["amd64", "aarch64"]],
-    [os: "windows", arches: ["amd64"]],
+    [os: "linux",   arches: ["x86_64", "armel", "armhf", "aarch64"]],
+    [os: "darwin",  arches: ["x86_64", "aarch64"]],
+    [os: "windows", arches: ["x86_64"]],
 ]
 
 def genPkgStep(LinkedHashMap pkg, String arch) {
@@ -64,12 +64,12 @@ def genPkgSteps(opts) {
 
 def genStaticStep(LinkedHashMap pkg, String arch) {
     def config = [
-        amd64:   [label: "x86_64",  targetarch: "amd64"],
-        aarch64: [label: "aarch64", targetarch: "arm64"],
-        armv6:   [label: "aarch64", targetarch: "arm/v6"],
-        armv7:   [label: "aarch64", targetarch: "arm/v7"],
-        ppc64le: [label: "ppc64le", targetarch: "ppc64le"],
-        s390x  : [label: "s390x",   targetarch: "s390x"],
+        x86_64:  [label: "x86_64"],
+        aarch64: [label: "aarch64"],
+        armel:   [label: "aarch64"],
+        armhf:   [label: "aarch64"],
+        ppc64le: [label: "ppc64le"],
+        s390x  : [label: "s390x"],
     ][arch]
     def nodeLabel = "linux&&${config.label}"
     if (config.label == 'x86_64') {
@@ -91,7 +91,7 @@ def genStaticStep(LinkedHashMap pkg, String arch) {
             stage("build") {
                 try {
                     checkout scm
-                    sh "make REF=$branch TARGETPLATFORM=${pkg.os}/${config.targetarch} static"
+                    sh "make REF=$branch STATICOS=${pkg.os} STATICARCH=${arch} static"
                 } finally {
                     sh "make clean"
                 }

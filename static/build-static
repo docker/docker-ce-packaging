@@ -2,6 +2,8 @@
 set -e
 
 : "${CURDIR=}"
+: "${STATICOS=}"
+: "${STATICARCH=}"
 : "${TARGETPLATFORM=}"
 : "${TARGETOS=}"
 : "${TARGETARCH=}"
@@ -12,37 +14,63 @@ if [ -z "$CURDIR" ]; then
 	echo 'CURDIR is required. See README.md for usage.'
 	exit 1
 fi
-
-# break up TARGETPLATFORM
-if [ -n "$TARGETPLATFORM" ]; then
-  os="$(echo "$TARGETPLATFORM" | cut -d"/" -f1)"
-  arch="$(echo "$TARGETPLATFORM" | cut -d"/" -f2)"
-  if [ -n "$os" ] && [ -n "$arch" ]; then
-    TARGETOS="$os"
-    TARGETARCH="$arch"
-    case "$arch" in
-      "arm")
-        case "$(echo "$TARGETPLATFORM" | cut -d"/" -f3)" in
-          "v5")
-            TARGETVARIANT="v5"
-            ;;
-          "v6")
-            TARGETVARIANT="v6"
-            ;;
-          "v8")
-            TARGETVARIANT="v8"
-            ;;
-          *)
-            TARGETVARIANT="v7"
-            ;;
-        esac
-        ;;
-      "mips"*)
-        TARGETVARIANT="$(echo "$TARGETPLATFORM" | cut -d"/" -f3)"
-        ;;
-    esac
-  fi
+if [[ -z "$STATICOS" ]] || [[ -z "$STATICARCH" ]]; then
+	# shellcheck disable=SC2016
+	echo 'STATICOS and STATICARCH are required. See README.md for usage.'
+	exit 1
 fi
+
+# TODO: remove this once we support TARGETPLATFORM in download.docker.com folder structure
+TARGETOS="$STATICOS"
+# STATICARCH reverse lookup for compat with TARGETPLATFORM
+case "$STATICARCH" in
+	"x86_64")
+		TARGETARCH="amd64"
+		;;
+	"i386")
+		TARGETARCH="386"
+		;;
+	"aarch64")
+		TARGETARCH="arm64"
+		;;
+	"armhf")
+		TARGETARCH="arm"
+		TARGETVARIANT="v7"
+		;;
+	"armel")
+		TARGETARCH="arm"
+		TARGETVARIANT="v6"
+		;;
+#	"armel")
+#		TARGETARCH="arm"
+#		TARGETVARIANT="v5"
+#		;;
+	"riscv64")
+		TARGETARCH="riscv64"
+		;;
+	"ppc64le")
+		TARGETARCH="ppc64le"
+		;;
+	"s390x")
+		TARGETARCH="s390x"
+		;;
+	"mips")
+		TARGETARCH="mips"
+		;;
+	"mipsle")
+		TARGETARCH="mipsle"
+		;;
+	"mips64")
+		TARGETARCH="mips64"
+		;;
+	"mips64le")
+		TARGETARCH="mips64le"
+		;;
+	*)
+		TARGETARCH="$STATICARCH"
+		;;
+esac
+TARGETPLATFORM="${TARGETOS}/${TARGETARCH}${TARGETVARIANT:+/${TARGETVARIANT}}"
 
 build_cli() {
 	(
@@ -270,7 +298,7 @@ fi
 # create bundle
 (
 	# bundle is expected to have a tar.gz extension, unlike the other archives, which use .tgz
-	bundlesFilename="bundles-ce-static-${TARGETOS}-${TARGETARCH}${TARGETVARIANT}.tar.gz"
+	bundlesFilename="bundles-ce-static-${STATICOS}-${STATICARCH}.tar.gz"
 	set -x
 	cd "${buildDir}"
 	rm -r */

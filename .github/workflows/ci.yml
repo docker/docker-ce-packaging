@@ -35,20 +35,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm/v6
-          - linux/arm/v7
-          - linux/arm64
-          - darwin/amd64
-          - darwin/arm64
-          - windows/amd64
+        include:
+          - os: linux
+            arch: x86_64
+          - os: linux
+            arch: armel
+          - os: linux
+            arch: armhf
+          - os: linux
+            arch: aarch64
+          - os: darwin
+            arch: x86_64
+          - os: darwin
+            arch: aarch64
+          - os: windows
+            arch: x86_64
     steps:
-      -
-        name: Prepare
-        run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
       -
         name: Checkout
         uses: actions/checkout@v3
@@ -58,7 +60,7 @@ jobs:
       -
         name: Build
         run: |
-          make TARGETPLATFORM=${{ matrix.platform }} static
+          make STATICOS=${{ matrix.os }} STATICARCH=${{ matrix.arch }} static
       -
         name: List files
         run: |
@@ -67,7 +69,7 @@ jobs:
         name: Upload static bundle
         uses: actions/upload-artifact@v3
         with:
-          name: static-${{ env.PLATFORM_PAIR }}
+          name: static-${{ matrix.os }}-${{ matrix.arch }}
           path: static/build/*.tar.gz
           if-no-files-found: error
           retention-days: 2

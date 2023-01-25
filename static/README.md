@@ -3,15 +3,14 @@
 Static packages can be built from root directory with the following syntax
 
 ```console
-make TARGETPLATFORM=${TARGETOS}/${TARGETARCH}/${TARGETVARIANT} static
+make STATICOS=${STATICOS} STATICOS=${STATICARCH} static
 ```
 
-Format of `TARGETOS`, `TARGETARCH`, `TARGETVARIANT` is the same as the [platform ARGs in the global scope](https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope)
-for a Dockerfile like `linux/arm/v7`.
+Format of `STATICOS`, `STATICARCH` should respect the current folder structure on
+[download.docker.com](https://download-stage.docker.com/linux/static/stable/) like
+`STATICOS=linux STATICARCH=armhf`.
 
-Artifacts will be located in `build` under the following directory structure:
-`build/$os/$arch/$variant/` or `build/$os/$arch/` if there is no variant being
-used.
+Artifacts will be located in `build` under `build/$STATICOS/$STATICARCH/`.
 
 ### Building from local source
 
@@ -22,7 +21,7 @@ building packages
 * `CLI_DIR` -> Specifies the directory where the cli code is located, eg: `$GOPATH/src/github.com/docker/cli`
 
 ```shell
-make ENGINE_DIR=/path/to/engine CLI_DIR=/path/to/cli TARGETPLATFORM=linux/amd64 static
+make ENGINE_DIR=/path/to/engine CLI_DIR=/path/to/cli STATICOS=linux STATICARCH=x86_64 static
 ```
 
 ## Supported platforms
@@ -30,13 +29,13 @@ make ENGINE_DIR=/path/to/engine CLI_DIR=/path/to/cli TARGETPLATFORM=linux/amd64 
 Here is a list of platforms that are currently supported:
 
 ```console
-make TARGETPLATFORM=linux/amd64 static
-make TARGETPLATFORM=linux/arm/v6 static
-make TARGETPLATFORM=linux/arm/v7 static
-make TARGETPLATFORM=linux/arm64 static
-make TARGETPLATFORM=darwin/amd64 static
-make TARGETPLATFORM=darwin/arm64 static
-make TARGETPLATFORM=windows/amd64 static
+make STATICOS=linux STATICARCH=x86_64 static
+make STATICOS=linux STATICARCH=armel static
+make STATICOS=linux STATICARCH=armhf static
+make STATICOS=linux STATICARCH=aarch64 static
+make STATICOS=darwin STATICARCH=x86_64 static
+make STATICOS=darwin STATICARCH=aarch64 static
+make STATICOS=windows STATICARCH=x86_64 static
 ```
 
 > note: `darwin` only packages the docker cli and plugins.
@@ -44,12 +43,6 @@ make TARGETPLATFORM=windows/amd64 static
 But you can test building against whatever platform you want like:
 
 ```console
-make TARGETPLATFORM=linux/riscv64 static
-make TARGETPLATFORM=linux/s390x static
-```
-
-Or the current one matching your host if not defined:
-
-```console
-make static
+make STATICOS=linux STATICARCH=riscv64 static
+make STATICOS=linux STATICARCH=s390x static
 ```
