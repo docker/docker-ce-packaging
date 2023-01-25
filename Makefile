@@ -92,11 +92,8 @@ debian-% raspbian-% ubuntu-%: checkout ## build deb packages for the specified d
 	$(MAKE) -C deb VERSION=$(VERSION) GO_VERSION=$(GO_VERSION) $@
 
 .PHONY: static
-static: DOCKER_BUILD_PKGS:=static-linux cross-mac cross-win cross-arm
-static: checkout ## build static-compiled packages
-	for p in $(DOCKER_BUILD_PKGS); do \
-		$(MAKE) -C $@ VERSION=$(VERSION) GO_VERSION=$(GO_VERSION) TARGETPLATFORM=$(TARGETPLATFORM) CONTAINERD_VERSION=$(CONTAINERD_VERSION) RUNC_VERSION=$(RUNC_VERSION) $${p}; \
-	done
+static: checkout ## build static package
+	$(MAKE) -C static build
 
 .PHONY: verify
 verify: ## verify installation of packages
