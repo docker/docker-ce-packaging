@@ -48,9 +48,9 @@ RUN?=docker run --rm \
 	$(RUN_FLAGS) \
 	debbuild-$@/$(ARCH)
 
-DEBIAN_VERSIONS ?= debian-buster debian-bullseye
+DEBIAN_VERSIONS ?= debian-buster debian-bullseye debian-bookworm
 UBUNTU_VERSIONS ?= ubuntu-bionic ubuntu-focal ubuntu-jammy ubuntu-kinetic
-RASPBIAN_VERSIONS ?= raspbian-buster raspbian-bullseye
+RASPBIAN_VERSIONS ?= raspbian-buster raspbian-bullseye raspbian-bookworm
 DISTROS := $(DEBIAN_VERSIONS) $(UBUNTU_VERSIONS) $(RASPBIAN_VERSIONS)
 
 .PHONY: help
