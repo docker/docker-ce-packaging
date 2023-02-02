@@ -44,6 +44,10 @@ jobs:
             arch: armhf
           - os: linux
             arch: aarch64
+          - os: linux
+            arch: ppc64le
+          - os: linux
+            arch: s390x
           - os: darwin
             arch: x86_64
           - os: darwin

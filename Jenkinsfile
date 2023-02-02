@@ -19,7 +19,7 @@ def pkgs = [
 ]
 
 def statics = [
-    [os: "linux",   arches: ["x86_64", "armel", "armhf", "aarch64"]],
+    [os: "linux",   arches: ["x86_64", "armel", "armhf", "aarch64", "ppc64le", "s390x"]],
     [os: "darwin",  arches: ["x86_64", "aarch64"]],
     [os: "windows", arches: ["x86_64"]],
 ]
@@ -68,8 +68,8 @@ def genStaticStep(LinkedHashMap pkg, String arch) {
         aarch64: [label: "aarch64"],
         armel:   [label: "aarch64"],
         armhf:   [label: "aarch64"],
-        ppc64le: [label: "ppc64le"],
-        s390x  : [label: "s390x"],
+        ppc64le: [label: "x86_64"],
+        s390x  : [label: "x86_64"],
     ][arch]
     def nodeLabel = "linux&&${config.label}"
     if (config.label == 'x86_64') {
