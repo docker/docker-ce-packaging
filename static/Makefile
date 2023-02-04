@@ -3,6 +3,7 @@ include ../common.mk
 CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
 ENGINE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/docker)
 BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
+COMPOSE_DIR=$(realpath $(CURDIR)/../src/github.com/docker/compose)
 
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
@@ -17,6 +18,7 @@ RUNC_VERSION?=$(shell grep "ARG RUNC_VERSION" "$(ENGINE_DIR)/Dockerfile" | awk -
 export CLI_DIR
 export ENGINE_DIR
 export BUILDX_DIR
+export COMPOSE_DIR
 export GEN_STATIC_VER
 export CONTAINERD_VERSION
 export RUNC_VERSION
@@ -25,8 +27,8 @@ export REF
 export DOCKER_CLI_REF
 export DOCKER_ENGINE_REF
 export DOCKER_SCAN_REF
-export DOCKER_COMPOSE_REF
 export DOCKER_BUILDX_REF
+export DOCKER_COMPOSE_REF
 
 export GO_VERSION
 

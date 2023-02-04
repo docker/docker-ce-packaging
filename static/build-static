@@ -125,6 +125,19 @@ build_buildx() {
 	)
 }
 
+build_compose() {
+	(
+		cd "${COMPOSE_DIR}"
+		set -x
+		docker buildx build \
+			--platform "${TARGETPLATFORM}" \
+			--build-arg BUILDKIT_MULTI_PLATFORM=true \
+			--build-arg GO_VERSION \
+			--output ./bin \
+			--target binary .
+	)
+}
+
 echo "TARGETPLATFORM=${TARGETPLATFORM}"
 echo "CONTAINERD_VERSION=${CONTAINERD_VERSION}"
 echo "RUNC_VERSION=${RUNC_VERSION}"
@@ -142,26 +155,31 @@ dockerBuildDir="${buildDir}/docker"
 containerdBuildDir="${buildDir}/containerd"
 rootlessExtrasBuildDir="${buildDir}/docker-rootless-extras"
 buildxBuildDir="${buildDir}/docker-buildx"
+composeBuildDir="${buildDir}/docker-compose"
 
 # clean up previous build output dirs
 [ -d "${CLI_DIR:?}/build" ] && rm -r "${CLI_DIR:?}/build"
 [ -d "${ENGINE_DIR:?}/build" ] && rm -r "${ENGINE_DIR:?}/build"
 [ -d "${BUILDX_DIR:?}/bin" ] && rm -r "${BUILDX_DIR:?}/bin"
+[ -d "${COMPOSE_DIR:?}/bin" ] && rm -r "${COMPOSE_DIR:?}/bin"
 
 case ${TARGETOS} in
 	linux)
 		build_cli
 		build_engine
 		build_buildx
+		build_compose
 		;;
 	darwin)
 		build_cli
 		build_buildx
+		build_compose
 		;;
 	windows)
 		build_cli
 		build_engine
 		build_buildx
+		build_compose
 		;;
 esac
 
@@ -317,6 +335,35 @@ if [ -d "${BUILDX_DIR}/bin" ]; then
 				cd "${buildDir}"
 				set -x
 				zip -r "docker-buildx-plugin-${DOCKER_BUILDX_REF#v}.zip" docker-buildx
+			)
+			;;
+	esac
+fi
+
+# compose
+if [ -d "${COMPOSE_DIR}/bin" ]; then
+	mkdir -p "${composeBuildDir}"
+	case ${TARGETOS} in
+		linux | darwin)
+			cp "${COMPOSE_DIR}/bin/${targetPair}/docker-compose" "${composeBuildDir}/docker-compose"
+			;;
+		windows)
+			cp "${COMPOSE_DIR}/bin/${targetPair}/docker-compose.exe" "${composeBuildDir}/docker-compose.exe"
+			;;
+	esac
+	# package compose
+	case ${TARGETOS} in
+		linux | darwin)
+			(
+				set -x
+				tar -C "${buildDir}" -c -z -f "${buildDir}/docker-compose-plugin-${DOCKER_COMPOSE_REF#v}.tgz" docker-compose
+			)
+			;;
+		windows)
+			(
+				cd "${buildDir}"
+				set -x
+				zip -r "docker-compose-plugin-${DOCKER_COMPOSE_REF#v}.zip" docker-compose
 			)
 			;;
 	esac
