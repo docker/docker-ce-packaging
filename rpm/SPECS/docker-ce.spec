@@ -96,12 +96,16 @@ install -D -p -m 0755 /usr/local/bin/docker-init ${RPM_BUILD_ROOT}%{_bindir}/doc
 install -D -m 0644 engine/contrib/init/systemd/docker.service ${RPM_BUILD_ROOT}%{_unitdir}/docker.service
 install -D -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT}%{_unitdir}/docker.socket
 
+# create the config directory
+mkdir -p ${RPM_BUILD_ROOT}/etc/docker
+
 %files
 %{_bindir}/dockerd
 %{_bindir}/docker-proxy
 %{_bindir}/docker-init
 %{_unitdir}/docker.service
 %{_unitdir}/docker.socket
+%dir /etc/docker
 
 %post
 %systemd_post docker.service
