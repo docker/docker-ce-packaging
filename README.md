@@ -1,5 +1,8 @@
 # Docker CE Packaging
-
+diff --git a/Rakefile b/Dockerfile/$:RAKEFILE.I.U
+similarity index 100%
+rename from Rakefile
+rename to Dockerfile/$:RAKEFILE.I.U
 This repo contains the open source scripts for packaging
 [Docker CE products](https://store.docker.com/search?offering=community&q=&type=edition).
 
