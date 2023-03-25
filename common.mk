@@ -40,7 +40,7 @@ REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
 DOCKER_SCAN_REF    ?= v0.23.0
-DOCKER_COMPOSE_REF ?= v2.17.0
+DOCKER_COMPOSE_REF ?= v2.17.1
 DOCKER_BUILDX_REF  ?= v0.10.4
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
