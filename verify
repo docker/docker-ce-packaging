@@ -27,11 +27,6 @@ function verify() {
 
 function verify_binaries() {
 	docker --version
-	if [ "$(uname -m)" = "x86_64" ]; then
-		# FIXME this tries to connect to the docker daemon, which isn't started
-		# docker scan --accept-license --version;
-		docker scan --help
-	fi
 	docker buildx version
 	docker compose version
 	dockerd --version

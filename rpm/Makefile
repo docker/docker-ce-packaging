@@ -6,10 +6,8 @@ GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
 GEN_BUILDX_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/buildx) "$(DOCKER_BUILDX_REF)")
 GEN_COMPOSE_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/compose) "$(DOCKER_COMPOSE_REF)")
-GEN_SCAN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) "$(DOCKER_SCAN_REF)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
-SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
 BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
@@ -24,11 +22,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	.
 
 
-ifeq ($(ARCH),x86_64)
-SPEC_FILES?=docker-ce.spec docker-ce-cli.spec docker-ce-rootless-extras.spec docker-buildx-plugin.spec docker-compose-plugin.spec docker-scan-plugin.spec
-else
 SPEC_FILES?=docker-ce.spec docker-ce-cli.spec docker-ce-rootless-extras.spec docker-buildx-plugin.spec docker-compose-plugin.spec
-endif
 
 SPECS?=$(addprefix SPECS/, $(SPEC_FILES))
 RPMBUILD_FLAGS?=-ba\
@@ -42,9 +36,6 @@ RPMBUILD_FLAGS?=-ba\
 	--define '_buildx_gitcommit $(BUILDX_GITCOMMIT)' \
 	--define '_compose_rpm_version $(word 1,$(GEN_COMPOSE_RPM_VER))' \
 	--define '_compose_version $(word 4,$(GEN_COMPOSE_RPM_VER))' \
-	--define '_scan_rpm_version $(word 1,$(GEN_SCAN_RPM_VER))' \
-	--define '_scan_version $(word 4,$(GEN_SCAN_RPM_VER))' \
-	--define '_scan_gitcommit $(SCAN_GITCOMMIT)' \
 	$(RPMBUILD_EXTRA_FLAGS) \
 	$(SPECS)
 
@@ -100,7 +91,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "rpmbuild/$@"
 
 .PHONY: sources
-sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/buildx.tgz rpmbuild/SOURCES/compose.tgz rpmbuild/SOURCES/scan-cli-plugin.tgz
+sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/buildx.tgz rpmbuild/SOURCES/compose.tgz
 
 rpmbuild/SOURCES/engine.tgz:
 	mkdir -p $(@D)
@@ -133,14 +124,6 @@ rpmbuild/SOURCES/compose.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/compose.tgz --exclude .git compose
-
-rpmbuild/SOURCES/scan-cli-plugin.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin):/scan-cli-plugin \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/scan-cli-plugin.tgz --exclude .git scan-cli-plugin
 
 # See ARCHES in common.mk. Could not figure out how to match both distro and arch.
 BUNDLES:=$(addsuffix .tar.gz,$(addprefix rpmbuild/bundles-ce-%-,$(ARCHES)))
