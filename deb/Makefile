@@ -7,10 +7,8 @@ EPOCH?=5
 GEN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
 GEN_BUILDX_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/buildx) "$(DOCKER_BUILDX_REF)")
 GEN_COMPOSE_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/compose) "$(DOCKER_COMPOSE_REF)")
-GEN_SCAN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) "$(DOCKER_SCAN_REF)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
-SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
 BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
@@ -41,9 +39,6 @@ RUN?=docker run --rm \
 	-e BUILDX_GITCOMMIT=$(BUILDX_GITCOMMIT) \
 	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
 	-e COMPOSE_DEB_VERSION=$(word 1, $(GEN_COMPOSE_DEB_VER)) \
-	-e SCAN_VERSION=$(DOCKER_SCAN_REF) \
-	-e SCAN_DEB_VERSION=$(word 1, $(GEN_SCAN_DEB_VER)) \
-	-e SCAN_GITCOMMIT=$(SCAN_GITCOMMIT) \
 	-v $(CURDIR)/debbuild/$@:/build \
 	$(RUN_FLAGS) \
 	debbuild-$@/$(ARCH)
@@ -86,7 +81,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "debbuild/$@"
 
 .PHONY: sources
-sources: sources/cli.tgz sources/engine.tgz sources/buildx.tgz sources/compose.tgz sources/scan-cli-plugin.tgz
+sources: sources/cli.tgz sources/engine.tgz sources/buildx.tgz sources/compose.tgz
 
 sources/engine.tgz:
 	mkdir -p $(@D)
@@ -119,14 +114,6 @@ sources/compose.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/compose.tgz --exclude .git compose
-
-sources/scan-cli-plugin.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin):/scan-cli-plugin \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/scan-cli-plugin.tgz --exclude .git scan-cli-plugin
 
 # See ARCHES in common.mk. Could not figure out how to match both distro and arch.
 BUNDLES:=$(addsuffix .tar.gz,$(addprefix debbuild/bundles-ce-%-,$(ARCHES)))
