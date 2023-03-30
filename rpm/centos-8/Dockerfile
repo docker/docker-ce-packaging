@@ -30,16 +30,7 @@ RUN if [ -f /etc/yum.repos.d/CentOS-Stream-PowerTools.repo ]; then sed -i 's/ena
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf install -y rpm-build rpmlint dnf-plugins-core
 COPY SPECS /root/rpmbuild/SPECS
-
-# TODO change once we support scan-plugin on other architectures
-RUN \
-  if [ "$(uname -m)" = "x86_64" ]; then \
-    dnf builddep -y /root/rpmbuild/SPECS/*.spec; \
-  else \
-    dnf builddep -y /root/rpmbuild/SPECS/docker-c*.spec; \
-    dnf builddep -y /root/rpmbuild/SPECS/docker-b*.spec; \
-  fi
-
+RUN dnf builddep -y /root/rpmbuild/SPECS/*.spec
 COPY --from=golang /usr/local/go /usr/local/go
 WORKDIR /root/rpmbuild
 ENTRYPOINT ["/bin/rpmbuild"]
