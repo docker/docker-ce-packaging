@@ -61,10 +61,8 @@ Description: Docker: the open-source application container engine
 Package: docker-ce-cli
 Architecture: linux-any
 Depends: ${shlibs:Depends}
-# TODO change once we support scan-plugin on other architectures
 Recommends: docker-buildx-plugin,
-            docker-compose-plugin,
-            docker-scan-plugin [amd64]
+            docker-compose-plugin
 Conflicts: docker (<< 1.5~),
            docker-engine,
            docker-engine-cs,
