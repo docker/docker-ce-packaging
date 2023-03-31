@@ -21,19 +21,6 @@ override_dh_auto_build:
 	cd /go/src/github.com/docker/cli && \
 		LDFLAGS='' DISABLE_WARN_OUTSIDE_CONTAINER=1 make VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) dynbinary manpages
 
-	# Build the compose plugin
-	cd /go/src/github.com/docker/compose \
-	&& make VERSION=$(COMPOSE_VERSION) DESTDIR=/usr/libexec/docker/cli-plugins build
-
-	# Build the scan-plugin
-	# TODO change once we support scan-plugin on other architectures
-	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
-		cd /go/src/github.com/docker/scan-cli-plugin \
-		&& PLATFORM_BINARY=docker-scan COMMIT=$(SCAN_GITCOMMIT) TAG_NAME=$(SCAN_VERSION) make native-build \
-		&& mkdir -p /usr/libexec/docker/cli-plugins/ \
-		&& mv bin/docker-scan /usr/libexec/docker/cli-plugins/; \
-	fi
-
 	# Build the CLI plugins
 	# Make sure to set LDFLAGS="" since, dpkg-buildflags sets it to some weird values
 	set -e;cd /sources && \
@@ -48,16 +35,6 @@ override_dh_auto_test:
 
 	ver="$$(cli/build/docker --version)"; \
 		test "$$ver" = "Docker version $(VERSION), build $(CLI_GITCOMMIT)" && echo "PASS: cli version OK" || (echo "FAIL: cli version ($$ver) did not match" && exit 1)
-
-	ver="$$(/usr/libexec/docker/cli-plugins/docker-compose docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $$1 == "Version" { print $$2 }')"; \
-		test "$$ver" = "$(COMPOSE_VERSION)" && echo "PASS: docker-compose version OK" || (echo "FAIL: docker-compose version ($$ver) did not match" && exit 1)
-
-	# FIXME: --version currently doesn't work as it makes a connection to the daemon, so using the plugin metadata instead
-	# TODO change once we support scan-plugin on other architectures
-	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
-		ver="$$(/usr/libexec/docker/cli-plugins/docker-scan docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $$1 == "Version" { print $$2 }')"; \
-			test "$$ver" = "$(SCAN_VERSION)" && echo "PASS: docker-scan version OK" || (echo "FAIL: docker-scan version ($$ver) did not match" && exit 1); \
-	fi
 
 override_dh_strip:
 	# Go has lots of problems with stripping, so just don't
@@ -81,15 +58,6 @@ override_dh_auto_install:
 	install -D -m 0755 /usr/local/bin/docker-proxy debian/docker-ce/usr/bin/docker-proxy
 	install -D -m 0755 /usr/local/bin/docker-init debian/docker-ce/usr/bin/docker-init
 
-	# docker-compose-plugin install
-	install -D -m 0755 /usr/libexec/docker/cli-plugins/docker-compose debian/docker-compose-plugin/usr/libexec/docker/cli-plugins/docker-compose
-
-	# docker-scan-plugin install
-	# TODO change once we support scan-plugin on other architectures
-	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
-		install -D -m 0755 /usr/libexec/docker/cli-plugins/docker-scan debian/docker-scan-plugin/usr/libexec/docker/cli-plugins/docker-scan; \
-	fi
-
 	# docker-ce-rootless-extras install
 	install -D -m 0755 /usr/local/bin/rootlesskit debian/docker-ce-rootless-extras/usr/bin/rootlesskit
 	install -D -m 0755 /usr/local/bin/rootlesskit-docker-proxy debian/docker-ce-rootless-extras/usr/bin/rootlesskit-docker-proxy
@@ -108,19 +76,6 @@ override_dh_install:
 	dh_install
 	# TODO Can we do this from within our container?
 	dh_apparmor --profile-name=docker-ce -pdocker-ce
-
-override_dh_gencontrol:
-	# Use separate version for the compose-plugin package, then generate the other control files as usual
-	# TODO override "Source" field in control as well (to point to compose, as it doesn't match the package name)
-	dh_gencontrol -pdocker-compose-plugin -- -v$${COMPOSE_DEB_VERSION#v}-$${PKG_REVISION}~$${DISTRO}.$${VERSION_ID}~$${SUITE}
-
-	# Use separate version for the scan-plugin package, then generate the other control files as usual
-	# TODO override "Source" field in control as well (to point to scan-cli-plugin, as it doesn't match the package name)
-	# TODO change once we support scan-plugin on other architectures (see dpkg-architecture -L)
-	if [ "$(TARGET_ARCH)" = "amd64" ]; then \
-		dh_gencontrol -pdocker-scan-plugin -- -v$${SCAN_DEB_VERSION#v}~$${DISTRO}-$${SUITE}; \
-	fi
-	dh_gencontrol --remaining-packages
 
 %:
 	dh $@ --with=bash-completion $(shell command -v dh_systemd_enable > /dev/null 2>&1 && echo --with=systemd)

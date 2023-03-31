@@ -4,11 +4,8 @@ PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
 GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
-GEN_COMPOSE_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/compose) "$(DOCKER_COMPOSE_REF)")
-GEN_SCAN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) "$(DOCKER_SCAN_REF)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
-SCAN_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
@@ -22,11 +19,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	.
 
 
-ifeq ($(ARCH),x86_64)
-SPEC_FILES?=docker-ce.spec docker-ce-cli.spec docker-ce-rootless-extras.spec docker-compose-plugin.spec docker-scan-plugin.spec
-else
-SPEC_FILES?=docker-ce.spec docker-ce-cli.spec docker-ce-rootless-extras.spec docker-compose-plugin.spec
-endif
+SPEC_FILES?=docker-ce.spec docker-ce-cli.spec docker-ce-rootless-extras.spec
 
 SPECS?=$(addprefix SPECS/, $(SPEC_FILES))
 RPMBUILD_FLAGS?=-ba\
@@ -35,11 +28,6 @@ RPMBUILD_FLAGS?=-ba\
 	--define '_release $(word 2,$(GEN_RPM_VER))' \
 	--define '_version $(word 1,$(GEN_RPM_VER))' \
 	--define '_origversion $(word 4, $(GEN_RPM_VER))' \
-	--define '_compose_rpm_version $(word 1,$(GEN_COMPOSE_RPM_VER))' \
-	--define '_compose_version $(word 4,$(GEN_COMPOSE_RPM_VER))' \
-	--define '_scan_rpm_version $(word 1,$(GEN_SCAN_RPM_VER))' \
-	--define '_scan_version $(word 4,$(GEN_SCAN_RPM_VER))' \
-	--define '_scan_gitcommit $(SCAN_GITCOMMIT)' \
 	$(RPMBUILD_EXTRA_FLAGS) \
 	$(SPECS)
 
@@ -98,7 +86,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "rpmbuild/$@"
 
 .PHONY: sources
-sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/compose.tgz rpmbuild/SOURCES/scan-cli-plugin.tgz rpmbuild/SOURCES/docker.service rpmbuild/SOURCES/docker.socket rpmbuild/SOURCES/plugin-installers.tgz
+sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/docker.service rpmbuild/SOURCES/docker.socket rpmbuild/SOURCES/plugin-installers.tgz
 
 rpmbuild/SOURCES/engine.tgz:
 	mkdir -p $(@D)
@@ -115,22 +103,6 @@ rpmbuild/SOURCES/cli.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
-
-rpmbuild/SOURCES/compose.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/compose):/compose \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/compose.tgz --exclude .git compose
-
-rpmbuild/SOURCES/scan-cli-plugin.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/scan-cli-plugin):/scan-cli-plugin \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/scan-cli-plugin.tgz --exclude .git scan-cli-plugin
 
 rpmbuild/SOURCES/docker.service: ../systemd/docker.service
 	mkdir -p $(@D)
