@@ -25,8 +25,6 @@ VERSION?=0.0.1-dev
 # the source from. These can be overridden to build from a fork.
 DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
 DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
-DOCKER_SCAN_REPO    ?= https://github.com/docker/scan-cli-plugin.git
-DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
 
 # REF can be used to specify the same branch or tag to use for *both* the CLI
 # and Engine source code. This can be useful if both the CLI and Engine have a
@@ -37,8 +35,6 @@ DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
-DOCKER_SCAN_REF    ?= v0.23.0
-DOCKER_COMPOSE_REF ?= v2.15.1
 
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
