@@ -9,8 +9,10 @@ def pkgs = [
     [target: "debian-buster",            image: "debian:buster",                          arches: ["amd64", "aarch64", "armhf"]], // Debian 10 (EOL: 2024)
     [target: "debian-bullseye",          image: "debian:bullseye",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 11 (stable)
     [target: "debian-bookworm",          image: "debian:bookworm",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 12 (Next stable)
-    [target: "fedora-36",                image: "fedora:36",                              arches: ["amd64", "aarch64"]],          // EOL: May 24, 2023
-    [target: "fedora-37",                image: "fedora:37",                              arches: ["amd64", "aarch64"]],          // EOL: TBD
+    [target: "fedora-36",                image: "fedora:36",                              arches: ["amd64", "aarch64"]],          // EOL: May 16, 2023
+    [target: "fedora-37",                image: "fedora:37",                              arches: ["amd64", "aarch64"]],          // EOL: November 14, 2023
+    [target: "fedora-38",                image: "fedora:38",                              arches: ["amd64", "aarch64"]],          // EOL: May 14, 2024
+    [target: "fedora-39",                image: "fedora:39",                              arches: ["amd64", "aarch64"]],          // EOL: November 12, 2024
     [target: "raspbian-buster",          image: "balenalib/rpi-raspbian:buster",          arches: ["armhf"]],                     // Debian/Raspbian 10 (EOL: 2024)
     [target: "raspbian-bullseye",        image: "balenalib/rpi-raspbian:bullseye",        arches: ["armhf"]],                     // Debian/Raspbian 11 (stable)
     [target: "raspbian-bookworm",        image: "balenalib/rpi-raspbian:bookworm",        arches: ["armhf"]],                     // Debian/Raspbian 12 (next stable)
