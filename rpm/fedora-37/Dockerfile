@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG GO_IMAGE
 ARG DISTRO=fedora
 ARG SUITE=37
@@ -16,8 +18,8 @@ ARG SUITE
 ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
 RUN dnf install -y rpm-build rpmlint dnf-plugins-core
-COPY SPECS /root/rpmbuild/SPECS
+COPY --link SPECS /root/rpmbuild/SPECS
 RUN dnf builddep -y /root/rpmbuild/SPECS/*.spec
-COPY --from=golang /usr/local/go /usr/local/go
+COPY --link --from=golang /usr/local/go /usr/local/go
 WORKDIR /root/rpmbuild
 ENTRYPOINT ["/bin/rpmbuild"]

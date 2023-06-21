@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG GO_IMAGE
 ARG DISTRO=centos
 ARG SUITE=9
@@ -25,8 +27,8 @@ RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
 RUN dnf install -y rpm-build rpmlint dnf-plugins-core
 RUN dnf config-manager --set-enabled crb
 
-COPY SPECS /root/rpmbuild/SPECS
+COPY --link SPECS /root/rpmbuild/SPECS
 RUN dnf builddep -y /root/rpmbuild/SPECS/*.spec
-COPY --from=golang /usr/local/go /usr/local/go
+COPY --link --from=golang /usr/local/go /usr/local/go
 WORKDIR /root/rpmbuild
 ENTRYPOINT ["/bin/rpmbuild"]
