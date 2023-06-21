@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG GO_IMAGE
 ARG DISTRO=raspbian
 ARG SUITE=buster
@@ -17,11 +19,11 @@ ENV GOPATH /go
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 
 ARG COMMON_FILES
-COPY ${COMMON_FILES} /root/build-deb/debian
+COPY --link ${COMMON_FILES} /root/build-deb/debian
 RUN apt-get update \
  && mk-build-deps -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y" -i /root/build-deb/debian/control
 
-COPY sources/ /sources
+COPY --link sources/ /sources
 ARG DISTRO
 ARG SUITE
 ARG VERSION_ID
@@ -29,7 +31,7 @@ ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
 ENV VERSION_ID=${VERSION_ID}
 
-COPY --from=golang /usr/local/go /usr/local/go
+COPY --link --from=golang /usr/local/go /usr/local/go
 
 WORKDIR /root/build-deb
 COPY build-deb /root/build-deb/build-deb
