@@ -27,8 +27,6 @@ function verify() {
 
 function verify_binaries() {
 	docker --version
-	docker buildx version
-	docker compose version
 	dockerd --version
 	docker-proxy --version
 	containerd --version
