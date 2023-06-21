@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ARG GO_IMAGE
 ARG DISTRO=rhel
 ARG SUITE=7
@@ -21,8 +23,8 @@ ENV CC=gcc
 # failing, so replace the URL.
 RUN if [ -f /etc/yum.repos.d/CentOS-Sources.repo ]; then sed -i 's/altarch/centos/g' /etc/yum.repos.d/CentOS-Sources.repo; fi
 RUN yum install -y rpm-build rpmlint
-COPY SPECS /root/rpmbuild/SPECS
+COPY --link SPECS /root/rpmbuild/SPECS
 RUN yum-builddep -y /root/rpmbuild/SPECS/*.spec
-COPY --from=golang /usr/local/go /usr/local/go
+COPY --link --from=golang /usr/local/go /usr/local/go
 WORKDIR /root/rpmbuild
 ENTRYPOINT ["/bin/rpmbuild"]
