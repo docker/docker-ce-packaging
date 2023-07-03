@@ -113,6 +113,9 @@ Package: docker-compose-plugin
 Priority: optional
 Architecture: linux-any
 Enhances: docker-ce-cli
+Conflicts: docker-compose
+Replaces: docker-compose
+Breaks: docker-compose
 Description: Docker Compose (V2) plugin for the Docker CLI.
  .
  This plugin provides the 'docker compose' subcommand.
