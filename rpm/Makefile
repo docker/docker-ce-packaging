@@ -2,7 +2,7 @@ include ../common.mk
 
 PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
 GO_BASE_IMAGE=golang
-GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-buster
+GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-bookworm
 GEN_RPM_VER=$(shell ./gen-rpm-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
