@@ -18,6 +18,9 @@ jobs:
       matrix:
         target:
           - debian-bullseye
+          - debian-bookworm
+          - ubuntu-focal
+          - ubuntu-jammy
     steps:
       -
         name: Checkout
