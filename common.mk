@@ -43,7 +43,7 @@ DOCKER_BUILDX_REF  ?= v0.11.2
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
-VERIFY_PACKAGE_REPO ?= staging
+VERIFY_PACKAGE_REPO ?= prod
 
 # Optional flags like --platform=linux/armhf
 VERIFY_PLATFORM ?=
