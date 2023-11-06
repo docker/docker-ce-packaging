@@ -25,7 +25,7 @@ Vcs-Git: git://github.com/docker/docker.git
 
 Package: docker-ce
 Architecture: linux-any
-Depends: containerd.io (>= 1.6.4),
+Depends: containerd.io (>= 1.6.24),
          docker-ce-cli,
          iptables,
          libseccomp2 (>= 2.3.0),
