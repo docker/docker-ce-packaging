@@ -5,6 +5,7 @@ Version: %{_version}
 Release: %{_release}%{?dist}
 Epoch: 3
 Source0: engine.tgz
+Patch0: 01-rlimit_nofile-rhel7.patch
 Summary: The open-source application container engine
 Group: Tools/Docker
 License: ASL 2.0
@@ -78,6 +79,9 @@ depending on a particular stack or provider.
 
 %prep
 %setup -q -c -n src -a 0
+%if 0%{?rhel} == 7
+%patch -p1 -P 0
+%endif
 
 %build
 
