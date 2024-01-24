@@ -26,8 +26,6 @@ VERSION?=0.0.1-dev
 # the source from. These can be overridden to build from a fork.
 DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
 DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
-DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
-DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 
 # REF can be used to specify the same branch or tag to use for *both* the CLI
 # and Engine source code. This can be useful if both the CLI and Engine have a
@@ -38,8 +36,6 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
-DOCKER_COMPOSE_REF ?= v2.21.0
-DOCKER_BUILDX_REF  ?= v0.11.2
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com

@@ -5,11 +5,8 @@ GO_BASE_IMAGE=golang
 GO_IMAGE?=$(GO_BASE_IMAGE):$(GO_VERSION)-bookworm
 EPOCH?=5
 GEN_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/cli) "$(VERSION)")
-GEN_BUILDX_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/buildx) "$(DOCKER_BUILDX_REF)")
-GEN_COMPOSE_DEB_VER=$(shell ./gen-deb-ver $(realpath $(CURDIR)/../src/github.com/docker/compose) "$(DOCKER_COMPOSE_REF)")
 CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && git rev-parse --short HEAD)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
-BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
@@ -34,11 +31,6 @@ RUN?=docker run --rm \
 	-e VERSION=$(word 2, $(GEN_DEB_VER)) \
 	-e CLI_GITCOMMIT=$(CLI_GITCOMMIT) \
 	-e ENGINE_GITCOMMIT=$(ENGINE_GITCOMMIT) \
-	-e BUILDX_VERSION=$(DOCKER_BUILDX_REF) \
-	-e BUILDX_DEB_VERSION=$(word 1, $(GEN_BUILDX_DEB_VER)) \
-	-e BUILDX_GITCOMMIT=$(BUILDX_GITCOMMIT) \
-	-e COMPOSE_VERSION=$(DOCKER_COMPOSE_REF) \
-	-e COMPOSE_DEB_VERSION=$(word 1, $(GEN_COMPOSE_DEB_VER)) \
 	-v $(CURDIR)/debbuild/$@:/build \
 	$(RUN_FLAGS) \
 	debbuild-$@/$(ARCH)
@@ -81,7 +73,7 @@ $(DISTROS): sources
 	$(CHOWN) -R $(shell id -u):$(shell id -g) "debbuild/$@"
 
 .PHONY: sources
-sources: sources/cli.tgz sources/engine.tgz sources/buildx.tgz sources/compose.tgz
+sources: sources/cli.tgz sources/engine.tgz
 
 sources/engine.tgz:
 	mkdir -p $(@D)
@@ -98,22 +90,6 @@ sources/cli.tgz:
 		-v $(CURDIR)/$(@D):/v \
 		alpine \
 		tar -C / -c -z -f /v/cli.tgz --exclude .git cli
-
-sources/buildx.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/buildx):/buildx \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/buildx.tgz --exclude .git buildx
-
-sources/compose.tgz:
-	mkdir -p $(@D)
-	docker run --rm -w /v \
-		-v $(realpath $(CURDIR)/../src/github.com/docker/compose):/compose \
-		-v $(CURDIR)/$(@D):/v \
-		alpine \
-		tar -C / -c -z -f /v/compose.tgz --exclude .git compose
 
 # See ARCHES in common.mk. Could not figure out how to match both distro and arch.
 BUNDLES:=$(addsuffix .tar.gz,$(addprefix debbuild/bundles-ce-%-,$(ARCHES)))
