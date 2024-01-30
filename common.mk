@@ -38,7 +38,7 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
-DOCKER_COMPOSE_REF ?= v2.24.3
+DOCKER_COMPOSE_REF ?= v2.24.4
 DOCKER_BUILDX_REF  ?= v0.12.1
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
