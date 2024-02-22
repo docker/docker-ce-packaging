@@ -18,6 +18,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	$(BUILD_IMAGE_FLAG) \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	-t rpmbuild-$@/$(ARCH) \
+	--platform linux/$(ARCH) \
 	-f $@/Dockerfile \
 	.
 
@@ -48,6 +49,7 @@ RUN_FLAGS=
 # https://github.com/docker/docker-ce-packaging/pull/1006#issuecomment-2006878743
 RUN?=docker run --rm \
 	--security-opt seccomp=unconfined \
+	--platform linux/$(ARCH) \
 	-e PLATFORM \
 	-v $(CURDIR)/rpmbuild/SOURCES:/root/rpmbuild/SOURCES:ro \
 	-v $(CURDIR)/rpmbuild/$@/RPMS:/root/rpmbuild/RPMS \

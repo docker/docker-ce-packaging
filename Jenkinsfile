@@ -43,10 +43,10 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
             stage("build") {
                 checkout scm
                 sh "make clean"
-                sh "make REF=$branch ${pkg.target}"
+                sh "make REF=$branch ARCH=${arch} ${pkg.target}"
             }
             stage("verify") {
-                sh "make IMAGE=${pkg.image} verify"
+                sh "make IMAGE=${pkg.image} ARCH=${arch} verify"
             }
         }
     }
