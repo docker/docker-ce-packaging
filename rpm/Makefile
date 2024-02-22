@@ -18,6 +18,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	$(BUILD_IMAGE_FLAG) \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	-t rpmbuild-$@/$(ARCH) \
+	--platform linux/$(ARCH) \
 	-f $@/Dockerfile \
 	.
 
@@ -42,6 +43,7 @@ RPMBUILD_FLAGS?=-ba\
 # Additional flags may be necessary at some point
 RUN_FLAGS=
 RUN?=docker run --rm \
+	--platform linux/$(ARCH) \
 	-e PLATFORM \
 	-v $(CURDIR)/rpmbuild/SOURCES:/root/rpmbuild/SOURCES:ro \
 	-v $(CURDIR)/rpmbuild/$@/RPMS:/root/rpmbuild/RPMS \
