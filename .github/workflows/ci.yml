@@ -21,6 +21,7 @@ jobs:
           - debian-bookworm
           - ubuntu-focal
           - ubuntu-jammy
+          - ubuntu-noble
     steps:
       -
         name: Checkout
