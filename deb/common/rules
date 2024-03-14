@@ -6,6 +6,13 @@ TARGET_ARCH = $(shell dpkg-architecture -qDEB_TARGET_ARCH)
 PKG_REVISION ?= 1
 export PKG_REVISION
 
+# FIXME: quick hardcoding of GOARM for raspbian; replace with a holistic
+# refactoring of how we handle target architecture
+distribution := $(shell . /etc/os-release; echo "$${ID}")
+ifeq ($(distribution),raspbian)
+	export GOARM=6
+endif
+
 # force packages to be built with xz compression, as Ubuntu 21.10 and up use
 # zstd compression, which is non-standard, and breaks 'dpkg-sig --verify'
 override_dh_builddeb:
