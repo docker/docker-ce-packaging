@@ -22,6 +22,10 @@ PLATFORM=Docker Engine - Community
 SHELL:=/bin/bash
 VERSION?=0.0.1-dev
 
+# PKG_REVISION is used for packaging-only releases. This variable is used
+# when constructing the deb, rpm, and static versions.
+PKG_REVISION ?= 1
+
 # DOCKER_CLI_REPO and DOCKER_ENGINE_REPO define the source repositories to clone
 # the source from. These can be overridden to build from a fork.
 DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
@@ -55,4 +59,5 @@ VERIFY_PLATFORM ?=
 export BUILDTIME
 export DEFAULT_PRODUCT_LICENSE
 export PACKAGER_NAME
+export PKG_REVISION
 export PLATFORM
