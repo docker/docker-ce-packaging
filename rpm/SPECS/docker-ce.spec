@@ -41,7 +41,6 @@ BuildRequires: pkgconfig
 BuildRequires: pkgconfig(systemd)
 BuildRequires: systemd-devel
 BuildRequires: tar
-BuildRequires: which
 
 # conflicting packages
 Conflicts: docker
