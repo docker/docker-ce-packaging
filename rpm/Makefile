@@ -41,7 +41,13 @@ RPMBUILD_FLAGS?=-ba\
 
 # Additional flags may be necessary at some point
 RUN_FLAGS=
+
+# FIXME(thaJeztah): disabling seccomp to handle (ppc64le) tar "chown / chmod"
+# failing when running in a Fedora 40 container on a Debian bookworm host;
+# see https://github.com/docker/docker-ce-packaging/issues/1012 and
+# https://github.com/docker/docker-ce-packaging/pull/1006#issuecomment-2006878743
 RUN?=docker run --rm \
+	--security-opt seccomp=unconfined \
 	-e PLATFORM \
 	-v $(CURDIR)/rpmbuild/SOURCES:/root/rpmbuild/SOURCES:ro \
 	-v $(CURDIR)/rpmbuild/$@/RPMS:/root/rpmbuild/RPMS \
