@@ -35,7 +35,6 @@ BuildRequires: git
 # conflicting packages
 Conflicts: docker
 Conflicts: docker-io
-Conflicts: docker-engine-cs
 Conflicts: docker-ee
 Conflicts: docker-ee-cli
 

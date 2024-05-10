@@ -41,7 +41,6 @@ Recommends: apparmor,
 Suggests: aufs-tools [amd64], cgroupfs-mount | cgroup-lite
 Conflicts: docker (<< 1.5~),
            docker-engine,
-           docker-engine-cs,
            docker.io,
            lxc-docker,
            lxc-docker-virtual-package
@@ -64,7 +63,6 @@ Recommends: docker-buildx-plugin,
             docker-compose-plugin
 Conflicts: docker (<< 1.5~),
            docker-engine,
-           docker-engine-cs,
            docker.io,
            lxc-docker,
            lxc-docker-virtual-package
