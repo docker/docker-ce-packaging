@@ -58,7 +58,6 @@ BuildRequires: which
 # conflicting packages
 Conflicts: docker
 Conflicts: docker-io
-Conflicts: docker-engine-cs
 Conflicts: docker-ee
 
 # Obsolete packages
