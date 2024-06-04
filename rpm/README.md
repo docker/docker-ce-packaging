@@ -29,7 +29,7 @@ make centos
 
 ## Specifying a specific distro version
 ```shell
-make centos-8
+make centos-9
 ```
 
 ## Building the for all distros
