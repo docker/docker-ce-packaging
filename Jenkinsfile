@@ -8,7 +8,6 @@ def pkgs = [
     [target: "debian-buster",            image: "debian:buster",                          arches: ["amd64", "aarch64", "armhf"]], // Debian 10 (EOL: 2024)
     [target: "debian-bullseye",          image: "debian:bullseye",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 11 (stable)
     [target: "debian-bookworm",          image: "debian:bookworm",                        arches: ["amd64", "aarch64", "armhf"]], // Debian 12 (Next stable)
-    [target: "fedora-38",                image: "fedora:38",                              arches: ["amd64", "aarch64"]],          // EOL: May 14, 2024
     [target: "fedora-39",                image: "fedora:39",                              arches: ["amd64", "aarch64"]],          // EOL: November 12, 2024
     [target: "fedora-40",                image: "fedora:40",                              arches: ["amd64", "aarch64"]],          // EOL: May 13, 2025
     [target: "raspbian-buster",          image: "balenalib/rpi-raspbian:buster",          arches: ["armhf"]],                     // Debian/Raspbian 10 (EOL: 2024)
