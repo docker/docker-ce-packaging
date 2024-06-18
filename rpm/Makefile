@@ -56,12 +56,8 @@ RUN?=docker run --rm \
 	rpmbuild-$@/$(ARCH) $(RPMBUILD_FLAGS)
 
 FEDORA_RELEASES ?= fedora-40 fedora-39
-CENTOS_RELEASES ?= centos-7 centos-9
-ifeq ($(ARCH),s390x)
-RHEL_RELEASES ?= rhel-7
-else
+CENTOS_RELEASES ?= centos-9
 RHEL_RELEASES ?=
-endif
 
 DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES)
 BUNDLES := $(patsubst %,rpmbuild/bundles-ce-%-$(DPKG_ARCH).tar.gz,$(DISTROS))
