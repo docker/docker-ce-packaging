@@ -32,7 +32,7 @@ RUN_FLAGS=
 # when running in a Ubuntu 24.04 container on a Ubuntu 20.04.6 host (kernel 5.15.0-1053-aws);
 # see https://github.com/docker/docker-ce-packaging/pull/1006#issuecomment-2006878743
 RUN?=docker run --rm \
-	--security-opt seccomp=unconfined \
+	--security-opt seccomp=$(CURDIR)/default.json \
 	-e PLATFORM \
 	-e EPOCH='$(EPOCH)' \
 	-e DEB_VERSION=$(word 1, $(GEN_DEB_VER)) \
