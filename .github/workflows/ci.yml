@@ -11,7 +11,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  pkg:
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
@@ -33,3 +33,51 @@ jobs:
         name: Build
         run: |
           make ${{ matrix.target }}
+
+  static:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: x86_64
+          - os: linux
+            arch: armel
+          - os: linux
+            arch: armhf
+          - os: linux
+            arch: aarch64
+          - os: linux
+            arch: ppc64le
+          - os: linux
+            arch: s390x
+          - os: darwin
+            arch: x86_64
+          - os: darwin
+            arch: aarch64
+          - os: windows
+            arch: x86_64
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Build
+        run: |
+          make STATICOS=${{ matrix.os }} STATICARCH=${{ matrix.arch }} static
+      -
+        name: List files
+        run: |
+          tree -nh ./static/build
+      -
+        name: Upload static bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: static-${{ matrix.os }}-${{ matrix.arch }}
+          path: static/build/*.tar.gz
+          if-no-files-found: error
+          retention-days: 2
