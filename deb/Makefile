@@ -22,6 +22,7 @@ BUILD?=DOCKER_BUILDKIT=1 \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	--build-arg COMMON_FILES=$(COMMON_FILES) \
 	-t debbuild-$@/$(ARCH) \
+	--platform linux/$(ARCH) \
 	-f $@/Dockerfile \
 	.
 
@@ -33,6 +34,7 @@ RUN_FLAGS=
 # see https://github.com/docker/docker-ce-packaging/pull/1006#issuecomment-2006878743
 RUN?=docker run --rm \
 	--security-opt seccomp=unconfined \
+	--platform linux/$(ARCH) \
 	-e PLATFORM \
 	-e EPOCH='$(EPOCH)' \
 	-e DEB_VERSION=$(word 1, $(GEN_DEB_VER)) \
