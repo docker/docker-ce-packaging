@@ -5,7 +5,6 @@ Version: %{_version}
 Release: %{_release}%{?dist}
 Epoch: 3
 Source0: engine.tgz
-Patch0: 01-rlimit_nofile-rhel7.patch
 Summary: The open-source application container engine
 Group: Tools/Docker
 License: ASL 2.0
@@ -15,15 +14,7 @@ Packager: Docker <support@docker.com>
 
 Requires: /usr/sbin/groupadd
 Requires: docker-ce-cli
-# CentOS 7 and RHEL 7 do not yet support weak dependencies
-#
-# Note that we're not using <= 7 here, to account for other RPM distros, such
-# as Fedora, which would not have the rhel macro set (so default to 0).
-%if 0%{?rhel} == 7
-Requires: docker-ce-rootless-extras
-%else
 Recommends: docker-ce-rootless-extras
-%endif
 Requires: container-selinux >= 2:2.74
 Requires: libseccomp >= 2.3
 Requires: systemd
@@ -78,9 +69,6 @@ depending on a particular stack or provider.
 
 %prep
 %setup -q -c -n src -a 0
-%if 0%{?rhel} == 7
-%patch -p1 -P 0
-%endif
 
 %build
 

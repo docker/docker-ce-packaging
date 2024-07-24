@@ -94,11 +94,6 @@ $(DISTROS): sources
 
 .PHONY: sources
 sources: rpmbuild/SOURCES/engine.tgz rpmbuild/SOURCES/cli.tgz rpmbuild/SOURCES/buildx.tgz rpmbuild/SOURCES/compose.tgz
-sources: rpmbuild/SOURCES/01-rlimit_nofile-rhel7.patch
-
-rpmbuild/SOURCES/%.patch:
-	mkdir -p $(@D)
-	cp $(CURDIR)/patches/$(@F) $@
 
 rpmbuild/SOURCES/engine.tgz:
 	mkdir -p $(@D)
