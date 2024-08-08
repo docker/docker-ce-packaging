@@ -50,7 +50,7 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 
 	# extra binaries for running rootless
 	mkdir -p build/linux/docker-rootless-extras
-	for f in rootlesskit rootlesskit-docker-proxy dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do \
+	for f in rootlesskit dockerd-rootless.sh dockerd-rootless-setuptool.sh vpnkit; do \
 		if [ -f $(ENGINE_DIR)/bundles/binary/$$f ]; then \
 			cp -L $(ENGINE_DIR)/bundles/binary/$$f build/linux/docker-rootless-extras/$$f; \
 		fi \

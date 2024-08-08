@@ -85,7 +85,6 @@ override_dh_auto_install:
 
 	# docker-ce-rootless-extras install
 	install -D -m 0755 /usr/local/bin/rootlesskit debian/docker-ce-rootless-extras/usr/bin/rootlesskit
-	install -D -m 0755 /usr/local/bin/rootlesskit-docker-proxy debian/docker-ce-rootless-extras/usr/bin/rootlesskit-docker-proxy
 	install -D -m 0755 engine/contrib/dockerd-rootless.sh debian/docker-ce-rootless-extras/usr/bin/dockerd-rootless.sh
 	install -D -m 0755 engine/contrib/dockerd-rootless-setuptool.sh debian/docker-ce-rootless-extras/usr/bin/dockerd-rootless-setuptool.sh
 	# TODO: how can we install vpnkit?
