@@ -48,13 +48,11 @@ TMP_GOPATH="/go" ${RPM_BUILD_DIR}/src/engine/hack/dockerfile/install/install.sh 
 install -D -p -m 0755 engine/contrib/dockerd-rootless.sh ${RPM_BUILD_ROOT}%{_bindir}/dockerd-rootless.sh
 install -D -p -m 0755 engine/contrib/dockerd-rootless-setuptool.sh ${RPM_BUILD_ROOT}%{_bindir}/dockerd-rootless-setuptool.sh
 install -D -p -m 0755 /usr/local/bin/rootlesskit ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit
-install -D -p -m 0755 /usr/local/bin/rootlesskit-docker-proxy ${RPM_BUILD_ROOT}%{_bindir}/rootlesskit-docker-proxy
 
 %files
 %{_bindir}/dockerd-rootless.sh
 %{_bindir}/dockerd-rootless-setuptool.sh
 %{_bindir}/rootlesskit
-%{_bindir}/rootlesskit-docker-proxy
 
 %post
 
