@@ -35,7 +35,7 @@ DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
 # tagged a release with the same version.
 #
 # For other situations, specify DOCKER_CLI_REF and/or DOCKER_ENGINE_REF separately.
-REF                ?= HEAD
+REF                ?= "27.x"
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
 # DOCKER_COMPOSE_REF is the version of compose to package. It usually is a tag,
