@@ -8,12 +8,20 @@ ARG BUILD_IMAGE=registry.access.redhat.com/ubi9/ubi
 FROM ${GO_IMAGE} AS golang
 
 FROM ${BUILD_IMAGE} AS subscribed-image
-ARG RH_USER
-ARG RH_PASS
-RUN rm /etc/rhsm-host
-RUN subscription-manager register --username=$RH_USER --password=$RH_PASS
-RUN subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
-# RUN dnf config-manager --set-enabled codeready-builder-for-rhel-9-$(arch)-rpms
+RUN --mount=type=secret,id=rh-user --mount=type=secret,id=rh-pass <<-EOT
+	rm -f /etc/rhsm-host
+
+	if [ ! -f /run/secrets/rh-user ] || [ ! -f /run/secrets/rh-pass ]; then
+		echo "Either RH_USER or RH_PASS is not set. Running build without subscription."
+	else
+		subscription-manager register \
+			--username="$(cat /run/secrets/rh-user)" \
+			--password="$(cat /run/secrets/rh-pass)"
+
+		subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
+		# dnf config-manager --set-enabled codeready-builder-for-rhel-9-$(arch)-rpms
+	fi
+EOT
 
 FROM subscribed-image
 

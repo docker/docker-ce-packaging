@@ -11,7 +11,7 @@ ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docke
 BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
 ifdef RH_USER
-	RH_FLAGS=--build-arg RH_USER=$(RH_USER) --build-arg RH_PASS=$(RH_PASS)
+	RH_FLAGS=--secret id=rh-user,env=RH_USER --secret id=rh-pass,env=RH_PASS
 endif
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
