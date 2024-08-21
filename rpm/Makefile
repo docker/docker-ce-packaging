@@ -10,14 +10,19 @@ CLI_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/cli) && 
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
 BUILDX_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/buildx) && git rev-parse --short HEAD)
 
+ifdef RH_USER
+	RH_FLAGS=--secret id=rh-user,env=RH_USER --secret id=rh-pass,env=RH_PASS
+endif
 ifdef BUILD_IMAGE
 	BUILD_IMAGE_FLAG=--build-arg $(BUILD_IMAGE)
 endif
 BUILD?=DOCKER_BUILDKIT=1 \
 	docker build \
+	$(RH_FLAGS) \
 	$(BUILD_IMAGE_FLAG) \
 	--build-arg GO_IMAGE=$(GO_IMAGE) \
 	-t rpmbuild-$@/$(ARCH) \
+	--platform linux/$(ARCH) \
 	-f $@/Dockerfile \
 	.
 
@@ -48,6 +53,7 @@ RUN_FLAGS=
 # https://github.com/docker/docker-ce-packaging/pull/1006#issuecomment-2006878743
 RUN?=docker run --rm \
 	--security-opt seccomp=unconfined \
+	--platform linux/$(ARCH) \
 	-e PLATFORM \
 	-v $(CURDIR)/rpmbuild/SOURCES:/root/rpmbuild/SOURCES:ro \
 	-v $(CURDIR)/rpmbuild/$@/RPMS:/root/rpmbuild/RPMS \
@@ -57,7 +63,7 @@ RUN?=docker run --rm \
 
 FEDORA_RELEASES ?= fedora-40 fedora-39
 CENTOS_RELEASES ?= centos-9
-RHEL_RELEASES ?=
+RHEL_RELEASES ?= rhel-8 rhel-9
 
 DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES)
 BUNDLES := $(patsubst %,rpmbuild/bundles-ce-%-$(DPKG_ARCH).tar.gz,$(DISTROS))
