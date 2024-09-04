@@ -24,7 +24,14 @@ function install_rpm_containerd() {
 	# so this logic works for both cases.
 	# (See also same logic in install_debian_containerd)
 
-	if command -v dnf; then
+	if command -v dnf5; then
+		dnf --version
+
+		dnf config-manager addrepo --save-filename=docker-ce.repo --from-repofile="${REPO_URL}"
+		dnf config-manager setopt 'docker-ce-*.enabled=0'
+		dnf config-manager setopt 'docker-ce-test.enabled=1'
+		dnf makecache
+	elif command -v dnf; then
 		dnf --version
 
 		dnf config-manager --add-repo "${REPO_URL}"
