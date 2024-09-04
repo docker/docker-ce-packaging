@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_IMAGE
+ARG GO_IMAGE=golang:latest
 ARG DISTRO=raspbian
 ARG SUITE=bookworm
 ARG VERSION_ID=12
