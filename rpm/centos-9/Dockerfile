@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_IMAGE
+ARG GO_IMAGE=golang:latest
 ARG DISTRO=centos
 ARG SUITE=9
 ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:stream${SUITE}
@@ -12,9 +12,9 @@ ENV GOPROXY=https://proxy.golang.org|direct
 ENV GO111MODULE=off
 ENV GOPATH=/go
 ENV GOTOOLCHAIN=local
-ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
-ENV AUTO_GOPATH 1
-ENV DOCKER_BUILDTAGS exclude_graphdriver_btrfs
+ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+ENV AUTO_GOPATH=1
+ENV DOCKER_BUILDTAGS=exclude_graphdriver_btrfs
 ARG DISTRO
 ARG SUITE
 ENV DISTRO=${DISTRO}
