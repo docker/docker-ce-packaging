@@ -1,4 +1,4 @@
-ARCH=$(shell uname -m)
+ARCH?=$(shell uname -m)
 
 # These are the architecture formats as used in release-packaging Jenkinsfile
 # This is an ugly chimera, nobody uses this combination of dpkg and uname formats
