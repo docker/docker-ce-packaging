@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_IMAGE
+ARG GO_IMAGE=golang:latest
 ARG DISTRO=rhel
 ARG SUITE=8
 ARG BUILD_IMAGE=registry.access.redhat.com/ubi8/ubi
