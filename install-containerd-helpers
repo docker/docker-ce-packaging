@@ -27,7 +27,12 @@ function install_rpm_containerd() {
 	if command -v dnf5; then
 		dnf --version
 
-		dnf config-manager addrepo --save-filename=docker-ce.repo --from-repofile="${REPO_URL}"
+		# FIXME(thaJeztah); strip empty lines as workaround for https://github.com/rpm-software-management/dnf5/issues/1603
+		TMP_REPO_FILE="$(mktemp --dry-run)"
+		curl -fsSL "${REPO_URL}" | tr -s '\n' > "${TMP_REPO_FILE}"
+		dnf config-manager addrepo --save-filename=docker-ce.repo  --overwrite --from-repofile="${TMP_REPO_FILE}"
+		rm -f "${TMP_REPO_FILE}"
+		# dnf config-manager addrepo --save-filename=docker-ce.repo --from-repofile="${REPO_URL}"
 		dnf config-manager setopt 'docker-ce-*.enabled=0'
 		dnf config-manager setopt 'docker-ce-test.enabled=1'
 		dnf makecache
