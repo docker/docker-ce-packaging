@@ -45,6 +45,9 @@ DOCKER_COMPOSE_REF ?= v2.29.2
 # but can be a valid git reference in DOCKER_BUILDX_REPO.
 DOCKER_BUILDX_REF  ?= v0.16.2
 
+DOCKER_BUILDX_VERSION ?= $(DOCKER_BUILDX_REF)
+DOCKER_COMPOSE_VERSION ?= $(DOCKER_COMPOSE_REF)
+
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
 VERIFY_PACKAGE_REPO ?= prod
