@@ -91,6 +91,10 @@ jobs:
           export IMAGE=${{ inputs.image }}
           export ARCH=${{ inputs.arch }}
           
+          if [ "$ARCH" == "armhf" ]; then
+              export VERIFY_PLATFORM="--platform linux/arm/v7"
+          fi
+
           make verify
 
       -
