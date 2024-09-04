@@ -24,15 +24,17 @@ function install_rpm_containerd() {
 	# so this logic works for both cases.
 	# (See also same logic in install_debian_containerd)
 
-	if dnf --version; then
+	if command -v dnf; then
+		dnf --version
+
 		dnf config-manager --add-repo "${REPO_URL}"
-		dnf config-manager --set-disabled docker-ce-*
-		dnf config-manager --set-enabled docker-ce-test
+		dnf config-manager --set-disabled 'docker-ce-*'
+		dnf config-manager --set-enabled 'docker-ce-test'
 		dnf makecache
 	else
 		yum-config-manager --add-repo "${REPO_URL}"
-		yum-config-manager --disable docker-ce-*
-		yum-config-manager --enable docker-ce-test
+		yum-config-manager --disable 'docker-ce-*'
+		yum-config-manager --enable 'docker-ce-test'
 		yum makecache
 	fi
 }
