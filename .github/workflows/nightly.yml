@@ -1,45 +1,48 @@
 name: nightly
 
 on:
-    schedule:
-        - cron: '0 0 * * *'
-    workflow_dispatch: {}
+    workflow_dispatch:
+    pull_request:
 
 jobs:
-    build:
-        runs-on: selfhosted
+    packages:
         strategy:
             fail-fast: false
             matrix:
-                target:
-                    - debian-bookworm
-        steps:
-            -
-                name: Set up Docker Buildx
-                uses: docker/setup-buildx-action@v1
+                arch:
+                    - amd64
+                    - arm64
+                dist:
+                    #- {target: "debian-bullseye", image: "debian:bullseye"}
+                    - {target: "debian-bookworm", image: "debian:bookworm"}
+                    #- {target: "ubuntu-focal", image: "ubuntu:focal"}
+                    - {target: "ubuntu-jammy", image: "ubuntu:jammy"}
+                    - {target: "ubuntu-noble", image: "ubuntu:noble"}
 
-            -
-                name: Checkout
-                uses: actions/checkout@v3
+                    - {target: "centos-9", image: "quay.io/centos/centos:stream9"}
+                    #- {target: "fedora-39", image: "fedora:39"}
+                    - {target: "fedora-40", image: "fedora:40"}
+                    #- {target: "rhel-8", image: "registry.access.redhat.com/ubi8/ubi"}
+                    #- {target: "rhel-9", image: "registry.access.redhat.com/ubi9/ubi"}
+                include:
+                    #- arch: armhf
+                    #  dist: {target: "debian-bullseye", image: "debian:bullseye"}
+                    - arch: armhf
+                      dist: {target: "debian-bookworm", image: "debian:bookworm"}
+                    #- arch: armhf
+                    #  dist: {target: "ubuntu-focal", image: "ubuntu:focal"}
+                    #- arch: armhf
+                    #  dist: {target: "ubuntu-jammy", image: "ubuntu:jammy"}
+                    - arch: armhf
+                      dist: {target: "ubuntu-noble", image: "ubuntu:noble"}
+                # TODO
+                #    - arch: armhf
+                #      dist: {target: "raspbian-bullseye", image: "balenalib/rpi-raspbian:bullseye"}
+                #    - arch: armhf
+                #      dist: {target: "raspbian-bookworm", image: "balenalib/rpi-raspbian:bookworm"}
+        uses: ./.github/workflows/.nightly.yml
+        with:
+            arch: ${{ matrix.arch }}
+            target: ${{ matrix.dist.target }}
+            image: ${{ matrix.dist.image }}
 
-            -
-                name: Build
-                run: |
-                    export VERSION=$(date +%Y%m%d)
-                    export REF=master
-
-                    export DOCKER_BUILDX_REF=master
-                    export DOCKER_BUILDX_VERSION=$VERSION
-
-                    export DOCKER_COMPOSE_REF=main
-                    export DOCKER_COMPOSE_VERSION=$VERSION
-
-                    make ${{ matrix.target }}
-
-            -
-                name: Artifact
-                uses: actions/upload-artifact@v2
-                with:
-                    name: nightly-${{ matrix.target }}
-                    path: deb/debbuild/${{ matrix.target }}
-                    retention-days: 3
