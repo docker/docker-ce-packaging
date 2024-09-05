@@ -103,13 +103,9 @@ jobs:
         name: Artifact deb
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-deb-${{ inputs.target }}-${{ inputs.arch }}
-          path: deb/debbuild/${{ inputs.target }}
-          retention-days: 1
-      -
-        name: Artifact rpm
-        uses: actions/upload-artifact@v4
-        with:
-          name: nightly-rpm-${{ inputs.target }}-${{ inputs.arch }}
-          path: rpm/rpmbuild/${{ inputs.target }}
+          name: nightly-${{ inputs.target }}-${{ inputs.arch }}
+          path: |
+            deb/debbuild/${{ inputs.target }}
+            rpm/rpmbuild/${{ inputs.target }}
+            static/build
           retention-days: 1
