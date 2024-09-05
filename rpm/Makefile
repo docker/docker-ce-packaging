@@ -61,7 +61,7 @@ RUN?=docker run --rm \
 	$(RUN_FLAGS) \
 	rpmbuild-$@/$(ARCH) $(RPMBUILD_FLAGS)
 
-FEDORA_RELEASES ?= fedora-40 fedora-39
+FEDORA_RELEASES ?= fedora-39 fedora-40 fedora-41
 CENTOS_RELEASES ?= centos-9
 RHEL_RELEASES ?= rhel-8 rhel-9
 
