@@ -25,12 +25,16 @@ jobs:
                     #- {target: "rhel-8", image: "registry.access.redhat.com/ubi8/ubi"}
                     #- {target: "rhel-9", image: "registry.access.redhat.com/ubi9/ubi"}
                 include:
-                    - arch: static
+                    - arch: static-linux
                       dist: {target: "static", image: ""}
+                    - arch: cross-mac
+                      dist: {target: "static", image: ""}
+                    - arch: cross-win
+                      dist: {target: "static", image: ""}
+                    - arch: armhf
+                      dist: {target: "debian-bookworm", image: "debian:bookworm"}
                     #- arch: armhf
                     #  dist: {target: "debian-bullseye", image: "debian:bullseye"}
-                    #- arch: armhf
-                    #  dist: {target: "debian-bookworm", image: "debian:bookworm"}
                     #- arch: armhf
                     #  dist: {target: "ubuntu-focal", image: "ubuntu:focal"}
                     #- arch: armhf
