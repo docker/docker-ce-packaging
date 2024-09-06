@@ -1,4 +1,4 @@
-ARCH=$(shell uname -m)
+ARCH?=$(shell uname -m)
 
 # These are the architecture formats as used in release-packaging Jenkinsfile
 # This is an ugly chimera, nobody uses this combination of dpkg and uname formats
@@ -44,6 +44,9 @@ DOCKER_COMPOSE_REF ?= v2.29.2
 # DOCKER_BUILDX_REF is the version of compose to package. It usually is a tag,
 # but can be a valid git reference in DOCKER_BUILDX_REPO.
 DOCKER_BUILDX_REF  ?= v0.16.2
+
+DOCKER_BUILDX_VERSION ?= $(DOCKER_BUILDX_REF)
+DOCKER_COMPOSE_VERSION ?= $(DOCKER_COMPOSE_REF)
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
