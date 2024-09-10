@@ -22,6 +22,7 @@ jobs:
           - ubuntu-focal
           - ubuntu-jammy
           - ubuntu-noble
+          - ubuntu-oracular
     steps:
       -
         name: Checkout
