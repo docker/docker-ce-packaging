@@ -49,7 +49,6 @@ BuildRequires: which
 # conflicting packages
 Conflicts: docker
 Conflicts: docker-io
-Conflicts: docker-ee
 
 # Obsolete packages
 Obsoletes: docker-ce-selinux
