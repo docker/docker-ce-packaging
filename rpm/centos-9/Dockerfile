@@ -25,7 +25,7 @@ ENV SUITE=${SUITE}
 # https://forums.centos.org/viewtopic.php?f=54&t=72574, and
 # https://access.redhat.com/solutions/3720351
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-RUN dnf install -y rpm-build rpmlint dnf-plugins-core
+RUN dnf install -y rpm-build dnf-plugins-core
 RUN dnf config-manager --set-enabled crb
 
 COPY --link SPECS /root/rpmbuild/SPECS

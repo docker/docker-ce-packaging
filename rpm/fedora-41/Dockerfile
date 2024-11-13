@@ -18,7 +18,7 @@ ARG DISTRO
 ARG SUITE
 ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
-RUN dnf install -y rpm-build rpmlint dnf-plugins-core
+RUN dnf install -y rpm-build dnf-plugins-core
 # FIXME(thaJeztah): workaround for building on Fedora 41 on arm64
 #
 # This is the equivalent of https://github.com/docker/containerd-packaging/pull/390
