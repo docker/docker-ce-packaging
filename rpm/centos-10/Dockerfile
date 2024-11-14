@@ -3,7 +3,7 @@
 ARG GO_IMAGE=golang:latest
 ARG DISTRO=centos
 ARG SUITE=10
-ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:stream${SUITE}-development
+ARG BUILD_IMAGE=quay.io/centos/${DISTRO}:stream${SUITE}
 
 FROM ${GO_IMAGE} AS golang
 
