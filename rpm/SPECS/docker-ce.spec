@@ -35,7 +35,6 @@ BuildRequires: cmake
 BuildRequires: gcc
 BuildRequires: git
 BuildRequires: glibc-static
-BuildRequires: libarchive
 BuildRequires: libseccomp-devel
 BuildRequires: libselinux-devel
 BuildRequires: libtool
@@ -46,7 +45,6 @@ BuildRequires: pkgconfig(systemd)
 BuildRequires: selinux-policy-devel
 BuildRequires: systemd-devel
 BuildRequires: tar
-BuildRequires: which
 
 # conflicting packages
 Conflicts: docker
