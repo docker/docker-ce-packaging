@@ -18,7 +18,6 @@ Recommends: kmod
 Requires: docker-ce-cli
 Recommends: docker-ce-rootless-extras
 Requires: container-selinux >= 2:2.74
-Requires: libseccomp >= 2.3
 Requires: systemd
 Requires: iptables
 %if %{undefined rhel} || 0%{?rhel} < 9
@@ -36,7 +35,6 @@ BuildRequires: gcc
 BuildRequires: git
 BuildRequires: glibc-static
 BuildRequires: libarchive
-BuildRequires: libseccomp-devel
 BuildRequires: libselinux-devel
 BuildRequires: libtool
 BuildRequires: libtool-ltdl-devel
