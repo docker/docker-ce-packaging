@@ -17,7 +17,7 @@ Requires: /usr/sbin/groupadd
 Recommends: kmod
 Requires: docker-ce-cli
 Recommends: docker-ce-rootless-extras
-Requires: container-selinux >= 2:2.74
+Requires: container-selinux
 Requires: systemd
 Requires: iptables
 %if %{undefined rhel} || 0%{?rhel} < 9
