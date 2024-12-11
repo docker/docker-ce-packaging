@@ -40,7 +40,6 @@ BuildRequires: libtool-ltdl-devel
 BuildRequires: make
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(systemd)
-BuildRequires: selinux-policy-devel
 BuildRequires: systemd-devel
 BuildRequires: tar
 BuildRequires: which
