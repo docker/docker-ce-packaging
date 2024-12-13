@@ -49,8 +49,7 @@ function verify_deb() {
 		ca-certificates \
 		curl \
 		gnupg2 \
-		lsb-release \
-		software-properties-common
+		lsb-release
 
 	DIST_ID=$(source /etc/os-release; echo "$ID")
 	DIST_VERSION=$(lsb_release -sc)
