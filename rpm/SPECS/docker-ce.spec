@@ -34,7 +34,6 @@ BuildRequires: cmake
 BuildRequires: gcc
 BuildRequires: git
 BuildRequires: glibc-static
-BuildRequires: libarchive
 BuildRequires: libtool
 BuildRequires: libtool-ltdl-devel
 BuildRequires: make
