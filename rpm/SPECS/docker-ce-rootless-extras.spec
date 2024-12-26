@@ -7,7 +7,7 @@ Epoch: 0
 Source0: engine.tgz
 Summary: Rootless support for Docker
 Group: Tools/Docker
-License: ASL 2.0
+License: Apache-2.0
 URL: https://docs.docker.com/engine/security/rootless/
 Vendor: Docker
 Packager: Docker <support@docker.com>

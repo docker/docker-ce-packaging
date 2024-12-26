@@ -7,7 +7,7 @@ Epoch: 0
 Source0: buildx.tgz
 Summary: Docker Buildx plugin for the Docker CLI
 Group: Tools/Docker
-License: ASL 2.0
+License: Apache-2.0
 URL: https://github.com/docker/buildx
 Vendor: Docker
 Packager: Docker <support@docker.com>
