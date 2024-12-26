@@ -7,7 +7,7 @@ Epoch: 0
 Source0: compose.tgz
 Summary: Docker Compose (V2) plugin for the Docker CLI
 Group: Tools/Docker
-License: ASL 2.0
+License: Apache-2.0
 URL: https://github.com/docker/compose/
 Vendor: Docker
 Packager: Docker <support@docker.com>

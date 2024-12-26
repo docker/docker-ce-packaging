@@ -6,7 +6,7 @@ Release: %{_release}%{?dist}
 Epoch: 1
 Summary: The open-source application container engine
 Group: Tools/Docker
-License: ASL 2.0
+License: Apache-2.0
 Source0: cli.tgz
 URL: https://www.docker.com
 Vendor: Docker
