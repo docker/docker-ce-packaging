@@ -48,6 +48,9 @@ mkdir -p /go/src/github.com/docker
 rm -f /go/src/github.com/docker/cli
 ln -snf ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
 make -C /go/src/github.com/docker/cli DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} dynbinary manpages
+/go/src/github.com/docker/cli/build/docker completion bash > /go/src/github.com/docker/cli/contrib/completion/bash/docker
+/go/src/github.com/docker/cli/build/docker completion zsh > /go/src/github.com/docker/cli/contrib/completion/zsh/_docker
+/go/src/github.com/docker/cli/build/docker completion fish > /go/src/github.com/docker/cli/contrib/completion/fish/docker.fish
 
 %check
 ver="$(cli/build/docker --version)"; \
