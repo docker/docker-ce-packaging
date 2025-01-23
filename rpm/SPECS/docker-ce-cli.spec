@@ -47,10 +47,7 @@ depending on a particular stack or provider.
 mkdir -p /go/src/github.com/docker
 rm -f /go/src/github.com/docker/cli
 ln -snf ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
-make -C /go/src/github.com/docker/cli DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} dynbinary manpages
-/go/src/github.com/docker/cli/build/docker completion bash > /go/src/github.com/docker/cli/contrib/completion/bash/docker
-/go/src/github.com/docker/cli/build/docker completion zsh > /go/src/github.com/docker/cli/contrib/completion/zsh/_docker
-/go/src/github.com/docker/cli/build/docker completion fish > /go/src/github.com/docker/cli/contrib/completion/fish/docker.fish
+make -C /go/src/github.com/docker/cli DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} dynbinary manpages shell-completion
 
 %check
 ver="$(cli/build/docker --version)"; \
@@ -61,9 +58,9 @@ ver="$(cli/build/docker --version)"; \
 install -D -p -m 755 cli/build/docker ${RPM_BUILD_ROOT}%{_bindir}/docker
 
 # add bash, zsh, and fish completions
-install -D -p -m 644 cli/contrib/completion/bash/docker ${RPM_BUILD_ROOT}%{_datadir}/bash-completion/completions/docker
-install -D -p -m 644 cli/contrib/completion/zsh/_docker ${RPM_BUILD_ROOT}%{_datadir}/zsh/vendor-completions/_docker
-install -D -p -m 644 cli/contrib/completion/fish/docker.fish ${RPM_BUILD_ROOT}%{_datadir}/fish/vendor_completions.d/docker.fish
+install -D -p -m 644 cli/build/completion/bash/docker ${RPM_BUILD_ROOT}%{_datadir}/bash-completion/completions/docker
+install -D -p -m 644 cli/build/completion/zsh/_docker ${RPM_BUILD_ROOT}%{_datadir}/zsh/vendor-completions/_docker
+install -D -p -m 644 cli/build/completion/fish/docker.fish ${RPM_BUILD_ROOT}%{_datadir}/fish/vendor_completions.d/docker.fish
 
 # install manpages
 # Note: we need to create destination dirs first (instead "install -D") due to wildcards used.
