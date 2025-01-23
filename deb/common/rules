@@ -26,7 +26,8 @@ override_dh_auto_build:
 	cd engine && TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
 	cd engine && TMP_GOPATH="/go" hack/dockerfile/install/install.sh rootlesskit dynamic
 	# Build the CLI
-	cd /go/src/github.com/docker/cli && VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) LDFLAGS='' GO_LINKMODE=dynamic ./scripts/build/binary && DISABLE_WARN_OUTSIDE_CONTAINER=1 LDFLAGS='' make manpages
+	cd /go/src/github.com/docker/cli \
+		&& make DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=$(VERSION) GITCOMMIT=$(CLI_GITCOMMIT) LDFLAGS='' dynbinary manpages
 
 	# Build buildx plugin
 	cd /go/src/github.com/docker/buildx \
