@@ -72,6 +72,35 @@ override_dh_auto_install:
 	install -D -p -m 0755 cli/build/docker debian/docker-ce-cli/usr/bin/docker
 
 	# docker-ce-cli shell-completion
+	#
+	# We are manually installing bash completions instead of using the "dh_bash-completion"
+	# debhelper (see [1]); dh_bash-completion only supports bash, and none of the other shells,
+	# which meant that we had to install 2 out of 3 manually, which was confusing ("what about
+	# Bash?"). Given that locations to install these completion scripts are well-known, we
+	# can safely use the manual approach for installing  them.
+	#
+	# In future, can consider using "dh_shell_completions" (see [2]), which supports bash, zsh
+	# and fish. However, "dh_shell_completions" is still really premature, and not available
+	# in stable releases. So, currently, adding it as build-dependency, especially since
+	# these are well-known, may not be a good choice, but we can revisit that in future
+	# if things mature in this area.
+	#
+	# Observant readers may notice that we don't include PowerShell completion in
+	# this list (even though Cobra provides them, and PowerShell *can* be installed
+	# oon Linux). The short story is that there's no well-defined location, nor
+	# a well-defined approach for this.
+	#
+	# The PowerShell maintainers (see [3]) considering that no completion scripts
+	# are needed for anything following the PowerShell specifications, and for
+	# anything else, PowerShell is capable enough to use zsh and bash completions.
+	#
+	# All of the above taken into account; it's fuzzy enough to just leave it as
+	# an exercise for the user to decide what to do.
+	#
+	# [1]: https://manpages.debian.org/bookworm/bash-completion/dh_bash-completion.1.en.html
+	# [2]: https://manpages.debian.org/testing/dh-shell-completions/dh_shell_completions.1.en.html
+	# [3]: https://github.com/PowerShell/PowerShell/issues/17582
+	install -D -p -m 0644 cli/contrib/completion/bash/docker debian/docker-ce-cli/usr/share/bash-completion/completions/docker
 	install -D -p -m 0644 cli/contrib/completion/fish/docker.fish debian/docker-ce-cli/usr/share/fish/vendor_completions.d/docker.fish
 	install -D -p -m 0644 cli/contrib/completion/zsh/_docker debian/docker-ce-cli/usr/share/zsh/vendor-completions/_docker
 
