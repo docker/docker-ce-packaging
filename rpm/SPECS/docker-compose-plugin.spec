@@ -28,18 +28,14 @@ Docker Compose V1 ('docker-compose').
 %setup -q -c -n src -a 0
 
 %build
-pushd ${RPM_BUILD_DIR}/src/compose
-    make VERSION=%{_compose_version} DESTDIR=./bin build
-popd
+make -C ${RPM_BUILD_DIR}/src/compose VERSION=%{_compose_version} DESTDIR=./bin build
 
 %check
 ver="$(${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-compose docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $1 == "Version" { print $2 }')"; \
     test "$ver" = "%{_compose_version}" && echo "PASS: docker-compose version OK" || (echo "FAIL: docker-compose version ($ver) did not match" && exit 1)
 
 %install
-pushd ${RPM_BUILD_DIR}/src/compose
-    install -D -p -m 0755 bin/docker-compose ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-compose
-popd
+install -D -p -m 0755 ${RPM_BUILD_DIR}/src/compose/bin/docker-compose ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-compose
 
 for f in LICENSE MAINTAINERS NOTICE README.md; do
     install -D -p -m 0644 "${RPM_BUILD_DIR}/src/compose/$f" "docker-compose-plugin-docs/$f"
