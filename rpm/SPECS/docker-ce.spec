@@ -14,7 +14,7 @@ Packager: Docker <support@docker.com>
 
 Requires: /usr/sbin/groupadd
 # Provides modprobe, which we use to load br_netfilter if not loaded.
-Recommends: kmod
+Suggests: kmod
 Requires: docker-ce-cli
 Recommends: docker-ce-rootless-extras
 Requires: container-selinux
