@@ -47,9 +47,7 @@ depending on a particular stack or provider.
 mkdir -p /go/src/github.com/docker
 rm -f /go/src/github.com/docker/cli
 ln -snf ${RPM_BUILD_DIR}/src/cli /go/src/github.com/docker/cli
-pushd /go/src/github.com/docker/cli
-make DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} dynbinary manpages
-popd
+make -C /go/src/github.com/docker/cli DISABLE_WARN_OUTSIDE_CONTAINER=1 VERSION=%{_origversion} GITCOMMIT=%{_gitcommit_cli} dynbinary manpages
 
 %check
 ver="$(cli/build/docker --version)"; \
