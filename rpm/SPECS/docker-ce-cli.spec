@@ -62,11 +62,14 @@ install -D -p -m 644 cli/build/completion/bash/docker ${RPM_BUILD_ROOT}%{_datadi
 install -D -p -m 644 cli/build/completion/zsh/_docker ${RPM_BUILD_ROOT}%{_datadir}/zsh/vendor-completions/_docker
 install -D -p -m 644 cli/build/completion/fish/docker.fish ${RPM_BUILD_ROOT}%{_datadir}/fish/vendor_completions.d/docker.fish
 
-# install manpages
-# Note: we need to create destination dirs first (instead "install -D") due to wildcards used.
-install -d ${RPM_BUILD_ROOT}%{_mandir}/man1 && install -p -m 644 cli/man/man1/*.1 ${RPM_BUILD_ROOT}%{_mandir}/man1
-install -d ${RPM_BUILD_ROOT}%{_mandir}/man5 && install -p -m 644 cli/man/man5/*.5 ${RPM_BUILD_ROOT}%{_mandir}/man5
-install -d ${RPM_BUILD_ROOT}%{_mandir}/man8 && install -p -m 644 cli/man/man8/*.8 ${RPM_BUILD_ROOT}%{_mandir}/man8
+# install man-pages
+for sec in $(seq 1 9); do
+    if [ -d "cli/man/man${sec}" ]; then
+        # Note: we need to create destination dirs first (instead "install -D") due to wildcards used.
+        install -d ${RPM_BUILD_ROOT}%{_mandir}/man${sec} && \
+        install -p -m 644 cli/man/man${sec}/*.${sec} ${RPM_BUILD_ROOT}%{_mandir}/man${sec};
+    fi
+done
 
 mkdir -p build-docs
 for cli_file in LICENSE MAINTAINERS NOTICE README.md; do
@@ -80,10 +83,7 @@ done
 %{_datadir}/bash-completion/completions/docker
 %{_datadir}/zsh/vendor-completions/_docker
 %{_datadir}/fish/vendor_completions.d/docker.fish
-%doc
-%{_mandir}/man1/*
-%{_mandir}/man5/*
-%{_mandir}/man8/*
+%{_mandir}/man*/*
 
 
 %post
