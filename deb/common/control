@@ -31,12 +31,12 @@ Recommends: apparmor,
             ca-certificates,
             docker-ce-rootless-extras,
             git,
-            kmod,
             libltdl7,
             pigz,
             procps,
             xz-utils
-Suggests: cgroupfs-mount | cgroup-lite
+Suggests: cgroupfs-mount | cgroup-lite,
+            kmod,
 Conflicts: docker (<< 1.5~),
            docker-engine,
            docker.io
