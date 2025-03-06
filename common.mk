@@ -10,7 +10,7 @@ ARCH=$(shell uname -m)
 # Adding new architectures or changing the format in release-packaging will prevent make
 # from finding the corresponding rule unless this list is updated.
 # Or Jenkinsfiles/Makefiles removed (🎵 Gotta have faith-a-faith-a-faith... 🎵)
-ARCHES:=amd64 aarch64 armhf armel s390x ppc64le
+ARCHES:=amd64 aarch64 armhf armel ppc64le riscv64 s390x
 
 BUILDTIME=$(shell date -u -d "@$${SOURCE_DATE_EPOCH:-$$(date +%s)}" --rfc-3339 ns 2> /dev/null | sed -e 's/ /T/')
 CHOWN:=docker run --rm -v $(CURDIR):/v -w /v alpine chown
