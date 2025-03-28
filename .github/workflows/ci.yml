@@ -23,6 +23,7 @@ jobs:
           - ubuntu-jammy
           - ubuntu-noble
           - ubuntu-oracular
+          - fedora-42
     steps:
       -
         name: Checkout
