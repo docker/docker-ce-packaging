@@ -2,6 +2,26 @@
 
 def branch = env.CHANGE_TARGET ?: env.BRANCH_NAME
 
+properties(
+    [
+        parameters([
+            string(name: 'GO_VERSION',           description: 'Version of Go to use to build.'),
+            string(name: 'DOCKER_CLI_REPO',      description: 'Docker CLI git source repository.'),
+            string(name: 'DOCKER_CLI_REF',       description: 'Docker CLI reference to build from (usually a branch).'),
+            string(name: 'DOCKER_ENGINE_REPO',   description: 'Docker Engine git source repository.'),
+            string(name: 'DOCKER_ENGINE_REF',    description: 'Docker Engine reference to build from (usually a branch).'),
+            string(name: 'DOCKER_SCAN_REPO',     description: 'Docker Scan git source repository.'),
+            string(name: 'DOCKER_SCAN_REF',      description: 'Docker Scan reference to build from (usually a branch).'),
+            string(name: 'DOCKER_COMPOSE_REPO',  description: 'Docker Compose git source repository.'),
+            string(name: 'DOCKER_COMPOSE_REF',   description: 'Docker Compose reference to build from (usually a branch).'),
+            string(name: 'DOCKER_BUILDX_REPO',   description: 'Docker Buildx git source repository.'),
+            string(name: 'DOCKER_BUILDX_REF',    description: 'Docker Buildx reference to build from (usually a branch).'),
+            string(name: 'CONTAINERD_VERSION',   description: 'Containerd version to build for the static packages. Leave empty to build the default version as specified in the Dockerfile in moby/moby.'),
+            string(name: 'RUNC_VERSION',         description: 'Runc version to build for the static packages. Leave empty to build the default version as specified in the Dockerfile in moby/moby.'),
+        ])
+    ]
+)
+
 def pkgs = [
     [target: "centos-9",                 image: "quay.io/centos/centos:stream9",          arches: ["amd64", "aarch64"]],
     [target: "centos-10",                image: "quay.io/centos/centos:stream10",         arches: ["amd64", "aarch64"]],          // CentOS Stream 10 (EOL: 2030)
