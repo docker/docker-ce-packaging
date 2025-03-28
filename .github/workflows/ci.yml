@@ -23,6 +23,7 @@ jobs:
           - ubuntu-jammy
           - ubuntu-noble
           - ubuntu-oracular
+          - ubuntu-plucky
           - fedora-41
           - fedora-42
           - centos-9
