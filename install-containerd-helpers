@@ -65,7 +65,9 @@ function install_debian_containerd() {
 	# Make sure ca-certificates are up-to-date
 	update-ca-certificates -f
 
-	curl -fsSL "${REPO_URL}/gpg" | apt-key add -
+	install -m 0755 -d /etc/apt/keyrings
+	curl -fsSL "${REPO_URL}/gpg" | tee /etc/apt/keyrings/docker.asc
+	chmod a+r /etc/apt/keyrings/docker.asc
 
 	if [ "${DIST_VERSION}" = "sid" ]; then
 		echo 'Debian sid ("unstable") cannot be used for packaging: replace with the actual codename'
@@ -77,7 +79,7 @@ function install_debian_containerd() {
 	# Once a containerd package becomes stable it will also be available in the test channel,
 	# so this logic works for both cases.
 	# (See also same logic in install_rpm_containerd)
-	echo "deb [arch=${ARCH}] ${REPO_URL} ${DIST_VERSION} test" > /etc/apt/sources.list.d/docker.list
+	echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.asc] ${REPO_URL} ${DIST_VERSION} test" > /etc/apt/sources.list.d/docker.list
 
 	apt-get update
 }
