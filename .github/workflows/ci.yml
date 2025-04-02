@@ -26,6 +26,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60 # guardrails timeout for the whole job
     strategy:
       fail-fast: false
       matrix:
