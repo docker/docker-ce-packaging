@@ -50,7 +50,7 @@ RUN?=docker run --rm \
 	$(RUN_FLAGS) \
 	debbuild-$@/$(ARCH)
 
-DEBIAN_VERSIONS ?= debian-bullseye debian-bookworm
+DEBIAN_VERSIONS ?= debian-bullseye debian-bookworm debian-trixie
 UBUNTU_VERSIONS ?= ubuntu-focal ubuntu-jammy ubuntu-noble ubuntu-oracular ubuntu-plucky
 RASPBIAN_VERSIONS ?= raspbian-bullseye raspbian-bookworm
 DISTROS := $(DEBIAN_VERSIONS) $(UBUNTU_VERSIONS) $(RASPBIAN_VERSIONS)
