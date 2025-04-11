@@ -33,6 +33,7 @@ jobs:
         target:
           - debian-bullseye
           - debian-bookworm
+          - debian-trixie
           - ubuntu-focal
           - ubuntu-jammy
           - ubuntu-noble
