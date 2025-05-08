@@ -11,6 +11,8 @@ mkdir -p /root/build-deb/buildx
 tar -C /root/build-deb -xzf /sources/buildx.tgz
 mkdir -p /root/build-deb/compose
 tar -C /root/build-deb -xzf /sources/compose.tgz
+mkdir -p /root/build-deb/model
+tar -C /root/build-deb -xzf /sources/model.tgz
 
 # link them to their canonical path
 mkdir -p /go/src/github.com/docker
@@ -18,6 +20,7 @@ ln -snf /root/build-deb/engine /go/src/github.com/docker/docker
 ln -snf /root/build-deb/cli /go/src/github.com/docker/cli
 ln -snf /root/build-deb/buildx /go/src/github.com/docker/buildx
 ln -snf /root/build-deb/compose /go/src/github.com/docker/compose
+ln -snf /root/build-deb/model /go/src/github.com/docker/model-cli
 
 EPOCH="${EPOCH:-}"
 EPOCH_SEP=""
