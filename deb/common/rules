@@ -123,6 +123,12 @@ override_dh_auto_install:
 	install -D -p -m 0755 engine/contrib/dockerd-rootless-setuptool.sh debian/docker-ce-rootless-extras/usr/bin/dockerd-rootless-setuptool.sh
 	# TODO: how can we install vpnkit?
 
+	# install systemd sysusers config
+	mkdir -p debian/docker-ce/etc/sysusers.d
+	echo "g docker -" >> debian/docker-ce/etc/sysusers.d/docker.conf
+	chmod 0644 debian/docker-ce/etc/sysusers.d/docker.conf
+	# install -D -p -m 0644 engine/contrib/systemd-sysusers/docker.conf debian/docker-ce/etc/sysusers.d/docker.conf
+
 override_dh_installinit:
 	# use "docker" as our service name, not "docker-ce"
 	dh_installinit --name=docker
