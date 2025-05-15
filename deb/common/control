@@ -58,6 +58,7 @@ Architecture: linux-any
 Depends: ${shlibs:Depends}
 Recommends: docker-buildx-plugin,
             docker-compose-plugin
+Suggests: docker-model-plugin
 Conflicts: docker (<< 1.5~),
            docker-engine,
            docker.io
@@ -113,3 +114,12 @@ Description: Docker Compose (V2) plugin for the Docker CLI.
  The binary can also be run standalone as a direct replacement for
  Docker Compose V1 ('docker-compose').
 Homepage: https://github.com/docker/compose
+
+Package: docker-model-plugin
+Priority: optional
+Architecture: linux-any
+Enhances: docker-ce-cli
+Description: Docker Model Runner plugin for the Docker CLI.
+ .
+ This plugin provides the 'docker model' subcommand.
+Homepage: https://docs.docker.com/model-runner/

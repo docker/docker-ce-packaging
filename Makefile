@@ -15,7 +15,7 @@ clean-src:
 	$(RM) -r src
 
 .PHONY: src
-src: src/github.com/docker/cli src/github.com/docker/docker src/github.com/docker/buildx src/github.com/docker/compose ## clone source
+src: src/github.com/docker/cli src/github.com/docker/docker src/github.com/docker/buildx src/github.com/docker/compose src/github.com/docker/model-cli ## clone source
 
 ifdef CLI_DIR
 src/github.com/docker/cli:
@@ -45,6 +45,10 @@ src/github.com/docker/compose:
 	git init $@
 	git -C $@ remote add origin "$(DOCKER_COMPOSE_REPO)"
 
+src/github.com/docker/model-cli:
+	git init $@
+	git -C $@ remote add origin "$(DOCKER_MODEL_REPO)"
+
 .PHONY: checkout-cli
 checkout-cli: src/github.com/docker/cli
 	./scripts/checkout.sh src/github.com/docker/cli "$(DOCKER_CLI_REF)"
@@ -61,8 +65,12 @@ checkout-buildx: src/github.com/docker/buildx
 checkout-compose: src/github.com/docker/compose
 	./scripts/checkout.sh src/github.com/docker/compose "$(DOCKER_COMPOSE_REF)"
 
+.PHONY: checkout-model
+checkout-model: src/github.com/docker/model-cli
+	./scripts/checkout.sh src/github.com/docker/model-cli "$(DOCKER_MODEL_REF)"
+
 .PHONY: checkout
-checkout: checkout-cli checkout-docker checkout-buildx checkout-compose ## checkout source at the given reference(s)
+checkout: checkout-cli checkout-docker checkout-buildx checkout-compose checkout-model ## checkout source at the given reference(s)
 
 .PHONY: clean
 clean: clean-src ## remove build artifacts

@@ -19,6 +19,8 @@ Requires: /usr/sbin/groupadd
 Recommends: docker-buildx-plugin
 Recommends: docker-compose-plugin
 
+Suggests: docker-model-plugin
+
 BuildRequires: make
 BuildRequires: libtool-ltdl-devel
 BuildRequires: git

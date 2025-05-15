@@ -28,6 +28,7 @@ DOCKER_CLI_REPO     ?= https://github.com/docker/cli.git
 DOCKER_ENGINE_REPO  ?= https://github.com/docker/docker.git
 DOCKER_COMPOSE_REPO ?= https://github.com/docker/compose.git
 DOCKER_BUILDX_REPO  ?= https://github.com/docker/buildx.git
+DOCKER_MODEL_REPO   ?= https://github.com/docker/model-cli.git
 
 # REF can be used to specify the same branch or tag to use for *both* the CLI
 # and Engine source code. This can be useful if both the CLI and Engine have a
@@ -44,6 +45,9 @@ DOCKER_COMPOSE_REF ?= v2.36.0
 # DOCKER_BUILDX_REF is the version of compose to package. It usually is a tag,
 # but can be a valid git reference in DOCKER_BUILDX_REPO.
 DOCKER_BUILDX_REF  ?= v0.23.0
+# DOCKER_MODEL_REF is the version of model to package. It is usually a tag,
+# but can be a valid git reference in DOCKER_MODEL_REPO.
+DOCKER_MODEL_REF   ?= v0.1.23
 
 # Use "stage" to install dependencies from download-stage.docker.com during the
 # verify step. Leave empty or use any other value to install from download.docker.com
