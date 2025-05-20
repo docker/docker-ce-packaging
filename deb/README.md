@@ -29,7 +29,7 @@ make ubuntu
 
 ## Specifying a specific distro version
 ```shell
-make ubuntu-focal
+make ubuntu-noble
 ```
 
 ## Building the for all distros
