@@ -47,8 +47,8 @@ Description: Docker: the open-source application container engine
  lightweight container
  .
  Docker containers are both hardware-agnostic and platform-agnostic. This means
- they can run anywhere, from your laptop to the largest cloud compute instance and
- everything in between - and they don't require you to use a particular
+ they can run anywhere, from your laptop to the largest cloud compute instance
+ and everything in between - and they don't require you to use a particular
  language, framework or packaging system. That makes them great building blocks
  for deploying and scaling web apps, databases, and backend services without
  depending on a particular stack or provider.
@@ -69,8 +69,8 @@ Description: Docker CLI: the open-source application container engine
  lightweight container
  .
  Docker containers are both hardware-agnostic and platform-agnostic. This means
- they can run anywhere, from your laptop to the largest cloud compute instance and
- everything in between - and they don't require you to use a particular
+ they can run anywhere, from your laptop to the largest cloud compute instance
+ and everything in between - and they don't require you to use a particular
  language, framework or packaging system. That makes them great building blocks
  for deploying and scaling web apps, databases, and backend services without
  depending on a particular stack or provider.
@@ -88,10 +88,10 @@ Recommends: slirp4netns (>= 0.4.0)
 # Unlike RPM, DEB packages do not contain "Recommends: fuse-overlayfs (>= 0.7.0)" here,
 # because Debian (since 10) and Ubuntu support the kernel-mode rootless overlayfs.
 Description: Rootless support for Docker.
-  Use dockerd-rootless.sh to run the daemon.
-  Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh .
-  This package contains RootlessKit, but does not contain VPNKit.
-  Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
+ Use dockerd-rootless.sh to run the daemon.
+ Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.
+ This package contains RootlessKit, but does not contain VPNKit.
+ Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
 Homepage: https://docs.docker.com/engine/security/rootless/
 
 Package: docker-buildx-plugin
@@ -100,6 +100,7 @@ Replaces: docker-ce-cli
 Architecture: linux-any
 Enhances: docker-ce-cli
 Description: Docker Buildx cli plugin.
+ This plugin provides the 'docker buildx' subcommand.
 Homepage: https://github.com/docker/buildx
 
 Package: docker-compose-plugin
@@ -108,7 +109,6 @@ Architecture: linux-any
 Recommends: docker-buildx-plugin
 Enhances: docker-ce-cli
 Description: Docker Compose (V2) plugin for the Docker CLI.
- .
  This plugin provides the 'docker compose' subcommand.
  .
  The binary can also be run standalone as a direct replacement for
@@ -120,6 +120,5 @@ Priority: optional
 Architecture: linux-any
 Enhances: docker-ce-cli
 Description: Docker Model Runner plugin for the Docker CLI.
- .
  This plugin provides the 'docker model' subcommand.
 Homepage: https://docs.docker.com/model-runner/
