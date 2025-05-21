@@ -89,7 +89,7 @@ install -D -p -m 0644 engine/contrib/init/systemd/docker.service ${RPM_BUILD_ROO
 install -D -p -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT}%{_unitdir}/docker.socket
 
 # install manpages
-make -C ${RPM_BUILD_DIR}/src/engine/man DESTDIR=${RPM_BUILD_ROOT} prefix=%{_mandir} install
+make -C ${RPM_BUILD_DIR}/src/engine/man DESTDIR=${RPM_BUILD_ROOT} mandir=%{_mandir} install
 
 # create the config directory
 mkdir -p ${RPM_BUILD_ROOT}/etc/docker
