@@ -30,7 +30,7 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
         platform = "--platform=linux/${arch}"
         nodeLabel = "${nodeLabel}&&ubuntu"
     } else {
-        nodeLabel = "${nodeLabel}&&ubuntu-2004"
+        nodeLabel = "${nodeLabel}&&ubuntu-2204"
     }
     return { ->
         wrappedNode(label: nodeLabel, cleanWorkspace: true) {
@@ -57,7 +57,7 @@ def genBuildStep(LinkedHashMap pkg, String arch) {
 
 def build_package_steps = [
     'static-linux': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
+        wrappedNode(label: 'ubuntu-2204 && x86_64', cleanWorkspace: true) {
             stage("static-linux") {
                 // This is just a "dummy" stage to make the distro/arch visible
                 // in Jenkins' BlueOcean view, which truncates names....
@@ -78,7 +78,7 @@ def build_package_steps = [
         }
     },
     'cross-mac': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
+        wrappedNode(label: 'ubuntu-2204 && x86_64', cleanWorkspace: true) {
             stage("cross-mac") {
                 // This is just a "dummy" stage to make the distro/arch visible
                 // in Jenkins' BlueOcean view, which truncates names....
@@ -99,7 +99,7 @@ def build_package_steps = [
         }
     },
     'cross-win': { ->
-        wrappedNode(label: 'ubuntu-2004 && x86_64', cleanWorkspace: true) {
+        wrappedNode(label: 'ubuntu-2204 && x86_64', cleanWorkspace: true) {
             stage("cross-win") {
                 // This is just a "dummy" stage to make the distro/arch visible
                 // in Jenkins' BlueOcean view, which truncates names....
