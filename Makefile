@@ -99,7 +99,7 @@ static: checkout ## build static-compiled packages
 
 .PHONY: verify
 verify: ## verify installation of packages
-# to verify using packages from staging, use: make VERIFY_PACKAGE_REPO=stage IMAGE=ubuntu:focal verify
+# to verify using packages from staging, use: make VERIFY_PACKAGE_REPO=stage IMAGE=ubuntu:noble verify
 	docker run $(VERIFY_PLATFORM) --rm -i \
 		-v "$$(pwd):/v" \
 		-e DEBIAN_FRONTEND=noninteractive \
