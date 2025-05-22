@@ -15,9 +15,6 @@ Please provide the following information:
 
 **- What I did**
 
-**- How I did it**
-
-**- How to verify it**
 
 **- Description for the changelog**
 <!--
@@ -31,7 +28,3 @@ The PR must have a relevant impact/ label.
 ```markdown changelog
 
 ```
-
-
-**- A picture of a cute animal (not mandatory but encouraged)**
-
