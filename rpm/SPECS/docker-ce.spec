@@ -84,9 +84,6 @@ install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary-daemon/dockerd) ${R
 install -D -p -m 0755 $(readlink -f engine/bundles/dynbinary-daemon/docker-proxy) ${RPM_BUILD_ROOT}%{_bindir}/docker-proxy
 install -D -p -m 0755 /usr/local/bin/docker-init ${RPM_BUILD_ROOT}%{_libexecdir}/docker/docker-init
 
-# install systemd sysusers config
-install -D -p -m 0644 engine/contrib/systemd-sysusers/docker.conf ${RPM_BUILD_ROOT}%{_sysusersdir}/docker.conf
-
 # install systemd scripts
 install -D -p -m 0644 engine/contrib/init/systemd/docker.service ${RPM_BUILD_ROOT}%{_unitdir}/docker.service
 install -D -p -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT}%{_unitdir}/docker.socket
@@ -103,12 +100,14 @@ mkdir -p ${RPM_BUILD_ROOT}/etc/docker
 %{_libexecdir}/docker/docker-init
 %{_unitdir}/docker.service
 %{_unitdir}/docker.socket
-%{_sysusersdir}/docker.conf
 %{_mandir}/man*/*
 %dir /etc/docker
 
 %post
 %systemd_post docker.service
+if ! getent group docker > /dev/null; then
+    groupadd --system docker
+fi
 
 %preun
 %systemd_preun docker.service docker.socket
