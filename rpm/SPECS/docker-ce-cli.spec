@@ -22,7 +22,6 @@ Recommends: docker-compose-plugin
 Suggests: docker-model-plugin
 
 BuildRequires: make
-BuildRequires: libtool-ltdl-devel
 BuildRequires: git
 
 # conflicting packages
