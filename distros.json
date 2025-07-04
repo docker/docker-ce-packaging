@@ -1,0 +1,141 @@
+{
+    "centos-9": {
+        "image": "quay.io/centos/centos:stream9",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "CentOS Stream 9",
+        "end_of_life": "2027"
+    },
+    "centos-10": {
+        "image": "quay.io/centos/centos:stream10",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "CentOS Stream 10",
+        "end_of_life": "2030"
+    },
+    "debian-bullseye": {
+        "image": "debian:bullseye",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Debian 11 (oldstable)"
+    },
+    "debian-bookworm": {
+        "image": "debian:bookworm",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Debian 12 (stable)"
+    },
+    "debian-trixie": {
+        "image": "debian:trixie",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Debian 13 (Next stable)"
+    },
+    "fedora-41": {
+        "image": "fedora:41",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "end_of_life": "November, 2025"
+    },
+    "fedora-42": {
+        "image": "fedora:42",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "end_of_life": "November, 2025"
+    },
+    "raspbian-bullseye": {
+        "image": "balenalib/rpi-raspbian:bullseye",
+        "arches": [
+            "armhf"
+        ],
+        "description": "Debian/Raspbian 11 (stable)"
+    },
+    "raspbian-bookworm": {
+        "image": "balenalib/rpi-raspbian:bookworm",
+        "arches": [
+            "armhf"
+        ],
+        "description": "Debian/Raspbian 12 (next stable)"
+    },
+    "ubuntu-jammy": {
+        "image": "ubuntu:jammy",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 22.04 LTS",
+        "end_of_life": "04-2032",
+        "end_of_support": "04-2027"
+    },
+    "ubuntu-noble": {
+        "image": "ubuntu:noble",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 24.04 LTS",
+        "end_of_life": "04-2034",
+        "end_of_support": "06-2029"
+    },
+    "ubuntu-oracular": {
+        "image": "ubuntu:oracular",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 24.10",
+        "end_of_life": "07-2025",
+        "end_of_support": "07-2025"
+    },
+    "ubuntu-plucky": {
+        "image": "ubuntu:plucky",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 25.04",
+        "end_of_life": "01-2026",
+        "end_of_support": "01-2026"
+    },
+    "rhel-8": {
+        "image": "registry.access.redhat.com/ubi8/ubi",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "Red Hat Enterprise Linux 8",
+        "end_of_life": "05-2029",
+        "end_of_support": "05-2024"
+    },
+    "rhel-9": {
+        "image": "registry.access.redhat.com/ubi9/ubi",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "Red Hat Enterprise Linux 9",
+        "end_of_life": "05-2032",
+        "end_of_support": "05-2027"
+    }
+}
