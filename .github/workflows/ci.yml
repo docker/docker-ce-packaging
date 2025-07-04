@@ -33,12 +33,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Get targets
         id: get-targets
-        run: echo "targets=$(jq 'with_entries(select(.value.arches | any(. == "amd64"))) | keys_unsorted' distros.json)" >> $GITHUB_OUTPUT
+        run: |
+          echo "targets=$(jq -c '[to_entries[] | .key as $distro | .value.arches[] | {distro: $distro, arch: .}]' distros.json)" >> $GITHUB_OUTPUT
 
   build:
     needs:
       - generate-matrix
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.target.arch != 'amd64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 60 # guardrails timeout for the whole job
     strategy:
       fail-fast: false
@@ -54,4 +55,4 @@ jobs:
       -
         name: Build
         run: |
-          make ${{ matrix.target }}
+          make ARCH=${{ matrix.target.arch }} ${{ matrix.target.distro }}
