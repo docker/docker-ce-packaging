@@ -141,6 +141,10 @@ override_dh_installsystemd:
 	# use "docker" as our service name, not "docker-ce"
 	dh_installsystemd --name=docker
 
+override_dh_installsysusers:
+	# use "docker" as our service name, not "docker-ce"
+	dh_installsysusers --name=docker
+
 override_dh_shlibdeps:
 	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
 
