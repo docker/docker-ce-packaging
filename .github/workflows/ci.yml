@@ -24,24 +24,27 @@ on:
   pull_request:
 
 jobs:
-  build:
+  generate-matrix:
     runs-on: ubuntu-24.04
+    outputs:
+      targets: ${{ steps.get-targets.outputs.targets }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get targets
+        id: get-targets
+        run: |
+          echo "targets=$(jq -c '[to_entries[] | .key as $distro | .value.arches[] | {distro: $distro, arch: .}]' distros.json)" >> $GITHUB_OUTPUT
+
+  build:
+    needs:
+      - generate-matrix
+    runs-on: ${{ matrix.target.arch != 'amd64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 60 # guardrails timeout for the whole job
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - debian-bullseye
-          - debian-bookworm
-          - debian-trixie
-          - ubuntu-jammy
-          - ubuntu-noble
-          - ubuntu-oracular
-          - ubuntu-plucky
-          - fedora-41
-          - fedora-42
-          - centos-9
-          - centos-10
+        target: ${{ fromJson(needs.generate-matrix.outputs.targets) }}
     steps:
       -
         name: Checkout
@@ -52,4 +55,4 @@ jobs:
       -
         name: Build
         run: |
-          make ${{ matrix.target }}
+          make ARCH=${{ matrix.target.arch }} ${{ matrix.target.distro }}
