@@ -20,9 +20,12 @@ export PKG_REVISION
 override_dh_builddeb:
 	dh_builddeb -- -Zxz
 
+# Determine the Go module mode based on the presence of vendor.mod or go.mod
+override_dh_auto_build: GOMOD := $(if $(wildcard engine/vendor.mod),off,$(if $(wildcard engine/go.mod),on,$(error "No go.mod or vendor.mod found in engine directory")))
+# Override the default dh_auto_build target
 override_dh_auto_build:
 	# Build the daemon and dependencies
-	cd engine && DOCKER_GITCOMMIT=$(ENGINE_GITCOMMIT) PRODUCT=docker ./hack/make.sh dynbinary
+	cd engine && GO111MODULE=$(GOMOD) DOCKER_GITCOMMIT=$(ENGINE_GITCOMMIT) PRODUCT=docker ./hack/make.sh dynbinary
 	cd engine && TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
 	cd engine && TMP_GOPATH="/go" hack/dockerfile/install/install.sh rootlesskit dynamic
 

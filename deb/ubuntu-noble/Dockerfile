@@ -20,7 +20,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y curl devscripts equivs git
 
 ENV GOPROXY=https://proxy.golang.org|direct
-ENV GO111MODULE=off
+ENV GO111MODULE=on
 ENV GOPATH=/go
 ENV GOTOOLCHAIN=local
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin

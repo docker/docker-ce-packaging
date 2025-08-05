@@ -68,7 +68,17 @@ ln -snf ${RPM_BUILD_DIR}/src/engine /go/src/github.com/docker/docker
 
 pushd ${RPM_BUILD_DIR}/src/engine
 TMP_GOPATH="/go" hack/dockerfile/install/install.sh tini
-VERSION=%{_origversion} PRODUCT=docker hack/make.sh dynbinary
+
+# Determine Go module mode based on file presence
+if [ -f vendor.mod ]; then
+    GOMOD=off
+elif [ -f go.mod ]; then
+    GOMOD=on
+else
+    echo "No go.mod or vendor.mod found in engine directory"
+    exit 1
+fi
+GO111MODULE=$GOMOD VERSION=%{_origversion} PRODUCT=docker hack/make.sh dynbinary
 popd
 
 #  build  man-pages
