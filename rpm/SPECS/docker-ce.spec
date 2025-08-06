@@ -24,7 +24,7 @@ Requires: iptables
 # Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
 Requires: libcgroup
 %endif
-Requires: containerd.io >= 1.6.24
+Requires: containerd.io >= 1.7.27
 Requires: tar
 Requires: xz
 
