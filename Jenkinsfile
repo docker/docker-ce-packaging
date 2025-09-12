@@ -10,6 +10,7 @@ def pkgs = [
     [target: "debian-trixie",            image: "debian:trixie",                          arches: ["amd64", "aarch64", "armhf"]], // Debian 13 (testing)
     [target: "fedora-41",                image: "fedora:41",                              arches: ["amd64", "aarch64"]],          // EOL: November 19, 2025
     [target: "fedora-42",                image: "fedora:42",                              arches: ["amd64", "aarch64"]],          // EOL: May 13, 2026
+    [target: "fedora-43",                image: "fedora:43",                              arches: ["amd64", "aarch64"]],          // EOL: December 02, 2026
     [target: "raspbian-bullseye",        image: "balenalib/rpi-raspbian:bullseye",        arches: ["armhf"]],                     // Debian/Raspbian 11 (stable)
     [target: "raspbian-bookworm",        image: "balenalib/rpi-raspbian:bookworm",        arches: ["armhf"]],                     // Debian/Raspbian 12 (next stable)
     [target: "ubuntu-jammy",             image: "ubuntu:jammy",                           arches: ["amd64", "aarch64", "armhf"]], // Ubuntu 22.04 LTS (End of support: June,  2027. EOL: April, 2032)
