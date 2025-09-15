@@ -67,8 +67,10 @@ RUN?=docker run --rm \
 FEDORA_RELEASES ?= fedora-41 fedora-42
 CENTOS_RELEASES ?= centos-9 centos-10
 RHEL_RELEASES ?= rhel-8 rhel-9
+OPENCLOUDOS_RELEASES ?= opencloudos-9
+TENCENTOS_RELEASES ?= tencentos-4
 
-DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES)
+DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES) $(OPENCLOUDOS_RELEASES) $(TENCENTOS_RELEASES)
 BUNDLES := $(patsubst %,rpmbuild/bundles-ce-%-$(DPKG_ARCH).tar.gz,$(DISTROS))
 
 .PHONY: help
@@ -82,7 +84,7 @@ clean: ## remove build artifacts
 	-docker builder prune -f --filter until=24h
 
 .PHONY: rpm
-rpm: fedora centos ## build all rpm packages
+rpm: fedora centos opencloudos tencentos ## build all rpm packages
 
 .PHONY: fedora
 fedora: $(FEDORA_RELEASES) ## build all fedora rpm packages
@@ -92,6 +94,12 @@ centos: $(CENTOS_RELEASES) ## build all centos rpm packages
 
 .PHONY: rhel
 rhel: $(RHEL_RELEASES) ## build all rhel rpm packages
+
+.PHONY: opencloudos
+opencloudos: $(OPENCLOUDOS_RELEASES) ## build all opencloudos rpm packages
+
+.PHONY: tencentos
+tencentos: $(TENCENTOS_RELEASES) ## build all tencentos rpm packages
 
 .PHONY: $(DISTROS)
 $(DISTROS): sources
