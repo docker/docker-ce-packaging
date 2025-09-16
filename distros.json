@@ -126,5 +126,15 @@
         "description": "Red Hat Enterprise Linux 9",
         "end_of_life": "05-2032",
         "end_of_support": "05-2027"
+    },
+    "rhel-10": {
+        "image": "registry.access.redhat.com/ubi10/ubi",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "Red Hat Enterprise Linux 10",
+        "end_of_life": "05-2035",
+        "end_of_support": "05-2030"
     }
 }
