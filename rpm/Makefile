@@ -66,7 +66,7 @@ RUN?=docker run --rm \
 
 FEDORA_RELEASES ?= fedora-41 fedora-42
 CENTOS_RELEASES ?= centos-9 centos-10
-RHEL_RELEASES ?= rhel-8 rhel-9
+RHEL_RELEASES ?= rhel-8 rhel-9 rhel-10
 
 DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES)
 BUNDLES := $(patsubst %,rpmbuild/bundles-ce-%-$(DPKG_ARCH).tar.gz,$(DISTROS))
