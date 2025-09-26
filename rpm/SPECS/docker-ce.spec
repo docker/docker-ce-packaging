@@ -25,6 +25,11 @@ Requires: iptables-nft
 %else
 Requires: iptables
 %endif
+%if %{undefined _no_libnftables}
+# When dockerd is not linked against libnftables, the nftables package
+# is not a hard requirement.
+Requires: nftables
+%endif
 %if %{undefined rhel} || 0%{?rhel} < 9
 # Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
 Requires: libcgroup
@@ -40,6 +45,9 @@ BuildRequires: gcc
 BuildRequires: git
 BuildRequires: glibc-static
 BuildRequires: libtool
+%if %{undefined _no_libnftables}
+BuildRequires: nftables-devel
+%endif
 BuildRequires: make
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(systemd)
