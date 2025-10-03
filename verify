@@ -34,8 +34,15 @@ function verify_binaries() {
 	docker-proxy --version
 	containerd --version
 	ctr --version
-	containerd-shim -v
-	containerd-shim-runc-v1 -v
+
+	containerd_version=$(containerd --version | awk '{print $3}' | sed 's/^v//')
+	containerd_major=$(echo "$containerd_version" | cut -d. -f1)
+	if [ "$containerd_major" -lt 2 ]; then
+		echo "Running containerd-shim and containerd-shim-runc-v1 checks for containerd v$containerd_version (v2+)"
+		containerd-shim -v
+		containerd-shim-runc-v1 -v
+	fi
+
 	containerd-shim-runc-v2 -v
 	runc --version
 }
