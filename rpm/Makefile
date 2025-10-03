@@ -92,6 +92,11 @@ centos: $(CENTOS_RELEASES) ## build all centos rpm packages
 
 .PHONY: rhel
 rhel: $(RHEL_RELEASES) ## build all rhel rpm packages
+# The nftables-devel package is only available in RHEL CRB. For now, build
+# with tag "no_libnftables", so dockerd will exec the nft tool, and this
+# package is not required. Note that this '--define' is also hard-coded in
+# each of the rhel-*/Dockerfile files.
+$(RHEL_RELEASES): RPMBUILD_EXTRA_FLAGS += --define '_no_libnftables true'
 
 .PHONY: $(DISTROS)
 $(DISTROS): sources
