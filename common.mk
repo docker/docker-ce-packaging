@@ -36,7 +36,7 @@ DOCKER_MODEL_REPO   ?= https://github.com/docker/model-cli.git
 # tagged a release with the same version.
 #
 # For other situations, specify DOCKER_CLI_REF and/or DOCKER_ENGINE_REF separately.
-REF                ?= 28.x
+REF                ?= HEAD
 DOCKER_CLI_REF     ?= $(REF)
 DOCKER_ENGINE_REF  ?= $(REF)
 # DOCKER_COMPOSE_REF is the version of compose to package. It usually is a tag,
