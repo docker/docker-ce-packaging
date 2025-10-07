@@ -19,12 +19,7 @@ Requires: docker-ce-cli
 Recommends: docker-ce-rootless-extras
 Requires: container-selinux
 Requires: systemd
-%if (0%{?fedora} >= 43) || (0%{?rhel} >= 10)
-# For Fedora >= 43 and RHEL >= 10, require iptables-nft
-Requires: iptables-nft
-%else
-Requires: iptables
-%endif
+Requires: (iptables-nft or iptables)
 Requires: nftables
 %if %{undefined rhel} || 0%{?rhel} < 9
 # Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
