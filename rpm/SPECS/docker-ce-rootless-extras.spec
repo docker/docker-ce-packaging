@@ -15,7 +15,7 @@ Packager: Docker <support@docker.com>
 Requires: docker-ce
 # TODO: conditionally add `Requires: dbus-daemon` for Fedora and CentOS 8
 # slirp4netns >= 0.4 is available in the all supported versions of CentOS and Fedora.
-Requires: slirp4netns >= 0.4
+Requires: (slirp4netns >= 0.4 or passt)
 # fuse-overlayfs >= 0.7 is available in the all supported versions of CentOS and Fedora.
 Requires: fuse-overlayfs >= 0.7
 
@@ -29,7 +29,7 @@ Rootless support for Docker.
 Use dockerd-rootless.sh to run the daemon.
 Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh .
 This package contains RootlessKit, but does not contain VPNKit.
-Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
+Either slirp4netns (>= 0.4.0), passt, or VPNKit needs to be installed separately.
 
 %prep
 %setup -q -c -n src -a 0
