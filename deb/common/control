@@ -85,14 +85,14 @@ Conflicts: rootlesskit
 Replaces: rootlesskit
 Breaks: rootlesskit
 # slirp4netns (>= 0.4.0) is available in Debian since 11 and Ubuntu since 19.10
-Recommends: slirp4netns (>= 0.4.0)
+Recommends: slirp4netns (>= 0.4.0) | passt
 # Unlike RPM, DEB packages do not contain "Recommends: fuse-overlayfs (>= 0.7.0)" here,
 # because Debian (since 10) and Ubuntu support the kernel-mode rootless overlayfs.
 Description: Rootless support for Docker.
  Use dockerd-rootless.sh to run the daemon.
  Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.
  This package contains RootlessKit, but does not contain VPNKit.
- Either VPNKit or slirp4netns (>= 0.4.0) needs to be installed separately.
+ Either slirp4netns (>= 0.4.0), passt, or VPNKit needs to be installed separately.
 Homepage: https://docs.docker.com/engine/security/rootless/
 
 Package: docker-buildx-plugin
