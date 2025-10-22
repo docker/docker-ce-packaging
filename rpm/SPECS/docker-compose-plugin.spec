@@ -13,7 +13,7 @@ Vendor: Docker
 Packager: Docker <support@docker.com>
 
 Enhances: docker-ce-cli
-Recommends: docker-buildx-plugin
+Recommends: docker-buildx-plugin >= 0.17.0
 
 BuildRequires: bash
 
