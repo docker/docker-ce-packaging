@@ -107,7 +107,7 @@ Homepage: https://github.com/docker/buildx
 Package: docker-compose-plugin
 Priority: optional
 Architecture: linux-any
-Recommends: docker-buildx-plugin
+Recommends: docker-buildx-plugin (>= 0.17.0)
 Enhances: docker-ce-cli
 Description: Docker Compose (V2) plugin for the Docker CLI.
  This plugin provides the 'docker compose' subcommand.
