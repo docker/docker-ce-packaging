@@ -1,15 +1,5 @@
 #!/usr/bin/make -f
 
-# Include default Makefile variables.
-include /usr/share/dpkg/default.mk
-
-# Build all armhf binaries as ARMv6 with hard float, to support both
-# Debian armhf and Raspbian armhf.
-ifeq ($(DEB_TARGET_ARCH),armhf)
-	export CFLAGS += -marm -march=armv6+fp
-	export GOARM := 6
-endif
-
 VERSION ?= $(shell cat engine/VERSION)
 # TODO(thaJeztah): allow passing this version when building.
 PKG_REVISION ?= 1

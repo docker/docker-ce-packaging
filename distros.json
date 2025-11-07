@@ -68,20 +68,6 @@
         ],
         "end_of_life": "December 02, 2026"
     },
-    "raspbian-bullseye": {
-        "image": "balenalib/rpi-raspbian:bullseye",
-        "arches": [
-            "armhf"
-        ],
-        "description": "Debian/Raspbian 11 (stable)"
-    },
-    "raspbian-bookworm": {
-        "image": "balenalib/rpi-raspbian:bookworm",
-        "arches": [
-            "armhf"
-        ],
-        "description": "Debian/Raspbian 12 (next stable)"
-    },
     "ubuntu-jammy": {
         "image": "ubuntu:jammy",
         "arches": [
