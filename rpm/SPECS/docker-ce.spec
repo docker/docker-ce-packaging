@@ -48,7 +48,6 @@ BuildRequires: tar
 # conflicting packages
 Conflicts: docker
 Conflicts: docker-io
-Conflicts: docker-ee
 
 %description
 Docker is a product for you to build, ship and run any application as a
