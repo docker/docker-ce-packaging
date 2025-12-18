@@ -24,6 +24,7 @@ ENV GO111MODULE=on
 ENV GOPATH=/go
 ENV GOTOOLCHAIN=local
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+ENV DOCKER_BUILDTAGS="nri_no_wasm"
 
 ARG COMMON_FILES
 COPY --link ${COMMON_FILES} /root/build-deb/debian

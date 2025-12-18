@@ -31,7 +31,7 @@ ENV GOPATH=/go
 ENV GOTOOLCHAIN=local
 ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 ENV AUTO_GOPATH=1
-ENV DOCKER_BUILDTAGS="exclude_graphdriver_btrfs no_libnftables"
+ENV DOCKER_BUILDTAGS="exclude_graphdriver_btrfs no_libnftables nri_no_wasm"
 ARG DISTRO
 ARG SUITE
 ENV DISTRO=${DISTRO}
