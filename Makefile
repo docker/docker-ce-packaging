@@ -82,8 +82,8 @@ clean: clean-src ## remove build artifacts
 deb rpm: checkout ## build rpm/deb packages
 	$(MAKE) -C $@ VERSION=$(VERSION) GO_VERSION=$(GO_VERSION) $@
 
-.PHONY: centos-% fedora-% rhel-%
-centos-% fedora-% rhel-%: checkout ## build rpm packages for the specified distro
+.PHONY: centos-% fedora-% rhel-% opensuse-%
+centos-% fedora-% rhel-% opensuse-%: checkout ## build rpm packages for the specified distro
 	$(MAKE) -C rpm VERSION=$(VERSION) GO_VERSION=$(GO_VERSION) $@
 
 .PHONY: debian-% raspbian-% ubuntu-%

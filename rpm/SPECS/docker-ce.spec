@@ -23,7 +23,11 @@ Requires: (iptables-nft or iptables)
 Requires: nftables
 %if %{undefined rhel} || 0%{?rhel} < 9
 # Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
+%if 0%{?suse_version}
+Requires: libcgroup3
+%else
 Requires: libcgroup
+%endif
 %endif
 Requires: containerd.io >= 1.7.27
 Requires: tar

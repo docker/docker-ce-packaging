@@ -112,14 +112,23 @@ function verify_rpm() {
 	DIST_ID=$(. /etc/os-release; echo "${ID}")
 	DIST_VERSION=$(. /etc/os-release; echo "${VERSION_ID}" | cut -d'.' -f1)
 
-	pkg_manager="yum"
-	pkg_config_manager="yum-config-manager"
-	if dnf --version; then
-		pkg_manager="dnf"
-		pkg_config_manager="dnf config-manager"
-		dnf clean all
-		${pkg_manager} install -y 'dnf-command(config-manager)'
-	fi
+	case ${DIST_ID} in
+	opensuse-tumbleweed)
+		pkg_manager="zypper"
+		DIST_VERSION="tumbleweed"
+		zypper clean -a
+		;;
+	*)
+		pkg_manager="yum"
+		pkg_config_manager="yum-config-manager"
+		if dnf --version; then
+			pkg_manager="dnf"
+			pkg_config_manager="dnf config-manager"
+			dnf clean all
+			${pkg_manager} install -y 'dnf-command(config-manager)'
+		fi
+		;;
+	esac
 
 	case ${DIST_ID}:${DIST_VERSION} in
 	ol:7*)
@@ -128,6 +137,9 @@ function verify_rpm() {
 		;;
 	fedora*)
 		dnf install -y findutils
+		;;
+	opensuse*)
+		zypper install -y findutils
 		;;
 	esac
 

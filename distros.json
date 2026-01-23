@@ -141,5 +141,15 @@
         "description": "Red Hat Enterprise Linux 10",
         "end_of_life": "05-2035",
         "end_of_support": "05-2030"
+    },
+    "opensuse-tumbleweed": {
+        "image": "registry.opensuse.org/opensuse/tumbleweed",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ],
+        "description": "openSUSE Tumbleweed",
+        "end_of_life": "12-2100",
+        "end_of_support": "12-2100"
     }
 }
