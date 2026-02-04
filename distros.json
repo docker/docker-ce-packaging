@@ -90,17 +90,6 @@
         "end_of_life": "04-2034",
         "end_of_support": "06-2029"
     },
-    "ubuntu-plucky": {
-        "image": "ubuntu:plucky",
-        "arches": [
-            "amd64",
-            "aarch64",
-            "armhf"
-        ],
-        "description": "Ubuntu 25.04",
-        "end_of_life": "01-2026",
-        "end_of_support": "01-2026"
-    },
     "ubuntu-questing": {
         "image": "ubuntu:questing",
         "arches": [

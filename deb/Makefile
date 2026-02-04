@@ -54,7 +54,7 @@ RUN?=docker run --rm \
 	debbuild-$@/$(ARCH)
 
 DEBIAN_VERSIONS ?= debian-bullseye debian-bookworm debian-trixie
-UBUNTU_VERSIONS ?= ubuntu-jammy ubuntu-noble ubuntu-plucky ubuntu-questing
+UBUNTU_VERSIONS ?= ubuntu-jammy ubuntu-noble ubuntu-questing
 RASPBIAN_VERSIONS ?= raspbian-bullseye raspbian-bookworm
 DISTROS := $(DEBIAN_VERSIONS) $(UBUNTU_VERSIONS) $(RASPBIAN_VERSIONS)
 
