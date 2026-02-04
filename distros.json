@@ -101,6 +101,17 @@
         "end_of_life": "26-06-2026",
         "end_of_support": "26-06-2026"
     },
+    "ubuntu-resolute": {
+        "image": "ubuntu:resolute",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 26.04 LTS",
+        "end_of_life": "04-2031",
+        "end_of_support": "04-2031"
+    },
     "rhel-8": {
         "image": "registry.access.redhat.com/ubi8/ubi",
         "arches": [
