@@ -63,12 +63,6 @@ override_dh_auto_test:
 override_dh_strip:
 	# Go has lots of problems with stripping, so just don't
 
-# http://manpages.debian.org/dh_dwz
-override_dh_dwz:
-	# dh_dwz in debhelper versions less than 13 has issues with files that are missing debug symbols (once we update to debhelper-compat 13+ this can be removed)
-	@# https://packages.debian.org/debhelper
-	@# https://packages.ubuntu.com/debhelper
-
 override_dh_auto_install:
 	# docker-ce-cli install
 	install -D -p -m 0755 cli/build/docker debian/docker-ce-cli/usr/bin/docker
