@@ -102,7 +102,7 @@
         "end_of_support": "26-06-2026"
     },
     "rhel-8": {
-        "image": "registry.access.redhat.com/ubi8/ubi",
+        "image": "redhat/ubi8",
         "arches": [
             "amd64",
             "aarch64"
@@ -112,7 +112,7 @@
         "end_of_support": "05-2024"
     },
     "rhel-9": {
-        "image": "registry.access.redhat.com/ubi9/ubi",
+        "image": "redhat/ubi9",
         "arches": [
             "amd64",
             "aarch64"
@@ -122,7 +122,7 @@
         "end_of_support": "05-2027"
     },
     "rhel-10": {
-        "image": "registry.access.redhat.com/ubi10/ubi",
+        "image": "redhat/ubi10",
         "arches": [
             "amd64",
             "aarch64"
