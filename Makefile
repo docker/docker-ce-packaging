@@ -1,3 +1,5 @@
+.POSIX:
+
 include common.mk
 
 STATIC_VERSION=$(shell static/gen-static-ver $(realpath $(CURDIR)/src/github.com/docker/docker) $(VERSION))
