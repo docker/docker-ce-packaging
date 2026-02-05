@@ -67,8 +67,9 @@ RUN?=docker run --rm \
 FEDORA_RELEASES ?= fedora-41 fedora-42 fedora-43
 CENTOS_RELEASES ?= centos-9 centos-10
 RHEL_RELEASES ?= rhel-8 rhel-9 rhel-10
+OPENSUSE_RELEASES ?= opensuse-tumbleweed
 
-DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES)
+DISTROS := $(FEDORA_RELEASES) $(CENTOS_RELEASES) $(RHEL_RELEASES) $(OPENSUSE_RELEASES)
 BUNDLES := $(patsubst %,rpmbuild/bundles-ce-%-$(DPKG_ARCH).tar.gz,$(DISTROS))
 
 .PHONY: help
@@ -82,7 +83,7 @@ clean: ## remove build artifacts
 	-docker builder prune -f --filter until=24h
 
 .PHONY: rpm
-rpm: fedora centos ## build all rpm packages
+rpm: fedora centos opensuse ## build all rpm packages
 
 .PHONY: fedora
 fedora: $(FEDORA_RELEASES) ## build all fedora rpm packages
@@ -97,6 +98,9 @@ rhel: $(RHEL_RELEASES) ## build all rhel rpm packages
 # package is not required. Note that this '--define' is also hard-coded in
 # each of the rhel-*/Dockerfile files.
 $(RHEL_RELEASES): RPMBUILD_EXTRA_FLAGS += --define '_no_libnftables true'
+
+.PHONY: opensuse
+opensuse: $(OPENSUSE_RELEASES) ## build all opensuse rpm packages
 
 .PHONY: $(DISTROS)
 $(DISTROS): sources
