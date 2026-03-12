@@ -24,7 +24,17 @@ function install_rpm_containerd() {
 	# so this logic works for both cases.
 	# (See also same logic in install_debian_containerd)
 
-	if command -v dnf5; then
+	if command -v zypper > /dev/null 2>&1; then
+		# openSUSE/SUSE uses zypper
+		zypper --version
+
+		zypper addrepo "${REPO_URL}" docker-ce
+		zypper --gpg-auto-import-keys refresh docker-ce
+		# Enable only the test repository
+		zypper modifyrepo --disable 'docker-ce-*'
+		zypper modifyrepo --enable 'docker-ce-test'
+		zypper refresh
+	elif command -v dnf5; then
 		dnf --version
 
 		# FIXME(thaJeztah); strip empty lines as workaround for https://github.com/rpm-software-management/dnf5/issues/1603
