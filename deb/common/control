@@ -84,13 +84,9 @@ Enhances: docker-ce
 Conflicts: rootlesskit
 Replaces: rootlesskit
 Breaks: rootlesskit
-# slirp4netns (>= 0.4.0) is available in Debian since 11 and Ubuntu since 19.10
-Recommends: slirp4netns (>= 0.4.0) | passt
 Description: Rootless support for Docker.
  Use dockerd-rootless.sh to run the daemon.
  Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.
- This package contains RootlessKit, but does not contain VPNKit.
- Either slirp4netns (>= 0.4.0), passt, or VPNKit needs to be installed separately.
 Homepage: https://docs.docker.com/engine/security/rootless/
 
 Package: docker-buildx-plugin
