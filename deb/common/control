@@ -86,8 +86,6 @@ Replaces: rootlesskit
 Breaks: rootlesskit
 # slirp4netns (>= 0.4.0) is available in Debian since 11 and Ubuntu since 19.10
 Recommends: slirp4netns (>= 0.4.0) | passt
-# Unlike RPM, DEB packages do not contain "Recommends: fuse-overlayfs (>= 0.7.0)" here,
-# because Debian (since 10) and Ubuntu support the kernel-mode rootless overlayfs.
 Description: Rootless support for Docker.
  Use dockerd-rootless.sh to run the daemon.
  Use dockerd-rootless-setuptool.sh to setup systemd for dockerd-rootless.sh.
