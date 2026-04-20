@@ -30,7 +30,7 @@ jobs:
       targets: ${{ steps.get-targets.outputs.targets }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Get targets
         id: get-targets
         run: |
@@ -48,7 +48,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
