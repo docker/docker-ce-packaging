@@ -7,7 +7,6 @@ BUILDX_DIR=$(realpath $(CURDIR)/../src/github.com/docker/buildx)
 ENGINE_GITCOMMIT?=$(shell cd $(realpath $(CURDIR)/../src/github.com/docker/docker) && git rev-parse --short HEAD)
 
 GEN_STATIC_VER=$(shell ./gen-static-ver $(CLI_DIR) $(VERSION))
-STATIC_PKG_SUFFIX=-2
 HASH_CMD=docker run -v $(CURDIR):/sum -w /sum debian:jessie bash hash_files
 DIR_TO_HASH:=build/linux
 DOCKER_CLI_GOLANG_IMG=golang:$(GO_VERSION)
@@ -47,7 +46,7 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 	for f in dockerd containerd ctr containerd-shim containerd-shim-runc-v2 docker-init docker-proxy runc; do \
 		cp -L $(ENGINE_DIR)/bundles/binary/$$f build/linux/docker/$$f; \
 	done
-	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER)$(STATIC_PKG_SUFFIX).tgz docker
+	tar -C build/linux -c -z -f build/linux/docker-$(GEN_STATIC_VER).tgz docker
 
 	# extra binaries for running rootless
 	mkdir -p build/linux/docker-rootless-extras
@@ -56,7 +55,7 @@ static-linux: static-cli static-engine static-buildx-plugin ## create tgz
 			cp -L $(ENGINE_DIR)/bundles/binary/$$f build/linux/docker-rootless-extras/$$f; \
 		fi \
 	done
-	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER)$(STATIC_PKG_SUFFIX).tgz docker-rootless-extras
+	tar -C build/linux -c -z -f build/linux/docker-rootless-extras-$(GEN_STATIC_VER).tgz docker-rootless-extras
 
 	# buildx
 	tar -C $(BUILDX_DIR)/bin -c -z -f build/linux/docker-buildx-plugin-$(DOCKER_BUILDX_REF:v%=%).tgz docker-buildx
@@ -77,7 +76,7 @@ cross-mac: buildx
 		arch=$$(echo $$platform | cut -d_ -f2); \
 		mkdir -p $$dest/$$arch/docker; \
 		cp $$platform/docker-darwin-* $$dest/$$arch/docker/docker && \
-		tar -C $$dest/$$arch -c -z -f $$dest/$$arch/docker-$(GEN_STATIC_VER)$(STATIC_PKG_SUFFIX).tgz docker; \
+		tar -C $$dest/$$arch -c -z -f $$dest/$$arch/docker-$(GEN_STATIC_VER).tgz docker; \
 	done
 
 .PHONY: cross-win
@@ -86,14 +85,14 @@ cross-win: cross-win-engine
 	mkdir -p build/win/amd64/docker
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
 	cp $(ENGINE_DIR)/bundles/cross/win/dockerd.exe build/win/amd64/docker/dockerd.exe
-	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER)$(STATIC_PKG_SUFFIX).zip docker'
+	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 
 .PHONY: cross-arm
 cross-arm: cross-all-cli ## create tgz with linux armhf client only
 	mkdir -p build/arm/docker
 	cp $(CLI_DIR)/build/docker-linux-arm build/arm/docker/docker
-	tar -C build/arm -c -z -f build/arm/docker-$(GEN_STATIC_VER)$(STATIC_PKG_SUFFIX).tgz docker
+	tar -C build/arm -c -z -f build/arm/docker-$(GEN_STATIC_VER).tgz docker
 
 .PHONY: static-cli
 static-cli:
