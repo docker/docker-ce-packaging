@@ -45,7 +45,7 @@ debDate="$(date --rfc-2822)"
 
 # Include an extra `1` in the version, in case we ever would have to re-build an
 # already published release with a packaging-only change.
-pkgRevision=2
+pkgRevision=1
 
 # Generate changelog. The version/name of the generated packages are based on this.
 #
