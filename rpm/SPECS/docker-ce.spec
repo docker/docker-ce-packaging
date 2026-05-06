@@ -104,6 +104,9 @@ install -D -p -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT
 # install manpages
 make -C ${RPM_BUILD_DIR}/src/engine/man DESTDIR=${RPM_BUILD_ROOT} mandir=%{_mandir} install
 
+# install SELinux policy to deny AF_ALG sockets in container domains
+install -D -m 644 engine/contrib/selinux/docker-af-alg-deny.cil %{buildroot}%{_datadir}/docker-ce/selinux/docker-af-alg-deny.cil
+
 # create the config directory
 mkdir -p ${RPM_BUILD_ROOT}/etc/docker
 
@@ -114,6 +117,7 @@ mkdir -p ${RPM_BUILD_ROOT}/etc/docker
 %{_unitdir}/docker.service
 %{_unitdir}/docker.socket
 %{_mandir}/man*/*
+%{_datadir}/docker-ce/selinux/docker-af-alg-deny.cil
 %dir /etc/docker
 
 %post
@@ -121,11 +125,24 @@ mkdir -p ${RPM_BUILD_ROOT}/etc/docker
 if ! getent group docker > /dev/null; then
     groupadd --system docker
 fi
+# Load the AF_ALG deny policy when SELinux is enabled. This may fail on systems
+# with SELinux userspace < 3.6, or without container-selinux's container_domain
+# attribute, so keep installation non-fatal.
+if command -v semodule > /dev/null 2>&1 && selinuxenabled 2>/dev/null; then
+    if ! semodule -i %{_datadir}/docker-ce/selinux/docker-af-alg-deny.cil 2>/dev/null; then
+        echo "warning: could not load docker-af-alg-deny.cil SELinux policy; AF_ALG SELinux denial is not active" >&2
+    fi
+fi
 
 %preun
 %systemd_preun docker.service docker.socket
 
 %postun
 %systemd_postun_with_restart docker.service
+if [ "$1" -eq 0 ]; then
+    if command -v semodule > /dev/null 2>&1; then
+        semodule -r container-af-alg-deny 2>/dev/null || :
+    fi
+fi
 
 %changelog
