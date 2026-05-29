@@ -25,14 +25,14 @@ This plugin provides the 'docker model' subcommand.
 %setup -q -c -n src -a 0
 
 %build
-GO111MODULE=on make -C ${RPM_BUILD_DIR}/src/model VERSION=%{_model_version} ce-release
+GO111MODULE=on make -C ${RPM_BUILD_DIR}/src/model/cmd/cli VERSION=%{_model_version} ce-release
 
 %check
 ver="$(${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-model docker-cli-plugin-metadata | awk '{ gsub(/[",:]/,"")}; $1 == "Version" { print $2 }')"; \
     test "$ver" = "%{_model_version}" && echo "PASS: docker-model version OK" || (echo "FAIL: docker-model version ($ver) did not match" && exit 1)
 
 %install
-install -D -p -m 0755 ${RPM_BUILD_DIR}/src/model/dist/docker-model ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-model
+install -D -p -m 0755 ${RPM_BUILD_DIR}/src/model/cmd/cli/dist/docker-model ${RPM_BUILD_ROOT}%{_libexecdir}/docker/cli-plugins/docker-model
 
 for f in LICENSE; do
     install -D -p -m 0644 "${RPM_BUILD_DIR}/src/model/$f" "docker-model-plugin-docs/$f"
