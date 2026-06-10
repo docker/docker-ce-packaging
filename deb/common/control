@@ -57,7 +57,10 @@ Depends: ${shlibs:Depends}
 Recommends: docker-buildx-plugin,
             docker-compose-plugin
 Suggests: docker-model-plugin
-Conflicts: docker.io
+# Debian Trixie ships the CLI as docker-cli; older Debian releases and
+# Ubuntu include it in docker.io.
+Conflicts: docker.io,
+           docker-cli
 Replaces: docker-ce (<< 5:0)
 Breaks: docker-ce (<< 5:0)
 Description: Docker CLI: the open-source application container engine
