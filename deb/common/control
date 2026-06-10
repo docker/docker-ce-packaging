@@ -38,8 +38,7 @@ Recommends: apparmor,
             xz-utils
 Suggests: cgroupfs-mount | cgroup-lite,
             kmod,
-Conflicts: docker (<< 1.5~),
-           docker.io
+Conflicts: docker.io
 Replaces: docker-ce-cli (<< 5:28.0.0)
 Description: Docker: the open-source application container engine
  Docker is a product for you to build, ship and run any application as a
@@ -58,8 +57,7 @@ Depends: ${shlibs:Depends}
 Recommends: docker-buildx-plugin,
             docker-compose-plugin
 Suggests: docker-model-plugin
-Conflicts: docker (<< 1.5~),
-           docker.io
+Conflicts: docker.io
 Replaces: docker-ce (<< 5:0)
 Breaks: docker-ce (<< 5:0)
 Description: Docker CLI: the open-source application container engine
