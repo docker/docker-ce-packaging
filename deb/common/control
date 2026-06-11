@@ -36,8 +36,7 @@ Recommends: apparmor,
             pigz,
             procps,
             xz-utils
-Suggests: cgroupfs-mount | cgroup-lite,
-            kmod,
+Suggests: cgroupfs-mount | cgroup-lite
 Conflicts: docker.io
 Replaces: docker-ce-cli (<< 5:28.0.0)
 Description: Docker: the open-source application container engine
