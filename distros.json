@@ -44,14 +44,6 @@
         ],
         "description": "Debian 13 (Next stable)"
     },
-    "fedora-42": {
-        "image": "fedora:42",
-        "arches": [
-            "amd64",
-            "aarch64"
-        ],
-        "end_of_life": "May 13, 2026"
-    },
     "fedora-43": {
         "image": "fedora:43",
         "arches": [
