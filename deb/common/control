@@ -24,7 +24,7 @@ Vcs-Git: https://github.com/moby/moby.git
 Package: docker-ce
 Architecture: linux-any
 Pre-Depends: init-system-helpers (>= 1.54~)
-Depends: containerd.io (>= 1.7.27),
+Depends: containerd.io (>= 2.1.5),
          docker-ce-cli,
          iptables,
          nftables,
