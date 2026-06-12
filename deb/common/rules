@@ -133,9 +133,6 @@ override_dh_installsystemd:
 	# use "docker" as our service name, not "docker-ce"
 	dh_installsystemd --name=docker
 
-override_dh_shlibdeps:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
-
 override_dh_install:
 	dh_install
 	# TODO Can we do this from within our container?
