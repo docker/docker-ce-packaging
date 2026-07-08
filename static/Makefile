@@ -1,3 +1,5 @@
+.POSIX:
+
 include ../common.mk
 
 CLI_DIR=$(realpath $(CURDIR)/../src/github.com/docker/cli)
