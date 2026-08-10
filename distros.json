@@ -82,17 +82,6 @@
         "end_of_life": "04-2034",
         "end_of_support": "06-2029"
     },
-    "ubuntu-questing": {
-        "image": "ubuntu:questing",
-        "arches": [
-            "amd64",
-            "aarch64",
-            "armhf"
-        ],
-        "description": "Ubuntu 25.10",
-        "end_of_life": "26-06-2026",
-        "end_of_support": "26-06-2026"
-    },
     "ubuntu-resolute": {
         "image": "ubuntu:resolute",
         "arches": [
