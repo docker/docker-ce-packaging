@@ -102,8 +102,9 @@ install -D -p -m 0644 engine/contrib/init/systemd/docker.socket ${RPM_BUILD_ROOT
 # install manpages
 make -C ${RPM_BUILD_DIR}/src/engine/man DESTDIR=${RPM_BUILD_ROOT} mandir=%{_mandir} install
 
-# install SELinux policy to deny AF_ALG sockets in container domains
-install -D -m 644 engine/contrib/selinux/docker-af-alg-deny.cil %{buildroot}%{_datadir}/docker-ce/selinux/docker-af-alg-deny.cil
+# install SELinux policies
+install -d -m 755 %{buildroot}%{_datadir}/docker-ce/selinux
+install -p -m 644 engine/contrib/selinux/*.cil %{buildroot}%{_datadir}/docker-ce/selinux/
 
 # create the config directory
 mkdir -p ${RPM_BUILD_ROOT}/etc/docker
@@ -115,7 +116,7 @@ mkdir -p ${RPM_BUILD_ROOT}/etc/docker
 %{_unitdir}/docker.service
 %{_unitdir}/docker.socket
 %{_mandir}/man*/*
-%{_datadir}/docker-ce/selinux/docker-af-alg-deny.cil
+%{_datadir}/docker-ce/selinux/*.cil
 %dir /etc/docker
 
 %post
