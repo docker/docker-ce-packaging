@@ -1,3 +1,5 @@
+.POSIX:
+
 include ../common.mk
 
 PLUGINS_DIR=$(realpath $(CURDIR)/../plugins)
