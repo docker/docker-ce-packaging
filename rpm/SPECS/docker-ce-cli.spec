@@ -27,8 +27,6 @@ BuildRequires: git
 # conflicting packages
 Conflicts: docker
 Conflicts: docker-io
-Conflicts: docker-ee
-Conflicts: docker-ee-cli
 
 %description
 Docker is is a product for you to build, ship and run any application as a
