@@ -1,0 +1,39 @@
+name: test
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  amd64:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up Docker
+        uses: vvoland/ghaction-setup-docker@master
+        with:
+          version: master
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+  arm64:
+    runs-on: ubuntu22_arm64
+    steps:
+      -
+        name: Set up Docker
+        uses: vvoland/ghaction-setup-docker@master
+        with:
+          version: master
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
