@@ -51,6 +51,13 @@
         ],
         "end_of_life": "May 2027"
     },
+    "fedora-45": {
+        "image": "fedora:45",
+        "arches": [
+            "amd64",
+            "aarch64"
+        ]
+    },
     "ubuntu-jammy": {
         "image": "ubuntu:jammy",
         "arches": [
