@@ -18,7 +18,17 @@ Requires: docker-ce-cli
 Recommends: docker-ce-rootless-extras
 Requires: container-selinux
 Requires: systemd
+
+%if 0%{?rhel} >= 10
+# Docker Engine 29+ supports a native nftables firewall backend.
+# EL10 UBI repositories do not provide iptables or iptables-nft.
+# Keep iptables as a weak dependency so distributions that provide it
+# retain the existing default behavior without making it mandatory.
+Recommends: (iptables-nft or iptables)
+%else
 Requires: (iptables-nft or iptables)
+%endif
+
 Requires: nftables
 %if %{undefined rhel} || 0%{?rhel} < 9
 # Libcgroup is no longer available in RHEL/CentOS >= 9 distros.
