@@ -91,6 +91,17 @@
         "end_of_life": "04-2031",
         "end_of_support": "04-2031"
     },
+    "ubuntu-stonking": {
+        "image": "ubuntu:stonking",
+        "arches": [
+            "amd64",
+            "aarch64",
+            "armhf"
+        ],
+        "description": "Ubuntu 26.10",
+        "end_of_life": "07-2027",
+        "end_of_support": "07-2027"
+    },
     "rhel-8": {
         "image": "registry.access.redhat.com/ubi8/ubi",
         "arches": [
