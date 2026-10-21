@@ -1,0 +1,139 @@
+name: bump-compose
+
+# Opens a pull request updating the version of Compose to package
+# (DOCKER_COMPOSE_REF in common.mk) when a new Compose release is out.
+#
+# It runs on a `bump-compose` repository_dispatch event, sent by the Compose
+# release process with the released tag as `client_payload.version`, and can
+# also be started manually.
+
+on:
+  repository_dispatch:
+    types: [bump-compose]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Compose version to bump to (e.g. v5.6.1)'
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: bump-compose
+  cancel-in-progress: false
+
+jobs:
+  bump-compose:
+    permissions:
+      contents: read # the pull request is created with the app token below
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master # the pull request targets master, whatever ref the workflow runs from
+          persist-credentials: false
+          sparse-checkout: /common.mk
+          sparse-checkout-cone-mode: false
+
+      - name: Resolve version
+        id: resolve
+        env:
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            VERSION="$DISPATCH_VERSION"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+          # Accept the version with or without the v prefix; common.mk uses the tag.
+          VERSION="v${VERSION#v}"
+          if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::not a valid Compose version (expected e.g. v5.6.1)"
+            exit 1
+          fi
+          echo "version_tag=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check the Compose tag exists
+        env:
+          VERSION_TAG: ${{ steps.resolve.outputs.version_tag }}
+        run: |
+          if ! git ls-remote --exit-code --tags https://github.com/docker/compose.git "refs/tags/$VERSION_TAG" > /dev/null; then
+            echo "::error::tag $VERSION_TAG does not exist in docker/compose"
+            exit 1
+          fi
+
+      - name: Get current version
+        id: current
+        run: |
+          CURRENT=$(sed -n 's/^DOCKER_COMPOSE_REF[[:space:]]*?=[[:space:]]*\(v[^[:space:]]*\)[[:space:]]*$/\1/p' common.mk)
+          if [ -z "$CURRENT" ]; then
+            echo "::error::DOCKER_COMPOSE_REF not found in common.mk"
+            exit 1
+          fi
+          echo "version_tag=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether to bump
+        id: decide
+        env:
+          CURRENT: ${{ steps.current.outputs.version_tag }}
+          VERSION_TAG: ${{ steps.resolve.outputs.version_tag }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$VERSION_TAG" = "$CURRENT" ]; then
+            echo "::notice::common.mk already packages Compose $CURRENT, nothing to do"
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_NAME" = "repository_dispatch" ] && [ "$(printf '%s\n%s\n' "$CURRENT" "$VERSION_TAG" | sort -V | tail -n 1)" = "$CURRENT" ]; then
+            # a patch release of an older line must not lower the packaged version
+            echo "::notice::$VERSION_TAG is older than the packaged $CURRENT, nothing to do"
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "bump=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update common.mk
+        env:
+          VERSION_TAG: ${{ steps.resolve.outputs.version_tag }}
+        run: |
+          sed -i "s/^\(DOCKER_COMPOSE_REF[[:space:]]*?=[[:space:]]*\)v[^[:space:]]*/\1$VERSION_TAG/" common.mk
+          git diff common.mk
+
+      - name: Generate app token
+        if: steps.decide.outputs.bump == 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: generate-token
+        with:
+          client-id: ${{ vars.DOCKER_READ_WRITE_APP_ID }}
+          private-key: ${{ secrets.DOCKER_READ_WRITE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create pull request
+        if: steps.decide.outputs.bump == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          sign-commits: true
+          signoff: true
+          commit-message: "bump compose to version ${{ steps.resolve.outputs.version_tag }}"
+          title: "bump compose to version ${{ steps.resolve.outputs.version_tag }}"
+          body: |
+            **- What I did**
+
+            Bump Compose from `${{ steps.current.outputs.version_tag }}` to `${{ steps.resolve.outputs.version_tag }}`: https://github.com/docker/compose/compare/${{ steps.current.outputs.version_tag }}...${{ steps.resolve.outputs.version_tag }}
+
+            **- Description for the changelog**
+
+            ```markdown changelog
+            Compose ${{ steps.resolve.outputs.version_tag }}
+            ```
+
+            This pull request was automatically generated by the `bump-compose` workflow.
+          branch: "bump-compose-${{ steps.resolve.outputs.version_tag }}"
+          delete-branch: true
+          base: master
+          add-paths: common.mk
