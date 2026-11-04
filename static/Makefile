@@ -86,6 +86,11 @@ cross-win: cross-win-engine
 	cp $(CLI_DIR)/build/docker-windows-amd64.exe build/win/amd64/docker/docker.exe
 	cp $(ENGINE_DIR)/bundles/cross/win/dockerd.exe build/win/amd64/docker/dockerd.exe
 	docker run --rm -v $(CURDIR)/build/win/amd64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
+	# windows/arm64 (client only)
+	cd $(CLI_DIR) && VERSION=$(GEN_STATIC_VER) docker buildx bake --set binary.platform=windows/arm64 binary
+	mkdir -p build/win/arm64/docker
+	cp $(CLI_DIR)/build/docker-windows-arm64.exe build/win/arm64/docker/docker.exe
+	docker run --rm -v $(CURDIR)/build/win/arm64:/v -w /v alpine sh -c 'apk update&&apk add zip&&zip -r docker-$(GEN_STATIC_VER).zip docker'
 	$(CHOWN) -R $(shell id -u):$(shell id -g) build
 
 .PHONY: cross-arm
