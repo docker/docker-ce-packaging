@@ -1,5 +1,11 @@
 # Docker CE Packaging
 
+> **⚠️ DEPRECATED: This repository is no longer used for packaging Docker CE.**
+>
+> The new location for packaging is **[docker/packaging](https://github.com/docker/packaging/tree/main/pkg/docker-engine)**
+
+---
+
 This repo contains the open source scripts for packaging the
 [Docker Engine](https://docs.docker.com/engine/), the Docker CLI, CLI plugins,
 and rootless-extras packages.
