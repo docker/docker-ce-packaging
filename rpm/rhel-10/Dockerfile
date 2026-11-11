@@ -37,7 +37,7 @@ ARG SUITE
 ENV DISTRO=${DISTRO}
 ENV SUITE=${SUITE}
 
-RUN dnf install -y rpm-build
+RUN dnf install -y --allowerasing rpm-build
 COPY --link SPECS /root/rpmbuild/SPECS
 RUN dnf builddep --define '_no_libnftables true' -y /root/rpmbuild/SPECS/*.spec
 COPY --link --from=golang /usr/local/go /usr/local/go
